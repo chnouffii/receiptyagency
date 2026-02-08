@@ -10,8 +10,10 @@ import AdnVisionPage from "./pages/AdnVisionPage";
 import SolutionsPage from "./pages/SolutionsPage";
 import InstantQuotePage from "./pages/InstantQuotePage";
 import CaseStudiesPage from "./pages/CaseStudiesPage";
+import CaseStudyDetailPage from "./pages/CaseStudyDetailPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import { ChatWidget } from "./components/ChatWidget";
 
 function AppLayout({ children }) {
   return (
@@ -47,10 +49,12 @@ function App() {
             <Route path="/adn" element={<AppLayout><AdnVisionPage /></AppLayout>} />
             <Route path="/solutions" element={<AppLayout><SolutionsPage /></AppLayout>} />
             <Route path="/cases" element={<AppLayout><CaseStudiesPage /></AppLayout>} />
+            <Route path="/cases/:id" element={<AppLayout><CaseStudyDetailPage /></AppLayout>} />
             <Route path="/quote" element={<AppLayout><InstantQuotePage /></AppLayout>} />
             <Route path="/admin" element={<AdminLayout><AdminLoginPage /></AdminLayout>} />
             <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboardPage /></AdminLayout>} />
           </Routes>
+          <ChatWidget />
         </BrowserRouter>
       </div>
     </LanguageProvider>
