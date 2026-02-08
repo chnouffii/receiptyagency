@@ -1,0 +1,167 @@
+{
+  "identity": {
+    "persona": "E1: The Anti-AI Designer",
+    "mission": "Create an ultra-modern, emotionally resonant agency portal that fuses high-tech precision with human creativity. Reject generic 'SaaS' trends in favor of deep, cinematic, and immersive experiences.",
+    "principles": [
+      "Fusion over Imitation: Mix brutalism with elegance.",
+      "Emotion First: Design for trust and awe.",
+      "Content is King: Every pixel serves the narrative.",
+      "Zoom In: Focus on high-fidelity details.",
+      "Negative Space: Luxury lies in the empty space.",
+      "Contrast: High stakes between light and dark."
+    ],
+    "anti_patterns": [
+      "No purple/teal gradients for CTAs.",
+      "No 'Inter' font for headings.",
+      "No uniform, boring grids.",
+      "No generic 'AI robot' illustrations."
+    ]
+  },
+  "design_system": {
+    "theme": "Dark Mode Premium",
+    "typography": {
+      "headings": {
+        "font_family": "Space Grotesk, sans-serif",
+        "weights": ["Bold (700)", "Medium (500)"],
+        "usage": "Use for all H1-H6. Tight tracking (tracking-tight) for large text."
+      },
+      "body": {
+        "font_family": "Manrope, sans-serif",
+        "weights": ["Regular (400)", "Light (300)"],
+        "usage": "Use for paragraphs and UI text. Good legibility at small sizes."
+      },
+      "mono": {
+        "font_family": "JetBrains Mono, monospace",
+        "usage": "Use for data metrics, code snippets, and technical labels."
+      }
+    },
+    "colors": {
+      "background": {
+        "base": "#050505",
+        "surface": "#0F0F10",
+        "surface_highlight": "#1A1A1C"
+      },
+      "primary": {
+        "main": "#007AFF",
+        "gradient": "linear-gradient(135deg, #007AFF 0%, #00C6FF 100%)",
+        "glow": "0 0 20px rgba(0, 122, 255, 0.5)"
+      },
+      "accent": {
+        "cyan": "#38BDF8",
+        "electric_blue": "#2563EB",
+        "glass_border": "rgba(255, 255, 255, 0.1)"
+      },
+      "text": {
+        "primary": "#F8FAFC",
+        "secondary": "#94A3B8",
+        "muted": "#475569"
+      },
+      "gradients": {
+        "hero_bg": "bg-gradient-to-b from-slate-950 via-[#020617] to-black",
+        "card_shimmer": "linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.05) 50%, transparent 75%)"
+      }
+    },
+    "surfaces": {
+      "glass_card": "bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl",
+      "neon_border": "border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]",
+      "solid_card": "bg-[#0F0F10] border border-white/5"
+    },
+    "spacing": {
+      "container_padding": "p-6 md:p-12 lg:p-24",
+      "section_gap": "gap-16 md:gap-32",
+      "element_gap": "gap-4 md:gap-8"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": {
+        "style": "bg-blue-600 hover:bg-blue-500 text-white rounded-full px-8 py-4 font-bold transition-all duration-300 shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]",
+        "interaction": "Scale up slightly (scale-105) on hover."
+      },
+      "secondary": {
+        "style": "bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full px-6 py-3 backdrop-blur-md transition-all",
+        "interaction": "Border brightness increases on hover."
+      }
+    },
+    "cards": {
+      "feature_card": "group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 transition-colors hover:border-blue-500/30 hover:bg-white/10",
+      "stat_card": "flex flex-col items-start justify-between rounded-xl border border-white/5 bg-black/40 p-6 backdrop-blur-sm"
+    },
+    "inputs": {
+      "style": "bg-white/5 border-white/10 focus:border-blue-500/50 focus:ring-blue-500/20 rounded-lg text-white placeholder:text-gray-500 h-12"
+    },
+    "navigation": {
+      "style": "fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-black/50 backdrop-blur-xl border-b border-white/5"
+    }
+  },
+  "layout_strategies": {
+    "grid_system": "Use 'Bento' grids (grid-cols-1 md:grid-cols-12) with varied spans (col-span-4, col-span-8). Avoid uniform grid-cols-3.",
+    "masonry": "Use CSS columns (columns-1 md:columns-2 lg:columns-3 gap-8) for case studies to create organic flow.",
+    "hero": "Centered or Split. For this project: Centered text animation, dominant negative space."
+  },
+  "motion": {
+    "library": "framer-motion",
+    "settings": {
+      "transition_smooth": { "type": "spring", "stiffness": 100, "damping": 20 },
+      "stagger_children": 0.1
+    },
+    "mandatory_effects": [
+      "Text Reveal: Words slide up and fade in.",
+      "Scroll Trigger: Elements fade in and move up (y: 20 -> 0) as they enter view.",
+      "Hover: Cards lift (y: -5px) and glow."
+    ]
+  },
+  "assets": {
+    "icons": {
+      "library": "lucide-react",
+      "style": "Stroke width 1.5px, crisp edges."
+    },
+    "images": {
+      "hero_background": "https://images.unsplash.com/photo-1762279388956-1c098163a2a8?q=80&w=2000&auto=format&fit=crop",
+      "abstract_neon": "https://images.unsplash.com/photo-1762279389006-43963a0cee55?q=80&w=2000&auto=format&fit=crop",
+      "team_working": "https://images.unsplash.com/photo-1758520145175-aa3b593b81af?q=80&w=2000&auto=format&fit=crop",
+      "meeting_dark": "https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?q=80&w=2000&auto=format&fit=crop",
+      "presentation": "https://images.unsplash.com/photo-1758691737182-d42aefd6dee8?q=80&w=2000&auto=format&fit=crop"
+    }
+  },
+  "pages_implementation": {
+    "home": {
+      "structure": "Hero (Text Anim + CTA) -> Trusted By (Logos) -> Value Prop (Grid) -> Solutions (Cards) -> Footer",
+      "hero_anim": "Typewriter effect or staggered word reveal for 'Nous automatisons votre entreprise.'",
+      "cta": "Gradient border button with glow."
+    },
+    "adn_vision": {
+      "structure": "Manifesto (Typography heavy) -> Team Grid (Bento) -> Stats (Animated Numbers)",
+      "team_grid": "Mix portrait photos with abstract data blocks. Do not just use a list of faces."
+    },
+    "solutions": {
+      "structure": "3 Pillars (Talent, Spend, Web). Each pillar has a 'Mini Dashboard' visualization.",
+      "mini_dashboard": "Use Recharts to show fake data (e.g., 'Time Saved', 'ROI'). Wrap in glass container."
+    },
+    "quote_configurator": {
+      "structure": "Multi-step Wizard. Step 1: Category (Icons). Step 2: Scale (Slider). Step 3: Features (Multi-select). Step 4: Quote.",
+      "ui_style": "Stealth Mode. Dark card floating in center. Progress bar on top. Smooth transitions between steps."
+    },
+    "case_studies": {
+      "structure": "Masonry Grid. Each card has a large image, Title, and ROI Badge (e.g., '+400% Efficiency').",
+      "hover": "Image zooms slightly, overlay darkens, 'Read Case' button appears."
+    },
+    "admin": {
+      "structure": "Sidebar Layout. Dashboard with 'Leads' table (Shadcn Table) and Auth (Shadcn Form)."
+    }
+  },
+  "universal_guidelines_for_main_agent": [
+    "Do not use gradients for dark backgrounds; use solid deep colors or subtle noise.",
+    "Do not center everything. Use asymmetry for tension.",
+    "Use 'sonner' for toasts.",
+    "Use 'lucide-react' for icons.",
+    "Interactive elements must have 'data-testid'.",
+    "Ensure 3:1 contrast for large text and 4.5:1 for small text.",
+    "Do not use 'transition: all'. Animate specific properties.",
+    "Components must use named exports.",
+    "Pages must use default exports.",
+    "Use Shadcn/UI for complex interactions (Dialog, Select, Form).",
+    "Use Tailwind for layout and spacing.",
+    "Setup fee range: 1000-10000€, Monthly: 99-499€."
+  ]
+}
