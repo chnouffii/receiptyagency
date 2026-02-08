@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogOut, Trash2, Users, UserPlus, UserCheck, Trophy, DollarSign, CalendarClock } from 'lucide-react';
+import { LogOut, Trash2, Users, UserPlus, UserCheck, Trophy, DollarSign, CalendarClock, Search, Download, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
@@ -23,14 +23,19 @@ export default function AdminDashboardPage() {
   const navigate = useNavigate();
   const [leads, setLeads] = useState([]);
   const [stats, setStats] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const token = localStorage.getItem('receipty-admin-token');
 
   const fetchData = useCallback(async () => {
     if (!token) { navigate('/admin'); return; }
     const authHeaders = { Authorization: `Bearer ${token}` };
     try {
+      const params = {};
+      if (searchQuery) params.search = searchQuery;
+      if (statusFilter && statusFilter !== 'all') params.status_filter = statusFilter;
       const [leadsRes, statsRes] = await Promise.all([
-        axios.get(`${API}/leads`, { headers: authHeaders }),
+        axios.get(`${API}/leads`, { headers: authHeaders, params }),
         axios.get(`${API}/admin/stats`, { headers: authHeaders }),
       ]);
       setLeads(leadsRes.data);
@@ -41,9 +46,27 @@ export default function AdminDashboardPage() {
         navigate('/admin');
       }
     }
-  }, [token, navigate]);
+  }, [token, navigate, searchQuery, statusFilter]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  const exportCSV = async () => {
+    const authHeaders = { Authorization: `Bearer ${token}` };
+    try {
+      const res = await axios.get(`${API}/leads/export`, { headers: authHeaders, responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'receipty_leads.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success(lang === 'fr' ? 'Export CSV telecharge' : 'CSV export downloaded');
+    } catch {
+      toast.error('Export failed');
+    }
+  };
 
   const updateStatus = async (leadId, status) => {
     const authHeaders = { Authorization: `Bearer ${token}` };
