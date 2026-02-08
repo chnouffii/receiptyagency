@@ -40,14 +40,10 @@ function App() {
 
     // Marque blanche : masquer le badge Emergent
     const hideBadge = () => {
-      document.querySelectorAll('a[href*="emergentagent"], div[class*="emergent"], [data-testid*="emergent"]').forEach(el => {
-        let target = el;
-        while (target && target !== document.body && target.parentElement !== document.body) {
-          target = target.parentElement;
-        }
-        if (target && target !== document.body) target.style.display = 'none';
-        el.style.display = 'none';
-      });
+      const badge = document.getElementById('emergent-badge');
+      if (badge) {
+        badge.remove();
+      }
     };
     hideBadge();
     const observer = new MutationObserver(hideBadge);
