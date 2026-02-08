@@ -383,8 +383,8 @@ class ReceiptyCoreAPITester:
 
     def run_all_tests(self):
         """Run all API tests in sequence"""
-        print("🚀 Starting Receipty Agency API Tests")
-        print("=" * 50)
+        print("🚀 Starting Receipty Agency API Tests - Phase 2 Features")
+        print("=" * 60)
         
         # Basic API connectivity
         self.test_api_root()
@@ -393,7 +393,7 @@ class ReceiptyCoreAPITester:
         self.test_admin_login_invalid()
         self.test_admin_login()
         
-        # Lead management tests
+        # Lead management tests (MVP)
         self.test_create_lead()
         self.test_get_leads_unauthorized()
         self.test_get_leads_authorized()
@@ -401,7 +401,15 @@ class ReceiptyCoreAPITester:
         self.test_update_lead_status()
         self.test_delete_lead()
         
-        print("=" * 50)
+        # Phase 2 New Features
+        print("\n🆕 Testing Phase 2 Features:")
+        self.test_chat_endpoint()
+        self.test_chat_history()
+        self.test_search_leads()
+        self.test_status_filter_leads()
+        self.test_csv_export()
+        
+        print("=" * 60)
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} passed")
         print(f"✅ Passed Tests: {', '.join(self.passed_tests)}")
         
