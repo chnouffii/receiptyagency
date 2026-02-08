@@ -80,7 +80,13 @@ html {
   pointer-events: none;
 }
 
-/* Masonry break-inside fix */
-.break-inside-avoid {
-  break-inside: avoid;
+/* Masquer le badge Emergent pour marque blanche */
+[data-testid="emergent-badge"],
+a[href*="emergentagent.com"],
+div[style*="position: fixed"][style*="bottom"] > a[href*="emergent"],
+body > div:last-child a[href*="emergent"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
