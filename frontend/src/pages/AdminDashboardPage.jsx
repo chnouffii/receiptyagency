@@ -46,8 +46,9 @@ export default function AdminDashboardPage() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const updateStatus = async (leadId, status) => {
+    const authHeaders = { Authorization: `Bearer ${token}` };
     try {
-      await axios.patch(`${API}/leads/${leadId}/status`, { status }, { headers });
+      await axios.patch(`${API}/leads/${leadId}/status`, { status }, { headers: authHeaders });
       toast.success('Status updated');
       fetchData();
     } catch {
@@ -56,8 +57,9 @@ export default function AdminDashboardPage() {
   };
 
   const deleteLead = async (leadId) => {
+    const authHeaders = { Authorization: `Bearer ${token}` };
     try {
-      await axios.delete(`${API}/leads/${leadId}`, { headers });
+      await axios.delete(`${API}/leads/${leadId}`, { headers: authHeaders });
       toast.success('Lead deleted');
       fetchData();
     } catch {
