@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Badge } from '../components/ui/badge';
 
@@ -15,16 +16,17 @@ const IMAGES = [
 function CaseCard({ item, image, index }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
+  const { t } = useLanguage();
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      className="group break-inside-avoid mb-6 overflow-hidden rounded-2xl border border-white/5 bg-[#0F0F10] transition-all duration-300 hover:border-blue-500/20"
-      data-testid={`case-card-${index}`}
-    >
+    <Link to={`/cases/${index}`} data-testid={`case-card-${index}`}>
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, y: 20 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ delay: index * 0.1, duration: 0.5 }}
+        className="group break-inside-avoid mb-6 overflow-hidden rounded-2xl border border-white/5 bg-[#0F0F10] transition-all duration-300 hover:border-blue-500/20"
+      >
       {/* Image */}
       <div className="relative overflow-hidden aspect-[16/10]">
         <img
@@ -45,7 +47,7 @@ function CaseCard({ item, image, index }) {
         {/* Hover overlay */}
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
           <span className="flex items-center gap-2 text-white text-sm font-medium">
-            <ArrowUpRight className="w-4 h-4" />
+            {t.cases.read_more} <ArrowUpRight className="w-4 h-4" />
           </span>
         </div>
       </div>
@@ -62,6 +64,7 @@ function CaseCard({ item, image, index }) {
         </div>
       </div>
     </motion.div>
+    </Link>
   );
 }
 
