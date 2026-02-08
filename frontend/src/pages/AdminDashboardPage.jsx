@@ -19,7 +19,7 @@ const STATUS_COLORS = {
 };
 
 export default function AdminDashboardPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const navigate = useNavigate();
   const [leads, setLeads] = useState([]);
   const [stats, setStats] = useState(null);
@@ -142,8 +142,45 @@ export default function AdminDashboardPage() {
 
         {/* Leads Table */}
         <div className="rounded-xl border border-white/5 bg-[#0F0F10] overflow-hidden">
-          <div className="p-4 border-b border-white/5">
+          <div className="p-4 border-b border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 className="font-heading text-lg font-semibold text-white">{t.admin.leads}</h2>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              {/* Search */}
+              <div className="relative flex-1 sm:flex-initial">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={lang === 'fr' ? 'Rechercher...' : 'Search...'}
+                  data-testid="admin-search-input"
+                  className="w-full sm:w-48 bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-lg text-white text-sm h-9 pl-9 pr-3 placeholder:text-gray-600 outline-none transition-all duration-200"
+                />
+              </div>
+              {/* Status Filter */}
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[130px] h-9 text-xs border-white/10 bg-white/5" data-testid="admin-status-filter">
+                  <Filter className="w-3 h-3 mr-1.5 text-gray-500" />
+                  <SelectValue placeholder={lang === 'fr' ? 'Statut' : 'Status'} />
+                </SelectTrigger>
+                <SelectContent className="bg-[#0F0F10] border-white/10">
+                  <SelectItem value="all">{lang === 'fr' ? 'Tous' : 'All'}</SelectItem>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="contacted">Contacted</SelectItem>
+                  <SelectItem value="qualified">Qualified</SelectItem>
+                  <SelectItem value="converted">Converted</SelectItem>
+                </SelectContent>
+              </Select>
+              {/* Export CSV */}
+              <button
+                onClick={exportCSV}
+                data-testid="admin-export-csv-btn"
+                className="flex items-center gap-1.5 h-9 px-3 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-all duration-200"
+              >
+                <Download className="w-3.5 h-3.5" />
+                CSV
+              </button>
+            </div>
           </div>
 
           {leads.length === 0 ? (
