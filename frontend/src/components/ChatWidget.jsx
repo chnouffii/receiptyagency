@@ -94,7 +94,7 @@ export const ChatWidget = () => {
             exit={{ scale: 0 }}
             onClick={() => setIsOpen(true)}
             data-testid="chat-toggle-btn"
-            className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-[0_0_25px_rgba(37,99,235,0.4)] hover:shadow-[0_0_35px_rgba(37,99,235,0.6)] transition-all duration-300 hover:scale-110"
+            className="fixed bottom-20 right-6 z-[9999] w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-[0_0_25px_rgba(37,99,235,0.4)] hover:shadow-[0_0_35px_rgba(37,99,235,0.6)] transition-all duration-300 hover:scale-110"
           >
             <MessageCircle className="w-6 h-6" />
           </motion.button>
@@ -109,7 +109,7 @@ export const ChatWidget = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.25 }}
-            className="fixed bottom-6 right-6 z-[9999] w-[380px] max-h-[520px] rounded-2xl border border-white/10 bg-[#0A0A0B] shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-20 right-6 z-[9999] w-[380px] max-h-[520px] rounded-2xl border border-white/10 bg-[#0A0A0B] shadow-2xl flex flex-col overflow-hidden"
             data-testid="chat-panel"
           >
             {/* Header */}
