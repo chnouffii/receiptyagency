@@ -105,15 +105,15 @@ export default function AdnVisionPage() {
           {t.adn.team}
         </motion.h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {t.adn.members.map((member, i) => {
-            const spans = ['md:col-span-7', 'md:col-span-5', 'md:col-span-5', 'md:col-span-7'];
+            const spans = ['', ''];
             return (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={teamInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
+                transition={{ delay: i * 0.15, duration: 0.5 }}
                 className={`${spans[i]} group relative overflow-hidden rounded-2xl border border-white/5 bg-[#0F0F10] p-8 transition-all duration-300 hover:border-blue-500/20`}
                 data-testid={`team-member-${i}`}
               >
