@@ -25,6 +25,8 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
 - [x] Dark mode premium design
 
 ## What's Been Implemented (Feb 2026)
+
+### Phase 1 - MVP
 - Full-stack application with 7 pages
 - Backend: 9 API endpoints (leads CRUD, admin auth, stats)
 - Frontend: 12 React components/pages
@@ -33,25 +35,32 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
 - i18n system with complete FR/EN translations
 - Responsive design with mobile hamburger menu
 
+### Phase 2 - Features additionnelles (Feb 2026)
+- Chatbot IA pre-qualification (GPT-5.2 via emergentintegrations)
+- Recherche et filtre leads dans le dashboard admin
+- Export CSV des leads
+- Pages detail etudes de cas (5 cas avec challenge/solution/resultats)
+- Backend: 14 API endpoints total (+5 nouveaux)
+- Collection MongoDB: chat_messages
+
 ## Prioritized Backlog
 ### P0 (Critical) - Done
 - All core pages implemented and functional
 
 ### P1 (High)
-- Case study detail pages (individual routing)
 - Email notification on new lead submission
 - Admin password change functionality
-- Search/filter leads in admin dashboard
+- Chatbot conversation analytics/dashboard
+- PDF quote generation and download
 
 ### P2 (Medium)
 - Blog/Resources section
 - Contact page with map
 - Animated page transitions (route-level)
-- PDF quote generation and download
 - Lead conversion funnel analytics
+- Testimonials section
 
 ### Next Tasks
-- Add lead export (CSV) for admin
-- Implement email notifications for new quotes
-- Add individual case study detail pages
-- Add testimonials/reviews section
+- Add email notifications for new quotes (SendGrid/Resend)
+- Chatbot analytics dashboard in admin panel
+- PDF quote download feature
