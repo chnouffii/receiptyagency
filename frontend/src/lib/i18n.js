@@ -30,10 +30,8 @@ export const translations = {
         automation: "Taux d'Automatisation"
       },
       members: [
-        { name: 'Sarah Chen', role: 'CEO & AI Strategist', desc: 'Ex-McKinsey, 15 ans en transformation digitale' },
-        { name: 'Marc Dubois', role: 'CTO', desc: 'PhD en Data Science, architecte de solutions IA' },
-        { name: 'Lea Martin', role: 'Head of Product', desc: 'Specialiste UX/UI et automatisation des process' },
-        { name: 'Thomas Keller', role: 'Lead Engineer', desc: 'Expert full-stack et integrations enterprise' }
+        { name: 'BOTH Quentin', role: 'Co-CEO & Expert IA', desc: 'Entrepreneur visionnaire specialise en intelligence artificielle. Expert en deploiement de solutions ML/Deep Learning a grande echelle, il pilote la strategie technologique et l\'innovation produit. Certifie en Data Science et architectures cloud, il transforme les defis business complexes en systemes automatises performants.' },
+        { name: 'DE FURST Valere', role: 'Co-CEO & Strategiste Business', desc: 'Entrepreneur aguerri avec une expertise pointue en International Business et developpement strategique. Diplome en commerce international, il orchestre les partenariats cles, le developpement commercial et la croissance de l\'agence. Sa vision globale et son sens aigu du marche garantissent des solutions alignees sur les enjeux reels des entreprises.' }
       ]
     },
     solutions: {
@@ -180,10 +178,8 @@ export const translations = {
         automation: 'Automation Rate'
       },
       members: [
-        { name: 'Sarah Chen', role: 'CEO & AI Strategist', desc: 'Ex-McKinsey, 15 years in digital transformation' },
-        { name: 'Marc Dubois', role: 'CTO', desc: 'PhD in Data Science, AI solutions architect' },
-        { name: 'Lea Martin', role: 'Head of Product', desc: 'UX/UI specialist and process automation' },
-        { name: 'Thomas Keller', role: 'Lead Engineer', desc: 'Full-stack expert and enterprise integrations' }
+        { name: 'BOTH Quentin', role: 'Co-CEO & AI Expert', desc: 'Visionary entrepreneur specialized in artificial intelligence. Expert in deploying ML/Deep Learning solutions at scale, he drives the technological strategy and product innovation. Certified in Data Science and cloud architectures, he transforms complex business challenges into high-performance automated systems.' },
+        { name: 'DE FURST Valere', role: 'Co-CEO & Business Strategist', desc: 'Seasoned entrepreneur with sharp expertise in International Business and strategic development. Graduate in international commerce, he orchestrates key partnerships, business development and agency growth. His global vision and keen market sense ensure solutions aligned with real business challenges.' }
       ]
     },
     solutions: {
