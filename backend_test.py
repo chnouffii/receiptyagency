@@ -228,6 +228,159 @@ class ReceiptyCoreAPITester:
             self.log_result("Delete Lead", False, "", f"Exception: {str(e)}")
             return False
 
+    def test_chat_endpoint(self):
+        """Test chatbot endpoint with GPT-5.2"""
+        try:
+            session_id = f"test-session-{datetime.now().strftime('%H%M%S')}"
+            payload = {
+                "session_id": session_id,
+                "message": "Hello, I need help with AI integration for my business",
+                "language": "en"
+            }
+            response = requests.post(f"{self.base_url}/chat", json=payload, timeout=30)  # Longer timeout for AI
+            if response.status_code == 200:
+                data = response.json()
+                if "response" in data and "session_id" in data and len(data["response"]) > 10:
+                    self.log_result("Chat Endpoint", True, f"AI response received: {len(data['response'])} chars")
+                    self.test_session_id = session_id  # Store for history test
+                    return True
+                else:
+                    self.log_result("Chat Endpoint", False, "", f"Invalid response format: {data}")
+                    return False
+            else:
+                self.log_result("Chat Endpoint", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Chat Endpoint", False, "", f"Exception: {str(e)}")
+            return False
+
+    def test_chat_history(self):
+        """Test getting chat history"""
+        if not hasattr(self, 'test_session_id'):
+            self.log_result("Chat History", False, "", "No test session ID available")
+            return False
+        
+        try:
+            response = requests.get(f"{self.base_url}/chat/{self.test_session_id}", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list) and len(data) >= 2:  # Should have user + assistant message
+                    self.log_result("Chat History", True, f"Retrieved {len(data)} messages")
+                    return True
+                else:
+                    self.log_result("Chat History", False, "", f"Expected list with 2+ messages, got: {data}")
+                    return False
+            else:
+                self.log_result("Chat History", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Chat History", False, "", f"Exception: {str(e)}")
+            return False
+
+    def test_search_leads(self):
+        """Test lead search functionality"""
+        if not self.admin_token:
+            self.log_result("Search Leads", False, "", "No admin token available")
+            return False
+        
+        # First create a lead to search for
+        timestamp = datetime.now().strftime("%H%M%S")
+        test_name = f"SearchTest{timestamp}"
+        payload = {
+            "name": test_name,
+            "email": f"search{timestamp}@example.com",
+            "company": f"SearchCorp {timestamp}",
+            "category": "talent",
+            "language": "en"
+        }
+        
+        try:
+            # Create test lead
+            requests.post(f"{self.base_url}/leads", json=payload, timeout=10)
+            
+            # Search for it
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(f"{self.base_url}/leads?search={test_name}", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                found = any(lead.get("name") == test_name for lead in data)
+                if found:
+                    self.log_result("Search Leads", True, f"Found test lead in search results")
+                    return True
+                else:
+                    self.log_result("Search Leads", False, "", f"Test lead not found in search results: {len(data)} leads")
+                    return False
+            else:
+                self.log_result("Search Leads", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Search Leads", False, "", f"Exception: {str(e)}")
+            return False
+
+    def test_status_filter_leads(self):
+        """Test lead status filtering"""
+        if not self.admin_token:
+            self.log_result("Status Filter Leads", False, "", "No admin token available")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(f"{self.base_url}/leads?status_filter=new", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    # Verify all returned leads have 'new' status
+                    all_new = all(lead.get("status") == "new" for lead in data)
+                    if all_new:
+                        self.log_result("Status Filter Leads", True, f"Filtered {len(data)} 'new' leads correctly")
+                        return True
+                    else:
+                        self.log_result("Status Filter Leads", False, "", "Some leads don't have 'new' status")
+                        return False
+                else:
+                    self.log_result("Status Filter Leads", False, "", "Response is not a list")
+                    return False
+            else:
+                self.log_result("Status Filter Leads", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Status Filter Leads", False, "", f"Exception: {str(e)}")
+            return False
+
+    def test_csv_export(self):
+        """Test CSV export functionality"""
+        if not self.admin_token:
+            self.log_result("CSV Export", False, "", "No admin token available")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(f"{self.base_url}/leads/export", headers=headers, timeout=15)
+            
+            if response.status_code == 200:
+                # Check if response is CSV format
+                content_type = response.headers.get('content-type', '')
+                if 'csv' in content_type.lower() or 'text/csv' in content_type:
+                    content = response.text
+                    # Basic CSV validation - should have headers
+                    if "Name,Email,Company" in content and len(content) > 50:
+                        self.log_result("CSV Export", True, f"CSV exported successfully ({len(content)} chars)")
+                        return True
+                    else:
+                        self.log_result("CSV Export", False, "", f"Invalid CSV content: {content[:100]}")
+                        return False
+                else:
+                    self.log_result("CSV Export", False, "", f"Wrong content type: {content_type}")
+                    return False
+            else:
+                self.log_result("CSV Export", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("CSV Export", False, "", f"Exception: {str(e)}")
+            return False
+
     def run_all_tests(self):
         """Run all API tests in sequence"""
         print("🚀 Starting Receipty Agency API Tests")
