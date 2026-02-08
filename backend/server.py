@@ -201,6 +201,86 @@ async def get_admin_stats(admin=Depends(verify_token)):
     }
 
 
+# --- Chat Endpoints ---
+
+@api_router.post("/chat")
+async def chat_endpoint(input: ChatMessageInput):
+    system_prompt = SYSTEM_PROMPT_FR if input.language == "fr" else SYSTEM_PROMPT_EN
+
+    # Load conversation history from DB
+    history = await db.chat_messages.find(
+        {"session_id": input.session_id}, {"_id": 0}
+    ).sort("created_at", 1).to_list(20)
+
+    # Build context from history
+    if history:
+        context_lines = []
+        for m in history:
+            role = "User" if m["role"] == "user" else "Assistant"
+            context_lines.append(f"{role}: {m['content']}")
+        system_prompt += "\n\nConversation history:\n" + "\n".join(context_lines)
+
+    # Store user message
+    await db.chat_messages.insert_one({
+        "session_id": input.session_id,
+        "role": "user",
+        "content": input.message,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+
+    try:
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=input.session_id,
+            system_message=system_prompt
+        )
+        response = await chat.send_message(UserMessage(text=input.message))
+    except Exception as e:
+        logger.error(f"Chat error: {e}")
+        response = "Desolee, une erreur est survenue. Veuillez reessayer." if input.language == "fr" else "Sorry, an error occurred. Please try again."
+
+    # Store assistant response
+    await db.chat_messages.insert_one({
+        "session_id": input.session_id,
+        "role": "assistant",
+        "content": response,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+
+    return {"response": response, "session_id": input.session_id}
+
+
+@api_router.get("/chat/{session_id}")
+async def get_chat_history(session_id: str):
+    messages = await db.chat_messages.find(
+        {"session_id": session_id}, {"_id": 0}
+    ).sort("created_at", 1).to_list(50)
+    return messages
+
+
+# --- CSV Export ---
+
+@api_router.get("/leads/export")
+async def export_leads_csv(admin=Depends(verify_token)):
+    leads = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(10000)
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Name", "Email", "Company", "Phone", "Category", "Size", "Setup EUR", "Monthly EUR", "Status", "Created"])
+    for lead in leads:
+        writer.writerow([
+            lead.get("name", ""), lead.get("email", ""), lead.get("company", ""),
+            lead.get("phone", ""), lead.get("category", ""), lead.get("company_size", ""),
+            lead.get("estimated_setup", 0), lead.get("estimated_monthly", 0),
+            lead.get("status", ""), lead.get("created_at", "")
+        ])
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=receipty_leads.csv"}
+    )
+
+
 # --- App Setup ---
 
 app.include_router(api_router)
