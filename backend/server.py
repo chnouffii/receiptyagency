@@ -99,6 +99,12 @@ class AdminLogin(BaseModel):
     password: str
 
 
+class ChatMessageInput(BaseModel):
+    session_id: str
+    message: str
+    language: str = "fr"
+
+
 # --- Auth ---
 
 def verify_token(authorization: str = Header(None)):
@@ -128,8 +134,21 @@ async def create_lead(input: LeadCreate):
 
 
 @api_router.get("/leads", response_model=List[Lead])
-async def get_leads(admin=Depends(verify_token)):
-    leads = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+async def get_leads(
+    admin=Depends(verify_token),
+    search: str = Query("", description="Search by name/email/company"),
+    status_filter: str = Query("", description="Filter by status")
+):
+    query = {}
+    if status_filter:
+        query["status"] = status_filter
+    if search:
+        query["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}},
+            {"company": {"$regex": search, "$options": "i"}},
+        ]
+    leads = await db.leads.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return leads
 
 
