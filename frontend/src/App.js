@@ -1,53 +1,59 @@
 import { useEffect } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import { Toaster } from "sonner";
+import { LanguageProvider } from "./context/LanguageContext";
+import { Navbar } from "./components/Navbar";
+import { Footer } from "./components/Footer";
+import HomePage from "./pages/HomePage";
+import AdnVisionPage from "./pages/AdnVisionPage";
+import SolutionsPage from "./pages/SolutionsPage";
+import InstantQuotePage from "./pages/InstantQuotePage";
+import CaseStudiesPage from "./pages/CaseStudiesPage";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+function AppLayout({ children }) {
+  return (
+    <>
+      <Navbar />
+      <main>{children}</main>
+      <Footer />
+    </>
+  );
+}
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+function AdminLayout({ children }) {
+  return (
+    <>
+      <Navbar />
+      <main>{children}</main>
+    </>
+  );
+}
 
+function App() {
   useEffect(() => {
-    helloWorldApi();
+    document.documentElement.classList.add("dark");
   }, []);
 
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
-
-function App() {
-  return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <LanguageProvider>
+      <div className="App min-h-screen bg-[#050505] text-white">
+        <BrowserRouter>
+          <Toaster theme="dark" position="top-right" richColors />
+          <Routes>
+            <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
+            <Route path="/adn" element={<AppLayout><AdnVisionPage /></AppLayout>} />
+            <Route path="/solutions" element={<AppLayout><SolutionsPage /></AppLayout>} />
+            <Route path="/cases" element={<AppLayout><CaseStudiesPage /></AppLayout>} />
+            <Route path="/quote" element={<AppLayout><InstantQuotePage /></AppLayout>} />
+            <Route path="/admin" element={<AdminLayout><AdminLoginPage /></AdminLayout>} />
+            <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboardPage /></AdminLayout>} />
+          </Routes>
+        </BrowserRouter>
+      </div>
+    </LanguageProvider>
   );
 }
 
