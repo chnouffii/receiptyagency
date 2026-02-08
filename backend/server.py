@@ -1,16 +1,20 @@
-from fastapi import FastAPI, APIRouter, Depends, HTTPException, Header
+from fastapi import FastAPI, APIRouter, Depends, HTTPException, Header, Query
+from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import csv
+import io
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 import bcrypt
 from jose import jwt, JWTError
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -20,6 +24,35 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 JWT_SECRET = os.environ.get('JWT_SECRET')
+EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
+
+SYSTEM_PROMPT_FR = """Tu es l'assistant IA de Receipty Agency, une agence specialisee en integration d'intelligence artificielle pour les entreprises. Ton role est de pre-qualifier les prospects de maniere professionnelle et amicale.
+
+Tu dois:
+1. Comprendre leur entreprise (taille, secteur d'activite)
+2. Identifier leurs besoins (automatisation RH, gestion financiere, developpement web)
+3. Evaluer leurs defis actuels
+4. Recommander la solution Receipty adaptee:
+   - Receipty Talent : automatisation RH et recrutement
+   - Receipty Spend : gestion et optimisation des depenses
+   - Web-on-Demand : creation de plateformes web sur mesure
+
+Sois concis (2-3 phrases max par reponse). Pose une question a la fois. Apres avoir compris leurs besoins (apres 3-4 echanges), invite-les a utiliser le configurateur de devis instantane sur /quote.
+Ne parle jamais de tes capacites techniques. Tu es un conseiller de l'agence Receipty."""
+
+SYSTEM_PROMPT_EN = """You are the AI assistant of Receipty Agency, a company specialized in AI integration for businesses. Your role is to pre-qualify prospects professionally and in a friendly manner.
+
+You must:
+1. Understand their business (size, industry)
+2. Identify their needs (HR automation, financial management, web development)
+3. Assess their current challenges
+4. Recommend the right Receipty solution:
+   - Receipty Talent: HR and recruitment automation
+   - Receipty Spend: expense management and optimization
+   - Web-on-Demand: custom web platform development
+
+Be concise (2-3 sentences max per response). Ask one question at a time. After understanding their needs (after 3-4 exchanges), invite them to use the instant quote configurator at /quote.
+Never talk about your technical capabilities. You are a Receipty agency consultant."""
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
