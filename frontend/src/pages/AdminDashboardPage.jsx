@@ -25,14 +25,13 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const token = localStorage.getItem('receipty-admin-token');
 
-  const headers = { Authorization: `Bearer ${token}` };
-
   const fetchData = useCallback(async () => {
     if (!token) { navigate('/admin'); return; }
+    const authHeaders = { Authorization: `Bearer ${token}` };
     try {
       const [leadsRes, statsRes] = await Promise.all([
-        axios.get(`${API}/leads`, { headers }),
-        axios.get(`${API}/admin/stats`, { headers }),
+        axios.get(`${API}/leads`, { headers: authHeaders }),
+        axios.get(`${API}/admin/stats`, { headers: authHeaders }),
       ]);
       setLeads(leadsRes.data);
       setStats(statsRes.data);
