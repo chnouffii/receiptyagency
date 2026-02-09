@@ -619,6 +619,47 @@ async def startup():
         await db.case_studies.insert_many(seed_cases)
         logger.info(f"Seeded {len(seed_cases)} case studies")
 
+    # Seed solutions if empty
+    sol_count = await db.solutions.count_documents({})
+    if sol_count == 0:
+        seed_solutions = [
+            {
+                "id": str(uuid.uuid4()), "order": 0, "published": True,
+                "name_fr": "Receipty Talent", "name_en": "Receipty Talent",
+                "tag_fr": "RH & Recrutement", "tag_en": "HR & Recruitment",
+                "desc_fr": "Automatisez votre processus de recrutement, de la selection des CV a l'onboarding.",
+                "desc_en": "Automate your recruitment process, from CV screening to onboarding.",
+                "features_fr": ["Screening automatise", "Matching IA candidats", "Onboarding digital", "Analytics RH"],
+                "features_en": ["Automated screening", "AI candidate matching", "Digital onboarding", "HR Analytics"],
+                "icon": "users", "chart_type": "area",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            },
+            {
+                "id": str(uuid.uuid4()), "order": 1, "published": True,
+                "name_fr": "Receipty Spend", "name_en": "Receipty Spend",
+                "tag_fr": "Finance & Depenses", "tag_en": "Finance & Expenses",
+                "desc_fr": "Optimisez vos depenses avec notre plateforme de gestion financiere intelligente.",
+                "desc_en": "Optimize your expenses with our intelligent financial management platform.",
+                "features_fr": ["Detection anomalies", "Previsions budgetaires", "Reporting automatise", "Conformite"],
+                "features_en": ["Anomaly detection", "Budget forecasting", "Automated reporting", "Compliance"],
+                "icon": "wallet", "chart_type": "bar",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            },
+            {
+                "id": str(uuid.uuid4()), "order": 2, "published": True,
+                "name_fr": "Web-on-Demand", "name_en": "Web-on-Demand",
+                "tag_fr": "Developpement Web", "tag_en": "Web Development",
+                "desc_fr": "Creez des plateformes web performantes avec notre solution modulaire.",
+                "desc_en": "Build high-performance web platforms with our modular solution.",
+                "features_fr": ["Sites sur mesure", "E-commerce IA", "SEO automatise", "Analytics avances"],
+                "features_en": ["Custom sites", "AI E-commerce", "Automated SEO", "Advanced analytics"],
+                "icon": "globe", "chart_type": "line",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+        ]
+        await db.solutions.insert_many(seed_solutions)
+        logger.info(f"Seeded {len(seed_solutions)} solutions")
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
