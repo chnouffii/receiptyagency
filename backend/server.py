@@ -442,6 +442,109 @@ async def startup():
         })
         logger.info("Default admin created: admin@receipty.ai")
 
+    # Seed case studies if empty
+    case_count = await db.case_studies.count_documents({})
+    if case_count == 0:
+        seed_cases = [
+            {
+                "id": str(uuid.uuid4()), "order": 0, "published": True,
+                "title_fr": "Automatisation RH chez GlobalTech", "title_en": "HR Automation at GlobalTech",
+                "category": "Receipty Talent", "roi": "+340% efficacite",
+                "desc_fr": "Reduction de 75% du temps de recrutement pour une entreprise de 2000 employes.",
+                "desc_en": "75% reduction in recruitment time for a 2000+ employee company.",
+                "challenge_fr": "GlobalTech faisait face a un volume de 500+ candidatures par semaine avec seulement 3 recruteurs. Le tri manuel prenait 80% de leur temps.",
+                "challenge_en": "GlobalTech was handling 500+ applications per week with only 3 recruiters. Manual screening took 80% of their time.",
+                "solution_fr": "Deploiement de Receipty Talent avec screening automatise par IA, matching semantique des competences et un pipeline de recrutement entierement digitalise.",
+                "solution_en": "Deployment of Receipty Talent with AI-powered automated screening, semantic skills matching and a fully digitized recruitment pipeline.",
+                "results_fr": ["Temps de tri des CV reduit de 75%", "Taux de matching candidat/poste ameliore de 340%", "Onboarding reduit a 3 jours au lieu de 2 semaines", "ROI atteint en 6 semaines"],
+                "results_en": ["CV screening time reduced by 75%", "Candidate/position matching rate improved by 340%", "Onboarding reduced to 3 days instead of 2 weeks", "ROI achieved in 6 weeks"],
+                "image_url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop",
+                "tags": ["RH", "IA", "Automatisation"],
+                "duration_fr": "8 semaines", "duration_en": "8 weeks",
+                "team_fr": "4 consultants", "team_en": "4 consultants",
+                "tech": ["NLP", "Machine Learning", "API Integration"],
+                "created_at": datetime.now(timezone.utc).isoformat()
+            },
+            {
+                "id": str(uuid.uuid4()), "order": 1, "published": True,
+                "title_fr": "Optimisation financiere BioPharm", "title_en": "Financial Optimization at BioPharm",
+                "category": "Receipty Spend", "roi": "-45% couts",
+                "desc_fr": "Detection d'anomalies financieres et optimisation des depenses operationnelles.",
+                "desc_en": "Financial anomaly detection and operational expense optimization.",
+                "challenge_fr": "BioPharm perdait en moyenne 2.3M EUR par an en anomalies financieres non detectees et processus de reporting manuels.",
+                "challenge_en": "BioPharm was losing an average of 2.3M EUR per year in undetected financial anomalies and manual reporting processes.",
+                "solution_fr": "Implementation de Receipty Spend avec detection d'anomalies en temps reel, previsions budgetaires par ML et reporting automatise.",
+                "solution_en": "Implementation of Receipty Spend with real-time anomaly detection, ML budget forecasting and automated reporting.",
+                "results_fr": ["Reduction de 45% des couts operationnels", "Detection de 98% des anomalies financieres", "Reporting mensuel passe de 5 jours a 4 heures", "Conformite reglementaire automatisee"],
+                "results_en": ["45% reduction in operational costs", "98% financial anomaly detection rate", "Monthly reporting from 5 days to 4 hours", "Automated regulatory compliance"],
+                "image_url": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1200&auto=format&fit=crop",
+                "tags": ["Finance", "Analytics", "Compliance"],
+                "duration_fr": "12 semaines", "duration_en": "12 weeks",
+                "team_fr": "6 consultants", "team_en": "6 consultants",
+                "tech": ["Anomaly Detection", "Forecasting ML", "Compliance Engine"],
+                "created_at": datetime.now(timezone.utc).isoformat()
+            },
+            {
+                "id": str(uuid.uuid4()), "order": 2, "published": True,
+                "title_fr": "Plateforme E-commerce NeoRetail", "title_en": "E-commerce Platform NeoRetail",
+                "category": "Web-on-Demand", "roi": "+280% conversion",
+                "desc_fr": "Creation d'une plateforme e-commerce avec recommandations IA personnalisees.",
+                "desc_en": "AI-powered e-commerce platform with personalized recommendations.",
+                "challenge_fr": "NeoRetail avait un taux de conversion de 1.2% sur leur ancien site e-commerce avec zero personnalisation.",
+                "challenge_en": "NeoRetail had a 1.2% conversion rate on their old e-commerce site with zero personalization.",
+                "solution_fr": "Creation complete d'une plateforme e-commerce avec Web-on-Demand, integrant un moteur de recommandation IA et une UX optimisee.",
+                "solution_en": "Complete e-commerce platform creation with Web-on-Demand, integrating an AI recommendation engine and conversion-optimized UX.",
+                "results_fr": ["Taux de conversion passe de 1.2% a 4.6% (+280%)", "Panier moyen augmente de 35%", "Taux de retour clients +60%", "SEO organique +150% en 6 mois"],
+                "results_en": ["Conversion rate from 1.2% to 4.6% (+280%)", "Average basket increased by 35%", "Customer return rate +60%", "Organic SEO +150% in 6 months"],
+                "image_url": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?q=80&w=1200&auto=format&fit=crop",
+                "tags": ["E-commerce", "UX", "IA"],
+                "duration_fr": "16 semaines", "duration_en": "16 weeks",
+                "team_fr": "5 consultants", "team_en": "5 consultants",
+                "tech": ["Recommendation Engine", "Semantic Search", "UX Optimization"],
+                "created_at": datetime.now(timezone.utc).isoformat()
+            },
+            {
+                "id": str(uuid.uuid4()), "order": 3, "published": True,
+                "title_fr": "Pipeline de recrutement MedStaff", "title_en": "Recruitment Pipeline MedStaff",
+                "category": "Receipty Talent", "roi": "85% automatise",
+                "desc_fr": "Automatisation complete du pipeline de recrutement medical avec matching IA.",
+                "desc_en": "Full automation of the medical recruitment pipeline with AI matching.",
+                "challenge_fr": "MedStaff devait recruter 200+ professionnels de sante par mois dans un marche en tension extreme.",
+                "challenge_en": "MedStaff needed to recruit 200+ healthcare professionals per month in an extremely tight market.",
+                "solution_fr": "Pipeline de recrutement medical automatise avec Receipty Talent, incluant verification automatique des certifications.",
+                "solution_en": "Automated medical recruitment pipeline with Receipty Talent, including automatic certification verification.",
+                "results_fr": ["85% du pipeline entierement automatise", "Temps de placement reduit de 60%", "Taux de retention ameliore de 40%", "Couverture de 95% des postes ouverts"],
+                "results_en": ["85% of pipeline fully automated", "Placement time reduced by 60%", "Retention rate improved by 40%", "95% coverage of open positions"],
+                "image_url": "https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?q=80&w=1200&auto=format&fit=crop",
+                "tags": ["Sante", "RH", "Pipeline"],
+                "duration_fr": "10 semaines", "duration_en": "10 weeks",
+                "team_fr": "5 consultants", "team_en": "5 consultants",
+                "tech": ["Credential Verification AI", "Predictive Analytics", "Healthcare APIs"],
+                "created_at": datetime.now(timezone.utc).isoformat()
+            },
+            {
+                "id": str(uuid.uuid4()), "order": 4, "published": True,
+                "title_fr": "Dashboard financier InvestCorp", "title_en": "Financial Dashboard InvestCorp",
+                "category": "Receipty Spend", "roi": "+200% productivite",
+                "desc_fr": "Dashboard temps reel avec predictions budgetaires et alertes automatisees.",
+                "desc_en": "Real-time dashboard with budget predictions and automated alerts.",
+                "challenge_fr": "InvestCorp gerait 50+ portefeuilles avec des tableaux Excel et des processus manuels.",
+                "challenge_en": "InvestCorp managed 50+ portfolios with Excel spreadsheets and manual processes.",
+                "solution_fr": "Dashboard financier temps reel avec Receipty Spend, integrant predictions budgetaires par ML et alertes automatisees.",
+                "solution_en": "Real-time financial dashboard with Receipty Spend, integrating ML budget predictions and automated alerts.",
+                "results_fr": ["Productivite de l'equipe finance +200%", "Reporting passe de 2 semaines a 2 heures", "Predictions budgetaires precises a 94%", "Satisfaction investisseurs +85%"],
+                "results_en": ["Finance team productivity +200%", "Reporting from 2 weeks to 2 hours", "Budget predictions accurate to 94%", "Investor satisfaction +85%"],
+                "image_url": "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?q=80&w=1200&auto=format&fit=crop",
+                "tags": ["Dashboard", "Prediction", "Finance"],
+                "duration_fr": "14 semaines", "duration_en": "14 weeks",
+                "team_fr": "4 consultants", "team_en": "4 consultants",
+                "tech": ["Real-time Analytics", "ML Forecasting", "Interactive Dashboards"],
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+        ]
+        await db.case_studies.insert_many(seed_cases)
+        logger.info(f"Seeded {len(seed_cases)} case studies")
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
