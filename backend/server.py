@@ -151,7 +151,32 @@ class CaseStudyUpdate(BaseModel):
     published: Optional[bool] = None
 
 
-# --- Auth ---
+class SolutionCreate(BaseModel):
+    name_fr: str
+    name_en: str = ""
+    tag_fr: str = ""
+    tag_en: str = ""
+    desc_fr: str = ""
+    desc_en: str = ""
+    features_fr: List[str] = []
+    features_en: List[str] = []
+    icon: str = "users"
+    chart_type: str = "area"
+    published: bool = True
+
+
+class SolutionUpdate(BaseModel):
+    name_fr: Optional[str] = None
+    name_en: Optional[str] = None
+    tag_fr: Optional[str] = None
+    tag_en: Optional[str] = None
+    desc_fr: Optional[str] = None
+    desc_en: Optional[str] = None
+    features_fr: Optional[List[str]] = None
+    features_en: Optional[List[str]] = None
+    icon: Optional[str] = None
+    chart_type: Optional[str] = None
+    published: Optional[bool] = None
 
 def verify_token(authorization: str = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
@@ -411,6 +436,55 @@ async def delete_case_study(case_id: str, admin=Depends(verify_token)):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Case study not found")
     return {"message": "Case study deleted"}
+
+
+# --- Solutions CRUD ---
+
+@api_router.get("/solutions")
+async def list_solutions(published_only: bool = True):
+    query = {"published": True} if published_only else {}
+    sols = await db.solutions.find(query, {"_id": 0}).sort("order", 1).to_list(100)
+    return sols
+
+
+@api_router.get("/solutions/{sol_id}")
+async def get_solution(sol_id: str):
+    sol = await db.solutions.find_one({"id": sol_id}, {"_id": 0})
+    if not sol:
+        raise HTTPException(status_code=404, detail="Solution not found")
+    return sol
+
+
+@api_router.post("/admin/solutions")
+async def create_solution(input: SolutionCreate, admin=Depends(verify_token)):
+    existing = await db.solutions.count_documents({})
+    doc = input.model_dump()
+    doc["id"] = str(uuid.uuid4())
+    doc["order"] = existing
+    doc["created_at"] = datetime.now(timezone.utc).isoformat()
+    await db.solutions.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.put("/admin/solutions/{sol_id}")
+async def update_solution(sol_id: str, input: SolutionUpdate, admin=Depends(verify_token)):
+    updates = {k: v for k, v in input.model_dump().items() if v is not None}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    result = await db.solutions.update_one({"id": sol_id}, {"$set": updates})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Solution not found")
+    updated = await db.solutions.find_one({"id": sol_id}, {"_id": 0})
+    return updated
+
+
+@api_router.delete("/admin/solutions/{sol_id}")
+async def delete_solution(sol_id: str, admin=Depends(verify_token)):
+    result = await db.solutions.delete_one({"id": sol_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Solution not found")
+    return {"message": "Solution deleted"}
 
 
 # --- App Setup ---
