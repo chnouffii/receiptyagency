@@ -105,6 +105,52 @@ class ChatMessageInput(BaseModel):
     language: str = "fr"
 
 
+class CaseStudyCreate(BaseModel):
+    title_fr: str
+    title_en: str = ""
+    category: str
+    roi: str
+    desc_fr: str
+    desc_en: str = ""
+    challenge_fr: str = ""
+    challenge_en: str = ""
+    solution_fr: str = ""
+    solution_en: str = ""
+    results_fr: List[str] = []
+    results_en: List[str] = []
+    image_url: str = ""
+    tags: List[str] = []
+    duration_fr: str = ""
+    duration_en: str = ""
+    team_fr: str = ""
+    team_en: str = ""
+    tech: List[str] = []
+    published: bool = True
+
+
+class CaseStudyUpdate(BaseModel):
+    title_fr: Optional[str] = None
+    title_en: Optional[str] = None
+    category: Optional[str] = None
+    roi: Optional[str] = None
+    desc_fr: Optional[str] = None
+    desc_en: Optional[str] = None
+    challenge_fr: Optional[str] = None
+    challenge_en: Optional[str] = None
+    solution_fr: Optional[str] = None
+    solution_en: Optional[str] = None
+    results_fr: Optional[List[str]] = None
+    results_en: Optional[List[str]] = None
+    image_url: Optional[str] = None
+    tags: Optional[List[str]] = None
+    duration_fr: Optional[str] = None
+    duration_en: Optional[str] = None
+    team_fr: Optional[str] = None
+    team_en: Optional[str] = None
+    tech: Optional[List[str]] = None
+    published: Optional[bool] = None
+
+
 # --- Auth ---
 
 def verify_token(authorization: str = Header(None)):
