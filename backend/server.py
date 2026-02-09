@@ -327,6 +327,92 @@ async def export_leads_csv(admin=Depends(verify_token)):
     )
 
 
+# --- Chat Analytics ---
+
+@api_router.get("/admin/chat-analytics")
+async def get_chat_analytics(admin=Depends(verify_token)):
+    total_messages = await db.chat_messages.count_documents({})
+    sessions = await db.chat_messages.aggregate([
+        {"$group": {"_id": "$session_id", "count": {"$sum": 1}, "first": {"$min": "$created_at"}, "last": {"$max": "$created_at"}}}
+    ]).to_list(10000)
+    total_sessions = len(sessions)
+    avg_messages = round(total_messages / total_sessions, 1) if total_sessions > 0 else 0
+
+    recent_sessions = await db.chat_messages.aggregate([
+        {"$sort": {"created_at": -1}},
+        {"$group": {"_id": "$session_id", "count": {"$sum": 1}, "last_at": {"$max": "$created_at"}, "first_msg": {"$first": "$content"}, "messages": {"$push": {"role": "$role", "content": "$content"}}}},
+        {"$sort": {"last_at": -1}},
+        {"$limit": 20}
+    ]).to_list(20)
+
+    conversations = []
+    for s in recent_sessions:
+        user_msgs = [m["content"] for m in s.get("messages", []) if m["role"] == "user"]
+        preview = user_msgs[0][:80] if user_msgs else ""
+        conversations.append({
+            "session_id": s["_id"],
+            "message_count": s["count"],
+            "last_at": s["last_at"],
+            "preview": preview
+        })
+
+    return {
+        "total_sessions": total_sessions,
+        "total_messages": total_messages,
+        "avg_messages_per_session": avg_messages,
+        "conversations": conversations
+    }
+
+
+# --- Case Studies CRUD ---
+
+@api_router.get("/case-studies")
+async def list_case_studies(published_only: bool = True):
+    query = {"published": True} if published_only else {}
+    cases = await db.case_studies.find(query, {"_id": 0}).sort("order", 1).to_list(100)
+    return cases
+
+
+@api_router.get("/case-studies/{case_id}")
+async def get_case_study(case_id: str):
+    case = await db.case_studies.find_one({"id": case_id}, {"_id": 0})
+    if not case:
+        raise HTTPException(status_code=404, detail="Case study not found")
+    return case
+
+
+@api_router.post("/admin/case-studies")
+async def create_case_study(input: CaseStudyCreate, admin=Depends(verify_token)):
+    existing = await db.case_studies.count_documents({})
+    doc = input.model_dump()
+    doc["id"] = str(uuid.uuid4())
+    doc["order"] = existing
+    doc["created_at"] = datetime.now(timezone.utc).isoformat()
+    await db.case_studies.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.put("/admin/case-studies/{case_id}")
+async def update_case_study(case_id: str, input: CaseStudyUpdate, admin=Depends(verify_token)):
+    updates = {k: v for k, v in input.model_dump().items() if v is not None}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    result = await db.case_studies.update_one({"id": case_id}, {"$set": updates})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Case study not found")
+    updated = await db.case_studies.find_one({"id": case_id}, {"_id": 0})
+    return updated
+
+
+@api_router.delete("/admin/case-studies/{case_id}")
+async def delete_case_study(case_id: str, admin=Depends(verify_token)):
+    result = await db.case_studies.delete_one({"id": case_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Case study not found")
+    return {"message": "Case study deleted"}
+
+
 # --- App Setup ---
 
 app.include_router(api_router)
