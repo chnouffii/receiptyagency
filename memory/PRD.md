@@ -43,6 +43,15 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
 - Backend: 14 API endpoints total (+5 nouveaux)
 - Collection MongoDB: chat_messages
 
+### Phase 3 - Analytics & CRUD Etudes de Cas (Feb 2026)
+- Chat Analytics dashboard dans le panel admin (sessions, messages, conversations recentes, detail dialogue)
+- CRUD complet etudes de cas dans l'admin (creer, modifier, supprimer, publier/depublier)
+- Formulaire bilingue FR/EN avec image URL, tags, technologies, defi/solution/resultats
+- Pages publiques chargent depuis l'API MongoDB au lieu du hardcode
+- Seed automatique de 5 etudes de cas au demarrage
+- Backend: 20 API endpoints total (+6 nouveaux)
+- Collection MongoDB: case_studies
+
 ## Prioritized Backlog
 ### P0 (Critical) - Done
 - All core pages implemented and functional
