@@ -381,6 +381,195 @@ class ReceiptyCoreAPITester:
             self.log_result("CSV Export", False, "", f"Exception: {str(e)}")
             return False
 
+    # ========== Phase 3 Features Tests ==========
+    
+    def test_chat_analytics(self):
+        """Test chat analytics endpoint"""
+        if not self.admin_token:
+            self.log_result("Chat Analytics", False, "", "No admin token available")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(f"{self.base_url}/admin/chat-analytics", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_keys = ["total_sessions", "total_messages", "avg_messages_per_session", "conversations"]
+                if all(key in data for key in required_keys):
+                    conversations = data.get("conversations", [])
+                    self.log_result("Chat Analytics", True, f"Retrieved analytics with {data['total_sessions']} sessions, {len(conversations)} recent conversations")
+                    return True
+                else:
+                    missing = [key for key in required_keys if key not in data]
+                    self.log_result("Chat Analytics", False, "", f"Missing keys: {missing}")
+                    return False
+            else:
+                self.log_result("Chat Analytics", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Chat Analytics", False, "", f"Exception: {str(e)}")
+            return False
+    
+    def test_get_case_studies_public(self):
+        """Test public case studies endpoint"""
+        try:
+            response = requests.get(f"{self.base_url}/case-studies", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    # Check that we get seeded case studies
+                    if len(data) >= 5:  # Should have at least 5 seeded case studies
+                        # Verify case study structure
+                        first_case = data[0]
+                        required_fields = ["id", "title_fr", "category", "roi", "published"]
+                        if all(field in first_case for field in required_fields):
+                            self.log_result("Get Case Studies Public", True, f"Retrieved {len(data)} published case studies")
+                            self.test_case_study_id = data[0]["id"]  # Store for detail test
+                            return True
+                        else:
+                            missing = [field for field in required_fields if field not in first_case]
+                            self.log_result("Get Case Studies Public", False, "", f"Missing fields in case study: {missing}")
+                            return False
+                    else:
+                        self.log_result("Get Case Studies Public", False, "", f"Expected at least 5 case studies, got {len(data)}")
+                        return False
+                else:
+                    self.log_result("Get Case Studies Public", False, "", "Response is not a list")
+                    return False
+            else:
+                self.log_result("Get Case Studies Public", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Get Case Studies Public", False, "", f"Exception: {str(e)}")
+            return False
+    
+    def test_get_case_study_detail(self):
+        """Test single case study detail endpoint"""
+        if not hasattr(self, 'test_case_study_id'):
+            self.log_result("Get Case Study Detail", False, "", "No test case study ID available")
+            return False
+        
+        try:
+            response = requests.get(f"{self.base_url}/case-studies/{self.test_case_study_id}", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["id", "title_fr", "category", "roi", "desc_fr", "challenge_fr", "solution_fr"]
+                if all(field in data for field in required_fields):
+                    self.log_result("Get Case Study Detail", True, f"Retrieved case study: {data.get('title_fr', 'N/A')}")
+                    return True
+                else:
+                    missing = [field for field in required_fields if field not in data]
+                    self.log_result("Get Case Study Detail", False, "", f"Missing fields: {missing}")
+                    return False
+            else:
+                self.log_result("Get Case Study Detail", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Get Case Study Detail", False, "", f"Exception: {str(e)}")
+            return False
+    
+    def test_create_case_study(self):
+        """Test creating a new case study"""
+        if not self.admin_token:
+            self.log_result("Create Case Study", False, "", "No admin token available")
+            return False
+        
+        try:
+            timestamp = datetime.now().strftime("%H%M%S")
+            payload = {
+                "title_fr": f"Test Case Study {timestamp}",
+                "title_en": f"Test Case Study EN {timestamp}",
+                "category": "Receipty Talent",
+                "roi": "+100% test",
+                "desc_fr": f"Description test {timestamp}",
+                "desc_en": f"Test description {timestamp}",
+                "challenge_fr": "Test challenge description",
+                "solution_fr": "Test solution description",
+                "results_fr": ["Test result 1", "Test result 2"],
+                "image_url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200",
+                "tags": ["Test", "API"],
+                "tech": ["Test Tech", "API"],
+                "published": True
+            }
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.post(f"{self.base_url}/admin/case-studies", json=payload, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "id" in data and data["title_fr"] == payload["title_fr"]:
+                    self.test_created_case_id = data["id"]
+                    self.log_result("Create Case Study", True, f"Case study created with ID: {self.test_created_case_id}")
+                    return True
+                else:
+                    self.log_result("Create Case Study", False, "", "Missing ID or title mismatch in response")
+                    return False
+            else:
+                self.log_result("Create Case Study", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Create Case Study", False, "", f"Exception: {str(e)}")
+            return False
+    
+    def test_update_case_study(self):
+        """Test updating a case study"""
+        if not self.admin_token or not hasattr(self, 'test_created_case_id'):
+            self.log_result("Update Case Study", False, "", "Missing admin token or test case study ID")
+            return False
+        
+        try:
+            payload = {
+                "title_fr": "Updated Test Case Study",
+                "roi": "+200% updated",
+                "published": False
+            }
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.put(f"{self.base_url}/admin/case-studies/{self.test_created_case_id}", json=payload, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("title_fr") == payload["title_fr"] and data.get("roi") == payload["roi"]:
+                    self.log_result("Update Case Study", True, "Case study updated successfully")
+                    return True
+                else:
+                    self.log_result("Update Case Study", False, "", "Case study not updated correctly")
+                    return False
+            else:
+                self.log_result("Update Case Study", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Update Case Study", False, "", f"Exception: {str(e)}")
+            return False
+    
+    def test_delete_case_study(self):
+        """Test deleting a case study"""
+        if not self.admin_token or not hasattr(self, 'test_created_case_id'):
+            self.log_result("Delete Case Study", False, "", "Missing admin token or test case study ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.delete(f"{self.base_url}/admin/case-studies/{self.test_created_case_id}", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "deleted" in data.get("message", "").lower():
+                    self.log_result("Delete Case Study", True, "Case study deleted successfully")
+                    return True
+                else:
+                    self.log_result("Delete Case Study", False, "", "Unexpected delete response")
+                    return False
+            else:
+                self.log_result("Delete Case Study", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Delete Case Study", False, "", f"Exception: {str(e)}")
+            return False
+
     def run_all_tests(self):
         """Run all API tests in sequence"""
         print("🚀 Starting Receipty Agency API Tests - Phase 2 Features")
