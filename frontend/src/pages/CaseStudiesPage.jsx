@@ -1,25 +1,21 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Badge } from '../components/ui/badge';
+import axios from 'axios';
 
-const IMAGES = [
-  'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?q=80&w=800&auto=format&fit=crop',
-];
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-function CaseCard({ item, image, index }) {
+function CaseCard({ item, index, lang }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
-  const { t } = useLanguage();
+  const title = lang === 'fr' ? item.title_fr : (item.title_en || item.title_fr);
+  const desc = lang === 'fr' ? item.desc_fr : (item.desc_en || item.desc_fr);
 
   return (
-    <Link to={`/cases/${index}`} data-testid={`case-card-${index}`}>
+    <Link to={`/cases/${item.id}`} data-testid={`case-card-${index}`}>
       <motion.div
         ref={ref}
         initial={{ opacity: 0, y: 20 }}
@@ -27,49 +23,48 @@ function CaseCard({ item, image, index }) {
         transition={{ delay: index * 0.1, duration: 0.5 }}
         className="group break-inside-avoid mb-6 overflow-hidden rounded-2xl border border-white/5 bg-[#0F0F10] transition-all duration-300 hover:border-blue-500/20"
       >
-      {/* Image */}
-      <div className="relative overflow-hidden aspect-[16/10]">
-        <img
-          src={image}
-          alt={item.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F10] via-transparent to-transparent opacity-60" />
-
-        {/* ROI Badge */}
-        <div className="absolute top-4 right-4">
-          <Badge className="bg-blue-600/90 text-white border-0 backdrop-blur-sm font-mono text-xs px-3 py-1">
-            {item.roi}
-          </Badge>
+        {item.image_url && (
+          <div className="relative overflow-hidden aspect-[16/10]">
+            <img src={item.image_url} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F10] via-transparent to-transparent opacity-60" />
+            <div className="absolute top-4 right-4">
+              <Badge className="bg-blue-600/90 text-white border-0 backdrop-blur-sm font-mono text-xs px-3 py-1">{item.roi}</Badge>
+            </div>
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <span className="flex items-center gap-2 text-white text-sm font-medium">
+                {lang === 'fr' ? 'Voir le cas' : 'View case'} <ArrowUpRight className="w-4 h-4" />
+              </span>
+            </div>
+          </div>
+        )}
+        <div className="p-6">
+          <p className="text-xs text-blue-400 font-medium mb-2">{item.category}</p>
+          <h3 className="font-heading text-lg font-semibold text-white leading-tight">{title}</h3>
+          <p className="mt-2 text-sm text-gray-500 leading-relaxed">{desc}</p>
+          {item.tags?.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {item.tags.map((tag) => (
+                <span key={tag} className="text-xs text-gray-600 bg-white/5 rounded-full px-3 py-1">{tag}</span>
+              ))}
+            </div>
+          )}
         </div>
-
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <span className="flex items-center gap-2 text-white text-sm font-medium">
-            {t.cases.read_more} <ArrowUpRight className="w-4 h-4" />
-          </span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-6">
-        <p className="text-xs text-blue-400 font-medium mb-2">{item.category}</p>
-        <h3 className="font-heading text-lg font-semibold text-white leading-tight">{item.title}</h3>
-        <p className="mt-2 text-sm text-gray-500 leading-relaxed">{item.desc}</p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {item.tags.map((tag) => (
-            <span key={tag} className="text-xs text-gray-600 bg-white/5 rounded-full px-3 py-1">{tag}</span>
-          ))}
-        </div>
-      </div>
-    </motion.div>
+      </motion.div>
     </Link>
   );
 }
 
 export default function CaseStudiesPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios.get(`${API}/case-studies`).then(res => {
+      setCases(res.data);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
 
   return (
     <div data-testid="cases-page" className="pt-24 bg-[#050505] min-h-screen">
@@ -88,12 +83,17 @@ export default function CaseStudiesPage() {
           </p>
         </motion.div>
 
-        {/* Masonry Grid */}
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
-          {t.cases.items.map((item, i) => (
-            <CaseCard key={i} item={item} image={IMAGES[i % IMAGES.length]} index={i} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center text-gray-500 py-20">{lang === 'fr' ? 'Chargement...' : 'Loading...'}</div>
+        ) : cases.length === 0 ? (
+          <div className="text-center text-gray-500 py-20">{lang === 'fr' ? 'Aucune etude de cas pour le moment.' : 'No case studies yet.'}</div>
+        ) : (
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
+            {cases.map((item, i) => (
+              <CaseCard key={item.id} item={item} index={i} lang={lang} />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
