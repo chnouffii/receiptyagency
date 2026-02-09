@@ -1,94 +1,36 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogOut, Trash2, Users, UserPlus, UserCheck, Trophy, DollarSign, CalendarClock, Search, Download, Filter } from 'lucide-react';
-import { toast } from 'sonner';
+import { LogOut, Users, MessageCircle, BookOpen } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { Badge } from '../components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
+import AdminLeadsTab from './admin/AdminLeadsTab';
+import AdminChatAnalytics from './admin/AdminChatAnalytics';
+import AdminCaseStudies from './admin/AdminCaseStudies';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const STATUS_COLORS = {
-  new: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
-  contacted: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  qualified: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  converted: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-};
-
 export default function AdminDashboardPage() {
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
-  const [leads, setLeads] = useState([]);
   const [stats, setStats] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
   const token = localStorage.getItem('receipty-admin-token');
 
-  const fetchData = useCallback(async () => {
+  const fetchStats = useCallback(async () => {
     if (!token) { navigate('/admin'); return; }
-    const authHeaders = { Authorization: `Bearer ${token}` };
     try {
-      const params = {};
-      if (searchQuery) params.search = searchQuery;
-      if (statusFilter && statusFilter !== 'all') params.status_filter = statusFilter;
-      const [leadsRes, statsRes] = await Promise.all([
-        axios.get(`${API}/leads`, { headers: authHeaders, params }),
-        axios.get(`${API}/admin/stats`, { headers: authHeaders }),
-      ]);
-      setLeads(leadsRes.data);
-      setStats(statsRes.data);
+      const res = await axios.get(`${API}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } });
+      setStats(res.data);
     } catch (err) {
       if (err.response?.status === 401) {
         localStorage.removeItem('receipty-admin-token');
         navigate('/admin');
       }
     }
-  }, [token, navigate, searchQuery, statusFilter]);
+  }, [token, navigate]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
-
-  const exportCSV = async () => {
-    const authHeaders = { Authorization: `Bearer ${token}` };
-    try {
-      const res = await axios.get(`${API}/leads/export`, { headers: authHeaders, responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'receipty_leads.csv');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      toast.success(lang === 'fr' ? 'Export CSV telecharge' : 'CSV export downloaded');
-    } catch {
-      toast.error('Export failed');
-    }
-  };
-
-  const updateStatus = async (leadId, status) => {
-    const authHeaders = { Authorization: `Bearer ${token}` };
-    try {
-      await axios.patch(`${API}/leads/${leadId}/status`, { status }, { headers: authHeaders });
-      toast.success('Status updated');
-      fetchData();
-    } catch {
-      toast.error('Error updating status');
-    }
-  };
-
-  const deleteLead = async (leadId) => {
-    const authHeaders = { Authorization: `Bearer ${token}` };
-    try {
-      await axios.delete(`${API}/leads/${leadId}`, { headers: authHeaders });
-      toast.success('Lead deleted');
-      fetchData();
-    } catch {
-      toast.error('Error deleting lead');
-    }
-  };
+  useEffect(() => { fetchStats(); }, [fetchStats]);
 
   const logout = () => {
     localStorage.removeItem('receipty-admin-token');
@@ -96,20 +38,10 @@ export default function AdminDashboardPage() {
     navigate('/admin');
   };
 
-  const statCards = stats ? [
-    { label: t.admin.total, value: stats.total_leads, icon: Users, color: 'text-gray-300' },
-    { label: t.admin.new_label, value: stats.new_leads, icon: UserPlus, color: 'text-sky-400' },
-    { label: t.admin.contacted, value: stats.contacted, icon: CalendarClock, color: 'text-amber-400' },
-    { label: t.admin.qualified, value: stats.qualified, icon: UserCheck, color: 'text-blue-400' },
-    { label: t.admin.converted, value: stats.converted, icon: Trophy, color: 'text-emerald-400' },
-    { label: t.admin.revenue, value: `${stats.total_setup_revenue?.toLocaleString() || 0} EUR`, icon: DollarSign, color: 'text-blue-400' },
-  ] : [];
-
   return (
     <div data-testid="admin-dashboard" className="pt-24 bg-[#050505] min-h-screen">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center justify-between mb-8">
           <h1 className="font-heading text-2xl font-bold text-white">{t.admin.dashboard}</h1>
           <button
             onClick={logout}
@@ -120,131 +52,32 @@ export default function AdminDashboardPage() {
           </button>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
-          {statCards.map((stat, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="rounded-xl border border-white/5 bg-[#0F0F10] p-4"
-              data-testid={`admin-stat-${i}`}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <stat.icon className={`w-4 h-4 ${stat.color}`} />
-                <span className="text-xs text-gray-500">{stat.label}</span>
-              </div>
-              <p className="font-mono text-xl font-bold text-white">{stat.value}</p>
-            </motion.div>
-          ))}
-        </div>
+        <Tabs defaultValue="leads" className="w-full">
+          <TabsList className="bg-[#0F0F10] border border-white/5 mb-8 h-11">
+            <TabsTrigger value="leads" data-testid="tab-leads" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 gap-2 text-sm">
+              <Users className="w-4 h-4" />
+              {lang === 'fr' ? 'Leads' : 'Leads'}
+            </TabsTrigger>
+            <TabsTrigger value="chat" data-testid="tab-chat-analytics" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 gap-2 text-sm">
+              <MessageCircle className="w-4 h-4" />
+              {lang === 'fr' ? 'Chat Analytics' : 'Chat Analytics'}
+            </TabsTrigger>
+            <TabsTrigger value="cases" data-testid="tab-case-studies" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 gap-2 text-sm">
+              <BookOpen className="w-4 h-4" />
+              {lang === 'fr' ? 'Etudes de Cas' : 'Case Studies'}
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Leads Table */}
-        <div className="rounded-xl border border-white/5 bg-[#0F0F10] overflow-hidden">
-          <div className="p-4 border-b border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h2 className="font-heading text-lg font-semibold text-white">{t.admin.leads}</h2>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              {/* Search */}
-              <div className="relative flex-1 sm:flex-initial">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={lang === 'fr' ? 'Rechercher...' : 'Search...'}
-                  data-testid="admin-search-input"
-                  className="w-full sm:w-48 bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-lg text-white text-sm h-9 pl-9 pr-3 placeholder:text-gray-600 outline-none transition-all duration-200"
-                />
-              </div>
-              {/* Status Filter */}
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[130px] h-9 text-xs border-white/10 bg-white/5" data-testid="admin-status-filter">
-                  <Filter className="w-3 h-3 mr-1.5 text-gray-500" />
-                  <SelectValue placeholder={lang === 'fr' ? 'Statut' : 'Status'} />
-                </SelectTrigger>
-                <SelectContent className="bg-[#0F0F10] border-white/10">
-                  <SelectItem value="all">{lang === 'fr' ? 'Tous' : 'All'}</SelectItem>
-                  <SelectItem value="new">New</SelectItem>
-                  <SelectItem value="contacted">Contacted</SelectItem>
-                  <SelectItem value="qualified">Qualified</SelectItem>
-                  <SelectItem value="converted">Converted</SelectItem>
-                </SelectContent>
-              </Select>
-              {/* Export CSV */}
-              <button
-                onClick={exportCSV}
-                data-testid="admin-export-csv-btn"
-                className="flex items-center gap-1.5 h-9 px-3 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-all duration-200"
-              >
-                <Download className="w-3.5 h-3.5" />
-                CSV
-              </button>
-            </div>
-          </div>
-
-          {leads.length === 0 ? (
-            <div className="p-12 text-center text-gray-500" data-testid="no-leads-msg">
-              {t.admin.no_leads}
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="border-white/5 hover:bg-transparent">
-                  <TableHead className="text-gray-500">Name</TableHead>
-                  <TableHead className="text-gray-500">Email</TableHead>
-                  <TableHead className="text-gray-500">Company</TableHead>
-                  <TableHead className="text-gray-500">Category</TableHead>
-                  <TableHead className="text-gray-500">Setup</TableHead>
-                  <TableHead className="text-gray-500">Monthly</TableHead>
-                  <TableHead className="text-gray-500">{t.admin.status}</TableHead>
-                  <TableHead className="text-gray-500">{t.admin.actions}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {leads.map((lead) => (
-                  <TableRow key={lead.id} className="border-white/5 hover:bg-white/[0.02]">
-                    <TableCell className="text-white font-medium text-sm">{lead.name}</TableCell>
-                    <TableCell className="text-gray-400 text-sm">{lead.email}</TableCell>
-                    <TableCell className="text-gray-400 text-sm">{lead.company}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs text-blue-400 border-blue-500/30 capitalize">
-                        {lead.category}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-mono text-sm text-gray-300">{lead.estimated_setup} EUR</TableCell>
-                    <TableCell className="font-mono text-sm text-gray-300">{lead.estimated_monthly} EUR/mo</TableCell>
-                    <TableCell>
-                      <Select value={lead.status} onValueChange={(val) => updateStatus(lead.id, val)}>
-                        <SelectTrigger
-                          className={`w-[130px] h-8 text-xs border ${STATUS_COLORS[lead.status] || ''} bg-transparent`}
-                          data-testid={`status-select-${lead.id}`}
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#0F0F10] border-white/10">
-                          <SelectItem value="new">New</SelectItem>
-                          <SelectItem value="contacted">Contacted</SelectItem>
-                          <SelectItem value="qualified">Qualified</SelectItem>
-                          <SelectItem value="converted">Converted</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() => deleteLead(lead.id)}
-                        data-testid={`delete-lead-${lead.id}`}
-                        className="text-gray-600 hover:text-red-400 transition-colors duration-200"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </div>
+          <TabsContent value="leads">
+            <AdminLeadsTab token={token} stats={stats} onRefresh={fetchStats} />
+          </TabsContent>
+          <TabsContent value="chat">
+            <AdminChatAnalytics token={token} />
+          </TabsContent>
+          <TabsContent value="cases">
+            <AdminCaseStudies token={token} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
