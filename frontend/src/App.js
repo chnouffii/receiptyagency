@@ -38,18 +38,29 @@ function App() {
   useEffect(() => {
     document.documentElement.classList.add("dark");
 
-    // Marque blanche : masquer le badge Emergent + forcer le titre
-    const hideBadge = () => {
+    const TITLE = "Receipty | Agence d'IA";
+
+    // Force title immediately and on every change
+    const forceTitle = () => { document.title = TITLE; };
+    forceTitle();
+
+    // Masquer le badge Emergent
+    const cleanup = () => {
       const badge = document.getElementById('emergent-badge');
       if (badge) badge.remove();
-      if (document.title !== "Receipty | Agence d'IA") document.title = "Receipty | Agence d'IA";
+      if (document.title !== TITLE) forceTitle();
     };
-    hideBadge();
-    const observer = new MutationObserver(hideBadge);
+    cleanup();
+
+    // MutationObserver pour intercepter les modifications du DOM et du <head>
+    const observer = new MutationObserver(cleanup);
     observer.observe(document.body, { childList: true, subtree: true });
-    // Observer le head aussi pour intercepter les changements de titre
     observer.observe(document.head, { childList: true, subtree: true, characterData: true });
-    return () => observer.disconnect();
+
+    // Interval de secours — certains scripts externes changent le titre après un délai
+    const interval = setInterval(cleanup, 500);
+
+    return () => { observer.disconnect(); clearInterval(interval); };
   }, []);
 
   return (
