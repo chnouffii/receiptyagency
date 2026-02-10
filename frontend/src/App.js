@@ -38,16 +38,17 @@ function App() {
   useEffect(() => {
     document.documentElement.classList.add("dark");
 
-    // Marque blanche : masquer le badge Emergent
+    // Marque blanche : masquer le badge Emergent + forcer le titre
     const hideBadge = () => {
       const badge = document.getElementById('emergent-badge');
-      if (badge) {
-        badge.remove();
-      }
+      if (badge) badge.remove();
+      if (document.title !== "Receipty | Agence d'IA") document.title = "Receipty | Agence d'IA";
     };
     hideBadge();
     const observer = new MutationObserver(hideBadge);
     observer.observe(document.body, { childList: true, subtree: true });
+    // Observer le head aussi pour intercepter les changements de titre
+    observer.observe(document.head, { childList: true, subtree: true, characterData: true });
     return () => observer.disconnect();
   }, []);
 
