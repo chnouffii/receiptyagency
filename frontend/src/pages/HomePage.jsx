@@ -25,11 +25,10 @@ export default function HomePage() {
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[min(800px,100vw)] h-[800px] rounded-full bg-blue-600/5 blur-[120px]" />
         </div>
 
-        <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 text-center pt-24 overflow-hidden">
+        <div className="relative z-10 w-full max-w-[90%] sm:max-w-2xl md:max-w-3xl lg:max-w-5xl mx-auto px-4 sm:px-6 text-center pt-24">
           {/* Animated Title */}
           <motion.h1
-            className="font-heading text-2xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-snug break-words"
-            style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}
+            className="font-heading text-[1.5rem] leading-tight sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, type: 'spring', stiffness: 80, damping: 20 }}
