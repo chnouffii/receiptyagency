@@ -26,10 +26,10 @@ export default function HomePage() {
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-blue-600/5 blur-[120px]" />
         </div>
 
-        <div className="relative z-10 max-w-5xl mx-auto px-6 text-center pt-24">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center pt-24">
           {/* Animated Title */}
           <motion.h1
-            className="font-heading text-[1.75rem] sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight overflow-hidden"
+            className="font-heading text-[1.75rem] sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight"
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
@@ -37,7 +37,7 @@ export default function HomePage() {
             {words.map((word, i) => (
               <motion.span
                 key={i}
-                className="inline-block mr-[0.3em]"
+                className="inline mr-[0.15em] sm:mr-[0.3em]"
                 variants={{
                   hidden: { opacity: 0, y: 40, filter: 'blur(8px)' },
                   visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring', stiffness: 80, damping: 20 } }
