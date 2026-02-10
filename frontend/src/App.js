@@ -44,11 +44,21 @@ function App() {
     const forceTitle = () => { document.title = TITLE; };
     forceTitle();
 
-    // Masquer le badge Emergent
+    // Masquer le badge Emergent + forcer favicon
     const cleanup = () => {
       const badge = document.getElementById('emergent-badge');
       if (badge) badge.remove();
       if (document.title !== TITLE) forceTitle();
+      // Force favicon
+      let link = document.querySelector("link[rel='icon']");
+      if (!link || !link.href.includes('favicon.png')) {
+        if (link) link.remove();
+        link = document.createElement('link');
+        link.rel = 'icon';
+        link.type = 'image/png';
+        link.href = '/favicon.png';
+        document.head.appendChild(link);
+      }
     };
     cleanup();
 
