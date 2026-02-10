@@ -6,7 +6,6 @@ import { useLanguage } from '../context/LanguageContext';
 
 export default function HomePage() {
   const { t, lang } = useLanguage();
-  const words = t.hero.title.split(' ');
   const featuresRef = useRef(null);
   const featuresInView = useInView(featuresRef, { once: true, margin: '-100px' });
 
