@@ -29,7 +29,7 @@ export default function HomePage() {
         <div className="relative z-10 max-w-5xl mx-auto px-6 text-center pt-24">
           {/* Animated Title */}
           <motion.h1
-            className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight"
+            className="font-heading text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight"
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
