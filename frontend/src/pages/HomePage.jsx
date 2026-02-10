@@ -25,7 +25,7 @@ export default function HomePage() {
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-blue-600/5 blur-[120px]" />
         </div>
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center pt-24">
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 text-center pt-24 overflow-hidden">
           {/* Animated Title */}
           <motion.h1
             className="font-heading text-2xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-snug break-words"
