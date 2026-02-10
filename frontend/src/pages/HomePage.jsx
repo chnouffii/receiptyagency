@@ -22,7 +22,7 @@ export default function HomePage() {
         {/* Background */}
         <div className="absolute inset-0 bg-[#050505]">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-transparent to-transparent" />
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-blue-600/5 blur-[120px]" />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[min(800px,100vw)] h-[800px] rounded-full bg-blue-600/5 blur-[120px]" />
         </div>
 
         <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 text-center pt-24 overflow-hidden">
