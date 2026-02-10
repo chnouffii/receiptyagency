@@ -569,6 +569,237 @@ class ReceiptyCoreAPITester:
         except Exception as e:
             self.log_result("Delete Case Study", False, "", f"Exception: {str(e)}")
             return False
+    
+    # ========== Phase 5 Features Tests ==========
+    
+    def test_get_solutions_public(self):
+        """Test public solutions endpoint"""
+        try:
+            response = requests.get(f"{self.base_url}/solutions", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    # Check that we get seeded solutions
+                    if len(data) >= 3:  # Should have at least 3 seeded solutions
+                        # Verify solution structure
+                        first_solution = data[0]
+                        required_fields = ["id", "name_fr", "tag_fr", "features_fr", "icon", "published"]
+                        if all(field in first_solution for field in required_fields):
+                            # Store solutions for later tests
+                            self.test_solutions = data
+                            self.test_solution_id = data[0]["id"]  # Store for detail test
+                            self.log_result("Get Solutions Public", True, f"Retrieved {len(data)} published solutions")
+                            return True
+                        else:
+                            missing = [field for field in required_fields if field not in first_solution]
+                            self.log_result("Get Solutions Public", False, "", f"Missing fields in solution: {missing}")
+                            return False
+                    else:
+                        self.log_result("Get Solutions Public", False, "", f"Expected at least 3 solutions, got {len(data)}")
+                        return False
+                else:
+                    self.log_result("Get Solutions Public", False, "", "Response is not a list")
+                    return False
+            else:
+                self.log_result("Get Solutions Public", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Get Solutions Public", False, "", f"Exception: {str(e)}")
+            return False
+    
+    def test_get_solution_detail(self):
+        """Test single solution detail endpoint"""
+        if not hasattr(self, 'test_solution_id'):
+            self.log_result("Get Solution Detail", False, "", "No test solution ID available")
+            return False
+        
+        try:
+            response = requests.get(f"{self.base_url}/solutions/{self.test_solution_id}", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["id", "name_fr", "tag_fr", "features_fr", "icon", "published"]
+                if all(field in data for field in required_fields):
+                    solution_name = data.get('name_fr', 'N/A')
+                    features_count = len(data.get('features_fr', []))
+                    self.log_result("Get Solution Detail", True, f"Retrieved solution: {solution_name} with {features_count} features")
+                    return True
+                else:
+                    missing = [field for field in required_fields if field not in data]
+                    self.log_result("Get Solution Detail", False, "", f"Missing fields: {missing}")
+                    return False
+            else:
+                self.log_result("Get Solution Detail", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Get Solution Detail", False, "", f"Exception: {str(e)}")
+            return False
+    
+    def test_create_solution(self):
+        """Test creating a new solution"""
+        if not self.admin_token:
+            self.log_result("Create Solution", False, "", "No admin token available")
+            return False
+        
+        try:
+            timestamp = datetime.now().strftime("%H%M%S")
+            payload = {
+                "name_fr": f"Test Solution {timestamp}",
+                "name_en": f"Test Solution EN {timestamp}",
+                "tag_fr": "Test Tag",
+                "tag_en": "Test Tag EN",
+                "desc_fr": f"Description test {timestamp}",
+                "desc_en": f"Test description {timestamp}",
+                "features_fr": ["Feature Test 1", "Feature Test 2", "Feature Test 3"],
+                "features_en": ["Test Feature 1", "Test Feature 2", "Test Feature 3"],
+                "icon": "cpu",
+                "chart_type": "area",
+                "published": True
+            }
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.post(f"{self.base_url}/admin/solutions", json=payload, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "id" in data and data["name_fr"] == payload["name_fr"]:
+                    self.test_created_solution_id = data["id"]
+                    features_count = len(data.get('features_fr', []))
+                    self.log_result("Create Solution", True, f"Solution created with ID: {self.test_created_solution_id}, {features_count} features")
+                    return True
+                else:
+                    self.log_result("Create Solution", False, "", "Missing ID or name mismatch in response")
+                    return False
+            else:
+                self.log_result("Create Solution", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Create Solution", False, "", f"Exception: {str(e)}")
+            return False
+    
+    def test_update_solution(self):
+        """Test updating a solution"""
+        if not self.admin_token or not hasattr(self, 'test_created_solution_id'):
+            self.log_result("Update Solution", False, "", "Missing admin token or test solution ID")
+            return False
+        
+        try:
+            payload = {
+                "name_fr": "Updated Test Solution",
+                "features_fr": ["Updated Feature 1", "Updated Feature 2"],
+                "published": False  # Test unpublishing
+            }
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.put(f"{self.base_url}/admin/solutions/{self.test_created_solution_id}", json=payload, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("name_fr") == payload["name_fr"] and data.get("published") == False:
+                    self.log_result("Update Solution", True, "Solution updated and unpublished successfully")
+                    return True
+                else:
+                    self.log_result("Update Solution", False, "", "Solution not updated correctly")
+                    return False
+            else:
+                self.log_result("Update Solution", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Update Solution", False, "", f"Exception: {str(e)}")
+            return False
+    
+    def test_unpublish_sync(self):
+        """Test that unpublished solutions don't appear in public endpoint"""
+        try:
+            # Get public solutions after unpublishing one
+            response = requests.get(f"{self.base_url}/solutions", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                # Check that our unpublished test solution is not in the list
+                if hasattr(self, 'test_created_solution_id'):
+                    found_unpublished = any(sol.get("id") == self.test_created_solution_id for sol in data)
+                    if not found_unpublished:
+                        self.log_result("Unpublish Sync", True, f"Unpublished solution correctly hidden from public API, {len(data)} solutions visible")
+                        return True
+                    else:
+                        self.log_result("Unpublish Sync", False, "", "Unpublished solution still appears in public API")
+                        return False
+                else:
+                    self.log_result("Unpublish Sync", True, f"No test solution to check, {len(data)} solutions visible")
+                    return True
+            else:
+                self.log_result("Unpublish Sync", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Unpublish Sync", False, "", f"Exception: {str(e)}")
+            return False
+    
+    def test_delete_solution(self):
+        """Test deleting a solution"""
+        if not self.admin_token or not hasattr(self, 'test_created_solution_id'):
+            self.log_result("Delete Solution", False, "", "Missing admin token or test solution ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.delete(f"{self.base_url}/admin/solutions/{self.test_created_solution_id}", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "deleted" in data.get("message", "").lower():
+                    self.log_result("Delete Solution", True, "Solution deleted successfully")
+                    return True
+                else:
+                    self.log_result("Delete Solution", False, "", "Unexpected delete response")
+                    return False
+            else:
+                self.log_result("Delete Solution", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Delete Solution", False, "", f"Exception: {str(e)}")
+            return False
+    
+    def test_lead_with_solution_category(self):
+        """Test creating lead with actual solution category name"""
+        if not hasattr(self, 'test_solutions') or not self.test_solutions:
+            self.log_result("Lead with Solution Category", False, "", "No test solutions available")
+            return False
+        
+        try:
+            # Use the first solution from our solutions list
+            solution = self.test_solutions[0]
+            solution_name = solution.get('name_fr', 'Test Solution')
+            
+            timestamp = datetime.now().strftime("%H%M%S")
+            payload = {
+                "name": f"Test User {timestamp}",
+                "email": f"test{timestamp}@example.com",
+                "company": f"Test Company {timestamp}",
+                "phone": "+1234567890",
+                "category": solution_name,  # Use actual solution name
+                "company_size": 50,
+                "features": solution.get('features_fr', [])[:2],  # Use first 2 features
+                "estimated_setup": 3000,
+                "estimated_monthly": 199,
+                "language": "fr"
+            }
+            response = requests.post(f"{self.base_url}/leads", json=payload, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if "id" in data and data["category"] == solution_name:
+                    self.log_result("Lead with Solution Category", True, f"Lead created with solution category: {solution_name}")
+                    return True
+                else:
+                    self.log_result("Lead with Solution Category", False, "", "Missing ID or category mismatch in response")
+                    return False
+            else:
+                self.log_result("Lead with Solution Category", False, f"Status: {response.status_code}", f"Response: {response.text}")
+                return False
+        except Exception as e:
+            self.log_result("Lead with Solution Category", False, "", f"Exception: {str(e)}")
+            return False
 
     def run_all_tests(self):
         """Run all API tests in sequence"""
