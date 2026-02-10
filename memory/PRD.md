@@ -52,6 +52,12 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
 - Backend: 20 API endpoints total (+6 nouveaux)
 - Collection MongoDB: case_studies
 
+### Phase 4 - Bug Fixes & UX (Feb 2026)
+- ✅ Correction bug mobile: titre hero coupé sur petits écrans (HomePage.jsx)
+  - Remplacé `max-w-5xl` par classes responsives (`max-w-[90%] sm:max-w-2xl md:max-w-3xl lg:max-w-5xl`)
+  - Ajusté tailles de police pour mobile: `text-[1.5rem]` au lieu de `text-2xl`
+  - Testé sur viewports mobile (390x844) et desktop (1920x800) - aucune régression
+
 ## Prioritized Backlog
 ### P0 (Critical) - Done
 - All core pages implemented and functional
