@@ -29,7 +29,7 @@ export default function HomePage() {
         <div className="relative z-10 max-w-5xl mx-auto px-6 text-center pt-24">
           {/* Animated Title */}
           <motion.h1
-            className="font-heading text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight"
+            className="font-heading text-[1.75rem] sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight overflow-hidden"
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
@@ -49,7 +49,7 @@ export default function HomePage() {
           </motion.h1>
 
           <motion.p
-            className="mt-8 text-base md:text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed"
+            className="mt-8 text-sm sm:text-base md:text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed px-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.6 }}
