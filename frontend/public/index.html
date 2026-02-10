@@ -23,6 +23,17 @@
         -->
         <title>Receipty | Agence d'IA</title>
         <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
+        <script>
+            // Lock title - override any external script
+            (function() {
+                var _title = "Receipty | Agence d'IA";
+                Object.defineProperty(document, 'title', {
+                    get: function() { return _title; },
+                    set: function(v) { _title = "Receipty | Agence d'IA"; },
+                    configurable: true
+                });
+            })();
+        </script>
         <!--
         These two scripts have been added for the Visual Edits, please do not edit or remove them
         -->
