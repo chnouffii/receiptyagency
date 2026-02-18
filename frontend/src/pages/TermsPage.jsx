@@ -112,17 +112,17 @@ Une utilisation du contenu à des fins personnelles et non commerciales est tol�
           icon: AlertTriangle,
           title: '5. Responsabilité',
           content: `**Limitation de responsabilité :**
-Receipty Agency s'efforce de fournir des informations exactes et à jour sur son site. Toutefois, nous ne pouvons garantir l'exactitude, la complétude ou l'actualité des informations diffusées.
+${company.name} s'efforce de fournir des informations exactes et à jour sur son site. Toutefois, nous ne pouvons garantir l'exactitude, la complétude ou l'actualité des informations diffusées.
 
 **Exclusions :**
-Receipty Agency décline toute responsabilité pour :
+${company.name} décline toute responsabilité pour :
 • Les dommages directs ou indirects résultant de l'utilisation du site
 • Les interruptions temporaires du site pour maintenance
 • La présence de virus ou d'éléments nuisibles sur le site (bien que nous prenions toutes les précautions nécessaires)
 • Les contenus de sites tiers accessibles via des liens hypertextes
 
 **Responsabilité du client :**
-Le client reste seul responsable de l'utilisation qu'il fait des services et conseils fournis par Receipty Agency. La mise en œuvre des recommandations relève de la décision et de la responsabilité du client.`
+Le client reste seul responsable de l'utilisation qu'il fait des services et conseils fournis par ${company.name}. La mise en œuvre des recommandations relève de la décision et de la responsabilité du client.`
         },
         {
           icon: Gavel,
@@ -140,22 +140,22 @@ En cas de litige relatif à l'interprétation ou l'exécution des présentes CGU
 Conformément aux articles L.616-1 et R.616-1 du code de la consommation, tout consommateur a le droit de recourir gratuitement à un médiateur de la consommation en vue de la résolution amiable d'un litige.
 
 **Contact pour les litiges :**
-juridique@receipty.ai`
+${company.legal_email}`
         }
       ]
     },
     en: {
       title: 'Terms of Service',
-      lastUpdate: 'Last updated: February 2026',
-      intro: 'These Terms of Service govern access to and use of the receipty.ai website and services offered by Receipty Agency.',
+      lastUpdate: `Last updated: ${terms.last_update_en}`,
+      intro: `These Terms of Service govern access to and use of the receipty.ai website and services offered by ${company.name}.`,
       sections: [
         {
           icon: Building2,
           title: '1. Legal Notice',
           content: `**Website Publisher:**
-Receipty Agency
-Limited Liability Company (SARL) under formation
-Share capital: In process of constitution
+${company.name}
+${company.legal_form}
+Share capital: ${company.capital}
 
 **Registered Office:**
 1 Place de la Gare
