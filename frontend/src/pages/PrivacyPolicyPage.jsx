@@ -150,7 +150,7 @@ The legal basis for this processing is your explicit consent (Article 6.1.a of G
 • **Database**: MongoDB hosted on secure servers
 • **Encryption**: All communications are encrypted via HTTPS/TLS
 • **Restricted access**: Only authorized administrators have access to data
-• **Retention period**: Your data is kept for 3 years from your last contact, unless otherwise required by law
+• **Retention period**: Your data is kept for ${privacy.data_retention_years} years from your last contact, unless otherwise required by law
 
 We do not transfer your data outside the European Union.`
         },
@@ -166,7 +166,7 @@ We do not transfer your data outside the European Union.`
 • **Right to portability** (Art. 20): Receive your data in a structured format
 • **Right to object** (Art. 21): Object to the processing of your data
 
-To exercise these rights, contact us at: **dpo@receipty.ai**`
+To exercise these rights, contact us at: **${company.dpo_email}**`
         },
         {
           icon: Shield,
@@ -184,9 +184,9 @@ We do not use advertising cookies or third-party trackers. No data is shared wit
           content: `For any questions regarding this policy or your data:
 
 **Data Controller:**
-Receipty Agency (SARL under formation)
-1 Place de la Gare, 67000 Strasbourg, France
-Email: dpo@receipty.ai
+${company.name} (${company.legal_form})
+${contact.address_line1}, ${contact.address_line2}
+Email: ${company.dpo_email}
 
 You also have the right to lodge a complaint with the CNIL (Commission Nationale de l'Informatique et des Libertés): www.cnil.fr`
         }
