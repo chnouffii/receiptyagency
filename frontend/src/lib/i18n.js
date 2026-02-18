@@ -5,7 +5,7 @@ export const translations = {
       adn: 'ADN & Vision',
       solutions: 'Solutions',
       cases: 'Etudes de Cas',
-      quote: 'Devis Instant',
+      contact: 'Contact',
       admin: 'Admin'
     },
     hero: {
@@ -180,7 +180,7 @@ export const translations = {
       adn: 'DNA & Vision',
       solutions: 'Solutions',
       cases: 'Case Studies',
-      quote: 'Instant Quote',
+      contact: 'Contact',
       admin: 'Admin'
     },
     hero: {
