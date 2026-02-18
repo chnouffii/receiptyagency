@@ -218,17 +218,17 @@ Use of content for personal and non-commercial purposes is tolerated subject to 
           icon: AlertTriangle,
           title: '5. Liability',
           content: `**Limitation of Liability:**
-Receipty Agency strives to provide accurate and up-to-date information on its site. However, we cannot guarantee the accuracy, completeness or timeliness of the information provided.
+${company.name} strives to provide accurate and up-to-date information on its site. However, we cannot guarantee the accuracy, completeness or timeliness of the information provided.
 
 **Exclusions:**
-Receipty Agency disclaims all liability for:
+${company.name} disclaims all liability for:
 • Direct or indirect damages resulting from the use of the site
 • Temporary interruptions of the site for maintenance
 • The presence of viruses or harmful elements on the site (although we take all necessary precautions)
 • Content of third-party sites accessible via hyperlinks
 
 **Client Responsibility:**
-The client remains solely responsible for the use made of the services and advice provided by Receipty Agency. Implementation of recommendations is at the client's decision and responsibility.`
+The client remains solely responsible for the use made of the services and advice provided by ${company.name}. Implementation of recommendations is at the client's decision and responsibility.`
         },
         {
           icon: Gavel,
@@ -246,7 +246,7 @@ In the absence of amicable resolution, any dispute will be submitted to the comp
 In accordance with articles L.616-1 and R.616-1 of the French Consumer Code, any consumer has the right to use a consumer mediator free of charge for the amicable resolution of a dispute.
 
 **Contact for Disputes:**
-legal@receipty.ai`
+${company.legal_email}`
         }
       ]
     }
