@@ -36,8 +36,8 @@ export default function PrivacyPolicyPage() {
   const content = {
     fr: {
       title: 'Politique de Confidentialité',
-      lastUpdate: 'Dernière mise à jour : Février 2026',
-      intro: 'Receipty Agency (ci-après "Receipty", "nous", "notre") s\'engage à protéger la vie privée de ses utilisateurs conformément au Règlement Général sur la Protection des Données (RGPD) et à la législation française en vigueur.',
+      lastUpdate: `Dernière mise à jour : ${privacy.last_update_fr}`,
+      intro: `${company.name} (ci-après "Receipty", "nous", "notre") s'engage à protéger la vie privée de ses utilisateurs conformément au Règlement Général sur la Protection des Données (RGPD) et à la législation française en vigueur.`,
       sections: [
         {
           icon: Database,
@@ -71,7 +71,7 @@ La base légale de ce traitement est votre consentement explicite (Article 6.1.a
 • **Base de données** : MongoDB hébergée sur des serveurs sécurisés
 • **Chiffrement** : Toutes les communications sont chiffrées via HTTPS/TLS
 • **Accès restreint** : Seuls les administrateurs autorisés ont accès aux données
-• **Durée de conservation** : Vos données sont conservées pendant 3 ans à compter de votre dernier contact, sauf obligation légale contraire
+• **Durée de conservation** : Vos données sont conservées pendant ${privacy.data_retention_years} ans à compter de votre dernier contact, sauf obligation légale contraire
 
 Nous ne transférons pas vos données en dehors de l'Union Européenne.`
         },
