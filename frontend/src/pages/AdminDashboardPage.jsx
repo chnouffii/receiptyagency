@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogOut, Users, MessageCircle, BookOpen, Layers } from 'lucide-react';
+import { LogOut, Users, MessageCircle, BookOpen, Layers, Settings } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import AdminLeadsTab from './admin/AdminLeadsTab';
 import AdminChatAnalytics from './admin/AdminChatAnalytics';
 import AdminCaseStudies from './admin/AdminCaseStudies';
 import AdminSolutions from './admin/AdminSolutions';
+import AdminSiteContent from './admin/AdminSiteContent';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -71,6 +72,10 @@ export default function AdminDashboardPage() {
               <Layers className="w-4 h-4" />
               Solutions
             </TabsTrigger>
+            <TabsTrigger value="content" data-testid="tab-content" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 gap-2 text-sm">
+              <Settings className="w-4 h-4" />
+              {lang === 'fr' ? 'Contenu Site' : 'Site Content'}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="leads">
@@ -84,6 +89,9 @@ export default function AdminDashboardPage() {
           </TabsContent>
           <TabsContent value="solutions">
             <AdminSolutions token={token} />
+          </TabsContent>
+          <TabsContent value="content">
+            <AdminSiteContent token={token} />
           </TabsContent>
         </Tabs>
       </div>
