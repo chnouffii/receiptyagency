@@ -213,6 +213,24 @@ async def create_lead(input: LeadCreate):
     return lead
 
 
+@api_router.post("/contact")
+async def create_contact(input: ContactMessage):
+    doc = {
+        "id": str(uuid.uuid4()),
+        "name": input.name,
+        "email": input.email,
+        "phone": input.phone,
+        "subject": input.subject,
+        "message": input.message,
+        "language": input.language,
+        "status": "new",
+        "type": "contact",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.leads.insert_one(doc)
+    return {"message": "Contact message received", "id": doc["id"]}
+
+
 @api_router.get("/leads", response_model=List[Lead])
 async def get_leads(
     admin=Depends(verify_token),
