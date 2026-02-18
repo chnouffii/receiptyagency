@@ -242,8 +242,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white">{t.contact.phone_label}</p>
-                    <a href="tel:+33388000000" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
-                      +33 3 88 00 00 00
+                    <a href={`tel:${contact.phone.replace(/\s/g, '')}`} className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                      {contact.phone}
                     </a>
                   </div>
                 </div>
@@ -254,8 +254,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white">{t.contact.email_label}</p>
-                    <a href="mailto:contact@receipty.ai" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
-                      contact@receipty.ai
+                    <a href={`mailto:${contact.email}`} className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                      {contact.email}
                     </a>
                   </div>
                 </div>
@@ -267,8 +267,8 @@ export default function ContactPage() {
                   <div>
                     <p className="text-sm font-medium text-white">{t.contact.address_label}</p>
                     <p className="text-sm text-gray-400">
-                      1 Place de la Gare<br />
-                      67000 Strasbourg, France
+                      {contact.address_line1}<br />
+                      {contact.address_line2}
                     </p>
                   </div>
                 </div>
@@ -280,7 +280,7 @@ export default function ContactPage() {
                   <div>
                     <p className="text-sm font-medium text-white">{t.contact.hours_label}</p>
                     <p className="text-sm text-gray-400">
-                      {lang === 'fr' ? 'Lun - Ven : 9h00 - 18h00' : 'Mon - Fri: 9:00 AM - 6:00 PM'}
+                      {lang === 'fr' ? contact.hours_fr : contact.hours_en}
                     </p>
                   </div>
                 </div>
