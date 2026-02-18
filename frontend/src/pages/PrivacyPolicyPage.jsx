@@ -1,9 +1,37 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Database, Lock, UserCheck, Mail, FileText } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import axios from 'axios';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function PrivacyPolicyPage() {
   const { lang } = useLanguage();
+  const [siteContent, setSiteContent] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${API}/site-content`).then(res => {
+      setSiteContent(res.data);
+    }).catch(() => {});
+  }, []);
+
+  const company = siteContent?.company || {
+    name: 'Receipty Agency',
+    legal_form: 'SARL en cours de formation',
+    address_line1: '1 Place de la Gare',
+    address_line2: '67000 Strasbourg, France',
+    dpo_email: 'dpo@receipty.ai'
+  };
+  const contact = siteContent?.contact || {
+    address_line1: '1 Place de la Gare',
+    address_line2: '67000 Strasbourg, France'
+  };
+  const privacy = siteContent?.privacy || {
+    data_retention_years: '3',
+    last_update_fr: 'Février 2026',
+    last_update_en: 'February 2026'
+  };
 
   const content = {
     fr: {
