@@ -14,7 +14,7 @@ export const Navbar = () => {
     { to: '/adn', label: t.nav.adn },
     { to: '/solutions', label: t.nav.solutions },
     { to: '/cases', label: t.nav.cases },
-    { to: '/quote', label: t.nav.quote },
+    { to: '/contact', label: t.nav.contact },
   ];
 
   const isActive = (path) => location.pathname === path;
