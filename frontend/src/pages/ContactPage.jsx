@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Phone, Mail, MapPin, Clock, Zap, PhoneCall } from 'lucide-react';
 import { toast } from 'sonner';
@@ -9,6 +9,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function ContactPage() {
   const { t, lang } = useLanguage();
+  const [siteContent, setSiteContent] = useState(null);
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -18,6 +19,22 @@ export default function ContactPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    axios.get(`${API}/site-content`).then(res => {
+      setSiteContent(res.data);
+    }).catch(() => {});
+  }, []);
+
+  const contact = siteContent?.contact || {
+    phone: '+33 3 88 00 00 00',
+    email: 'contact@receipty.ai',
+    urgent_email: 'urgent@receipty.ai',
+    address_line1: '1 Place de la Gare',
+    address_line2: '67000 Strasbourg, France',
+    hours_fr: 'Lun - Ven : 9h00 - 18h00',
+    hours_en: 'Mon - Fri: 9:00 AM - 6:00 PM'
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
