@@ -1,9 +1,41 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Building2, Scale, Shield, AlertTriangle, Gavel } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import axios from 'axios';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function TermsPage() {
   const { lang } = useLanguage();
+  const [siteContent, setSiteContent] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${API}/site-content`).then(res => {
+      setSiteContent(res.data);
+    }).catch(() => {});
+  }, []);
+
+  const company = siteContent?.company || {
+    name: 'Receipty Agency',
+    legal_form: 'SARL en cours de formation',
+    capital: 'En cours de constitution',
+    ceo1_name: 'BOTH Quentin',
+    ceo1_role_fr: 'Co-CEO',
+    ceo2_name: 'DE FURST Valère',
+    ceo2_role_fr: 'Co-CEO',
+    legal_email: 'juridique@receipty.ai'
+  };
+  const contact = siteContent?.contact || {
+    phone: '+33 3 88 00 00 00',
+    email: 'contact@receipty.ai',
+    address_line1: '1 Place de la Gare',
+    address_line2: '67000 Strasbourg, France'
+  };
+  const terms = siteContent?.terms || {
+    last_update_fr: 'Février 2026',
+    last_update_en: 'February 2026'
+  };
 
   const content = {
     fr: {
