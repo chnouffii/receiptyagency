@@ -94,6 +94,15 @@ class LeadStatusUpdate(BaseModel):
     status: str
 
 
+class ContactMessage(BaseModel):
+    name: str
+    email: str
+    phone: str = ""
+    subject: str = ""
+    message: str
+    language: str = "fr"
+
+
 class AdminLogin(BaseModel):
     email: str
     password: str
