@@ -8,9 +8,11 @@ import { Footer } from "./components/Footer";
 import HomePage from "./pages/HomePage";
 import AdnVisionPage from "./pages/AdnVisionPage";
 import SolutionsPage from "./pages/SolutionsPage";
-import InstantQuotePage from "./pages/InstantQuotePage";
+import ContactPage from "./pages/ContactPage";
 import CaseStudiesPage from "./pages/CaseStudiesPage";
 import CaseStudyDetailPage from "./pages/CaseStudyDetailPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsPage from "./pages/TermsPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import { ChatWidget } from "./components/ChatWidget";
@@ -84,7 +86,9 @@ function App() {
             <Route path="/solutions" element={<AppLayout><SolutionsPage /></AppLayout>} />
             <Route path="/cases" element={<AppLayout><CaseStudiesPage /></AppLayout>} />
             <Route path="/cases/:id" element={<AppLayout><CaseStudyDetailPage /></AppLayout>} />
-            <Route path="/quote" element={<AppLayout><InstantQuotePage /></AppLayout>} />
+            <Route path="/contact" element={<AppLayout><ContactPage /></AppLayout>} />
+            <Route path="/privacy" element={<AppLayout><PrivacyPolicyPage /></AppLayout>} />
+            <Route path="/terms" element={<AppLayout><TermsPage /></AppLayout>} />
             <Route path="/admin" element={<AdminLayout><AdminLoginPage /></AdminLayout>} />
             <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboardPage /></AdminLayout>} />
           </Routes>
