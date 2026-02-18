@@ -40,28 +40,28 @@ export default function TermsPage() {
   const content = {
     fr: {
       title: "Conditions Générales d'Utilisation",
-      lastUpdate: 'Dernière mise à jour : Février 2026',
-      intro: "Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation du site web receipty.ai ainsi que les services proposés par Receipty Agency.",
+      lastUpdate: `Dernière mise à jour : ${terms.last_update_fr}`,
+      intro: `Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation du site web receipty.ai ainsi que les services proposés par ${company.name}.`,
       sections: [
         {
           icon: Building2,
           title: '1. Mentions légales',
           content: `**Éditeur du site :**
-Receipty Agency
-Société à Responsabilité Limitée (SARL) en cours de formation
-Capital social : En cours de constitution
+${company.name}
+${company.legal_form}
+Capital social : ${company.capital}
 
 **Siège social :**
-1 Place de la Gare
-67000 Strasbourg, France
+${contact.address_line1}
+${contact.address_line2}
 
 **Co-gérants :**
-• BOTH Quentin - Co-CEO
-• DE FURST Valère - Co-CEO
+• ${company.ceo1_name} - ${company.ceo1_role_fr}
+• ${company.ceo2_name} - ${company.ceo2_role_fr}
 
 **Contact :**
-Email : contact@receipty.ai
-Téléphone : +33 3 88 00 00 00
+Email : ${contact.email}
+Téléphone : ${contact.phone}
 
 **Hébergement :**
 Le site est hébergé sur des serveurs sécurisés au sein de l'Union Européenne.`
@@ -75,7 +75,7 @@ Le site est hébergé sur des serveurs sécurisés au sein de l'Union Européenn
 L'accès et l'utilisation du site impliquent l'acceptation pleine et entière des présentes CGU. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre site.
 
 **Modification des CGU :**
-Receipty Agency se réserve le droit de modifier les présentes CGU à tout moment. Les modifications entrent en vigueur dès leur publication sur le site. Il est recommandé de consulter régulièrement cette page.`
+${company.name} se réserve le droit de modifier les présentes CGU à tout moment. Les modifications entrent en vigueur dès leur publication sur le site. Il est recommandé de consulter régulièrement cette page.`
         },
         {
           icon: Scale,
