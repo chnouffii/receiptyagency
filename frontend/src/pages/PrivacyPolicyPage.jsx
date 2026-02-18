@@ -105,9 +105,9 @@ Nous n'utilisons pas de cookies publicitaires ni de traceurs tiers. Aucune donn�
           content: `Pour toute question concernant cette politique ou vos données :
 
 **Responsable du traitement :**
-Receipty Agency (SARL en cours de formation)
-1 Place de la Gare, 67000 Strasbourg, France
-Email : dpo@receipty.ai
+${company.name} (${company.legal_form})
+${contact.address_line1}, ${contact.address_line2}
+Email : ${company.dpo_email}
 
 Vous avez également le droit d'introduire une réclamation auprès de la CNIL (Commission Nationale de l'Informatique et des Libertés) : www.cnil.fr`
         }
@@ -115,8 +115,8 @@ Vous avez également le droit d'introduire une réclamation auprès de la CNIL (
     },
     en: {
       title: 'Privacy Policy',
-      lastUpdate: 'Last updated: February 2026',
-      intro: 'Receipty Agency (hereinafter "Receipty", "we", "our") is committed to protecting the privacy of its users in accordance with the General Data Protection Regulation (GDPR) and applicable French law.',
+      lastUpdate: `Last updated: ${privacy.last_update_en}`,
+      intro: `${company.name} (hereinafter "Receipty", "we", "our") is committed to protecting the privacy of its users in accordance with the General Data Protection Regulation (GDPR) and applicable French law.`,
       sections: [
         {
           icon: Database,
