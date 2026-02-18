@@ -514,6 +514,73 @@ async def delete_solution(sol_id: str, admin=Depends(verify_token)):
     return {"message": "Solution deleted"}
 
 
+# --- Site Content Management ---
+
+@api_router.get("/site-content")
+async def get_public_site_content():
+    """Public endpoint to get site content for frontend pages"""
+    content = await db.site_content.find_one({"type": "main"}, {"_id": 0})
+    if not content:
+        return get_default_site_content()
+    return content
+
+@api_router.get("/admin/site-content")
+async def get_site_content(admin=Depends(verify_token)):
+    """Admin endpoint to get all site content"""
+    content = await db.site_content.find_one({"type": "main"}, {"_id": 0})
+    if not content:
+        return get_default_site_content()
+    return content
+
+@api_router.put("/admin/site-content")
+async def update_site_content(content: dict, admin=Depends(verify_token)):
+    """Admin endpoint to update site content"""
+    content["type"] = "main"
+    content["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.site_content.update_one(
+        {"type": "main"},
+        {"$set": content},
+        upsert=True
+    )
+    return {"message": "Content updated successfully"}
+
+def get_default_site_content():
+    return {
+        "type": "main",
+        "contact": {
+            "phone": "+33 3 88 00 00 00",
+            "email": "contact@receipty.ai",
+            "urgent_email": "urgent@receipty.ai",
+            "address_line1": "1 Place de la Gare",
+            "address_line2": "67000 Strasbourg, France",
+            "hours_fr": "Lun - Ven : 9h00 - 18h00",
+            "hours_en": "Mon - Fri: 9:00 AM - 6:00 PM"
+        },
+        "company": {
+            "name": "Receipty Agency",
+            "legal_form": "SARL en cours de formation",
+            "capital": "En cours de constitution",
+            "ceo1_name": "BOTH Quentin",
+            "ceo1_role_fr": "Co-CEO & Expert IA",
+            "ceo1_role_en": "Co-CEO & AI Expert",
+            "ceo2_name": "DE FURST Valère",
+            "ceo2_role_fr": "Co-CEO & Stratégiste Business",
+            "ceo2_role_en": "Co-CEO & Business Strategist",
+            "dpo_email": "dpo@receipty.ai",
+            "legal_email": "juridique@receipty.ai"
+        },
+        "privacy": {
+            "data_retention_years": "3",
+            "last_update_fr": "Février 2026",
+            "last_update_en": "February 2026"
+        },
+        "terms": {
+            "last_update_fr": "Février 2026",
+            "last_update_en": "February 2026"
+        }
+    }
+
+
 # --- App Setup ---
 
 app.include_router(api_router)
