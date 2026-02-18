@@ -158,16 +158,16 @@ ${company.legal_form}
 Share capital: ${company.capital}
 
 **Registered Office:**
-1 Place de la Gare
-67000 Strasbourg, France
+${contact.address_line1}
+${contact.address_line2}
 
 **Co-managers:**
-• BOTH Quentin - Co-CEO
-• DE FURST Valère - Co-CEO
+• ${company.ceo1_name} - ${company.ceo1_role_en || 'Co-CEO'}
+• ${company.ceo2_name} - ${company.ceo2_role_en || 'Co-CEO'}
 
 **Contact:**
-Email: contact@receipty.ai
-Phone: +33 3 88 00 00 00
+Email: ${contact.email}
+Phone: ${contact.phone}
 
 **Hosting:**
 The website is hosted on secure servers within the European Union.`
@@ -181,12 +181,12 @@ The website is hosted on secure servers within the European Union.`
 Access to and use of the site implies full acceptance of these Terms of Service. If you do not accept these conditions, please do not use our site.
 
 **Modification of Terms:**
-Receipty Agency reserves the right to modify these Terms at any time. Modifications take effect upon publication on the site. It is recommended to regularly check this page.`
+${company.name} reserves the right to modify these Terms at any time. Modifications take effect upon publication on the site. It is recommended to regularly check this page.`
         },
         {
           icon: Scale,
           title: '3. Services Offered',
-          content: `Receipty Agency provides artificial intelligence integration services for businesses:
+          content: `${company.name} provides artificial intelligence integration services for businesses:
 
 **Our solutions:**
 • **Receipty Talent**: HR and recruitment process automation
@@ -194,7 +194,7 @@ Receipty Agency reserves the right to modify these Terms at any time. Modificati
 • **Web-on-Demand**: Custom web platform development
 
 **AI audits and diagnostics:**
-Audits and diagnostics performed by Receipty Agency are provided for informational and advisory purposes. They constitute an analysis based on information provided by the client and do not guarantee specific results.
+Audits and diagnostics performed by ${company.name} are provided for informational and advisory purposes. They constitute an analysis based on information provided by the client and do not guarantee specific results.
 
 **Limitation:**
 ROI and performance estimates presented on the site are based on real case studies but may vary depending on each company's context.`
@@ -203,10 +203,10 @@ ROI and performance estimates presented on the site are based on real case studi
           icon: Shield,
           title: '4. Intellectual Property',
           content: `**Website Content:**
-All content on the receipty.ai website (texts, graphics, logos, images, videos, structure, database) is the exclusive property of Receipty Agency or its partners and is protected by French and international intellectual property laws.
+All content on the receipty.ai website (texts, graphics, logos, images, videos, structure, database) is the exclusive property of ${company.name} or its partners and is protected by French and international intellectual property laws.
 
 **Trademarks:**
-The trademarks "Receipty", "Receipty Agency", "Receipty Talent", "Receipty Spend" and "Web-on-Demand" are registered or pending trademarks of Receipty Agency.
+The trademarks "Receipty", "Receipty Agency", "Receipty Talent", "Receipty Spend" and "Web-on-Demand" are registered or pending trademarks of ${company.name}.
 
 **Prohibitions:**
 Any reproduction, representation, modification, publication, transmission, distortion, in whole or in part, of the site or its content, by any means whatsoever, and on any medium whatsoever, is prohibited without prior written authorization from Receipty Agency.
