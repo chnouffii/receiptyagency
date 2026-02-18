@@ -10,19 +10,20 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
 - **Fonts**: Syne (headings), Outfit (body), JetBrains Mono (data)
 
 ## User Personas
-1. **B2B Decision Maker** (CTO/COO): Explores solutions, requests quotes
-2. **Agency Admin**: Manages leads, tracks revenue pipeline
+1. **B2B Decision Maker** (CTO/COO): Explores solutions, requests contact
+2. **Agency Admin**: Manages leads, tracks communications
 
 ## Core Requirements
 - [x] Home Page with animated hero text + CTA
 - [x] ADN & Vision page with team grid (bento) + animated stats
 - [x] Solutions Verticales with 3 solutions + Recharts mini dashboards
-- [x] Instant Quote multi-step configurator (Setup 1000-10000 EUR, Monthly 99-499 EUR)
+- [x] Contact Page (replaced Instant Quote) - Two-column professional layout
 - [x] Case Studies masonry layout with ROI badges
 - [x] Admin authentication + lead management dashboard
 - [x] Bilingual FR/EN with navbar language switcher
 - [x] Framer Motion animations throughout
 - [x] Dark mode premium design
+- [x] Legal Pages (Privacy Policy + Terms of Service) - RGPD compliant
 
 ## What's Been Implemented (Feb 2026)
 
