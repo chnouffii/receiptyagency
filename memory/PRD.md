@@ -59,24 +59,38 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
   - Ajusté tailles de police pour mobile: `text-[1.5rem]` au lieu de `text-2xl`
   - Testé sur viewports mobile (390x844) et desktop (1920x800) - aucune régression
 
+### Phase 5 - Refonte Contact & Pages Légales (Feb 2026)
+- ✅ **Nouvelle Page Contact** (`/contact`) - Remplace l'ancien système de devis
+  - Layout 2 colonnes (desktop) / stack vertical (mobile)
+  - Formulaire blanc avec ombre: Nom, Email, Téléphone, Sujet, Message
+  - Bouton envoi vert Emerald avec icône avion
+  - Bloc informations contact avec icônes (Téléphone, Email, Adresse Strasbourg, Horaires)
+  - Bandeau "Besoin Urgent?" dégradé violet/bleu avec boutons action rapide
+  - Badge temps de réponse vert animé
+- ✅ **Page Politique de Confidentialité** (`/privacy`) - RGPD compliant
+  - 6 sections: Données collectées, Finalité, Stockage/Sécurité, Droits RGPD, Cookies, Contact
+  - Format carte avec icônes, texte formaté avec highlights
+- ✅ **Page CGU** (`/terms`) - Standard France
+  - 6 sections: Mentions légales SARL, Objet/Acceptation, Services, Propriété intellectuelle, Responsabilité, Droit applicable
+- ✅ **Backend**: Nouvel endpoint `/api/contact` pour formulaire
+- ✅ Navigation et Footer mis à jour avec nouveaux liens
+
 ## Prioritized Backlog
 ### P0 (Critical) - Done
 - All core pages implemented and functional
+- Contact form functional with database storage
 
 ### P1 (High)
-- Email notification on new lead submission
+- Email notification on new lead/contact submission
 - Admin password change functionality
-- Chatbot conversation analytics/dashboard
-- PDF quote generation and download
 
 ### P2 (Medium)
 - Blog/Resources section
-- Contact page with map
 - Animated page transitions (route-level)
 - Lead conversion funnel analytics
 - Testimonials section
 
 ### Next Tasks
-- Add email notifications for new quotes (SendGrid/Resend)
+- Add email notifications for new contacts (SendGrid/Resend)
 - Chatbot analytics dashboard in admin panel
 - PDF quote download feature
