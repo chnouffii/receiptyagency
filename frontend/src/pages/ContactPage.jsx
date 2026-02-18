@@ -313,7 +313,7 @@ export default function ContactPage() {
                 
                 <div className="flex flex-col sm:flex-row gap-3">
                   <a
-                    href="tel:+33388000000"
+                    href={`tel:${contact.phone.replace(/\s/g, '')}`}
                     data-testid="urgent-call-btn"
                     className="flex items-center justify-center gap-2 bg-white text-violet-700 hover:bg-white/90 rounded-xl px-5 py-3 font-semibold text-sm transition-all duration-200"
                   >
@@ -321,7 +321,7 @@ export default function ContactPage() {
                     {t.contact.call_now}
                   </a>
                   <a
-                    href="mailto:urgent@receipty.ai"
+                    href={`mailto:${contact.urgent_email}`}
                     data-testid="urgent-email-btn"
                     className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-xl px-5 py-3 font-semibold text-sm transition-all duration-200"
                   >
