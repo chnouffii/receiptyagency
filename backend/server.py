@@ -821,11 +821,15 @@ def get_default_site_content():
         "privacy": {
             "data_retention_years": "3",
             "last_update_fr": "Février 2026",
-            "last_update_en": "February 2026"
+            "last_update_en": "February 2026",
+            "sections_fr": {},
+            "sections_en": {}
         },
         "terms": {
             "last_update_fr": "Février 2026",
-            "last_update_en": "February 2026"
+            "last_update_en": "February 2026",
+            "sections_fr": {},
+            "sections_en": {}
         }
     }
 
