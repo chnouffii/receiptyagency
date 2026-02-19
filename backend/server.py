@@ -122,6 +122,33 @@ class AdminLogin(BaseModel):
     password: str
 
 
+class AdminCreate(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+    role: str = "admin"  # admin, super_admin
+
+
+class AdminUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    name: Optional[str] = None
+    role: Optional[str] = None
+    password: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class AuditLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    admin_id: str
+    admin_email: str
+    action: str  # login, create, update, delete, view
+    target_type: str  # lead, admin, case_study, solution, site_content
+    target_id: Optional[str] = None
+    details: Optional[str] = None
+    ip_address: Optional[str] = None
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
 class ChatMessageInput(BaseModel):
     session_id: str
     message: str
