@@ -496,44 +496,110 @@ export default function AdminSiteContent({ token }) {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0F0F10] border border-white/5 rounded-xl p-6"
+          className="space-y-6"
         >
-          <h3 className="font-heading text-lg font-semibold text-white mb-6 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-blue-400" />
-            Politique de Confidentialité
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Durée conservation (années)</label>
-              <input
-                type="number"
-                value={privacyContent.data_retention_years}
-                onChange={(e) => setPrivacyContent({ ...privacyContent, data_retention_years: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Dernière MAJ (FR)</label>
-              <input
-                type="text"
-                value={privacyContent.last_update_fr}
-                onChange={(e) => setPrivacyContent({ ...privacyContent, last_update_fr: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Dernière MAJ (EN)</label>
-              <input
-                type="text"
-                value={privacyContent.last_update_en}
-                onChange={(e) => setPrivacyContent({ ...privacyContent, last_update_en: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
-              />
+          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
+            <h3 className="font-heading text-lg font-semibold text-white mb-6 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-blue-400" />
+              Politique de Confidentialité - Paramètres
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Durée conservation (années)</label>
+                <input
+                  type="number"
+                  value={privacyContent.data_retention_years}
+                  onChange={(e) => setPrivacyContent({ ...privacyContent, data_retention_years: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Dernière MAJ (FR)</label>
+                <input
+                  type="text"
+                  value={privacyContent.last_update_fr}
+                  onChange={(e) => setPrivacyContent({ ...privacyContent, last_update_fr: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Dernière MAJ (EN)</label>
+                <input
+                  type="text"
+                  value={privacyContent.last_update_en}
+                  onChange={(e) => setPrivacyContent({ ...privacyContent, last_update_en: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                />
+              </div>
             </div>
           </div>
-          <p className="mt-4 text-xs text-gray-500">
-            Note : Les sections détaillées de la politique de confidentialité (RGPD) sont générées automatiquement avec les informations de la société.
-          </p>
+
+          {/* Privacy Sections Editor */}
+          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
+            <h4 className="font-heading text-md font-semibold text-white mb-4">Sections détaillées (FR)</h4>
+            {[
+              { key: 'data_collected', label: '1. Données collectées' },
+              { key: 'purpose', label: '2. Finalité du traitement' },
+              { key: 'storage', label: '3. Stockage et sécurité' },
+              { key: 'rights', label: '4. Vos droits (RGPD)' },
+              { key: 'cookies', label: '5. Cookies' }
+            ].map(({ key, label }) => (
+              <div key={key} className="mb-4">
+                <button
+                  type="button"
+                  onClick={() => setExpandedSections({ ...expandedSections, [`privacy_fr_${key}`]: !expandedSections[`privacy_fr_${key}`] })}
+                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-white py-2"
+                >
+                  {label}
+                  {expandedSections[`privacy_fr_${key}`] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+                {expandedSections[`privacy_fr_${key}`] && (
+                  <textarea
+                    value={privacyContent.sections_fr?.[key] || ''}
+                    onChange={(e) => setPrivacyContent({
+                      ...privacyContent,
+                      sections_fr: { ...privacyContent.sections_fr, [key]: e.target.value }
+                    })}
+                    rows={8}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
+            <h4 className="font-heading text-md font-semibold text-white mb-4">Sections détaillées (EN)</h4>
+            {[
+              { key: 'data_collected', label: '1. Data Collected' },
+              { key: 'purpose', label: '2. Purpose of Processing' },
+              { key: 'storage', label: '3. Storage and Security' },
+              { key: 'rights', label: '4. Your Rights (GDPR)' },
+              { key: 'cookies', label: '5. Cookies' }
+            ].map(({ key, label }) => (
+              <div key={key} className="mb-4">
+                <button
+                  type="button"
+                  onClick={() => setExpandedSections({ ...expandedSections, [`privacy_en_${key}`]: !expandedSections[`privacy_en_${key}`] })}
+                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-white py-2"
+                >
+                  {label}
+                  {expandedSections[`privacy_en_${key}`] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+                {expandedSections[`privacy_en_${key}`] && (
+                  <textarea
+                    value={privacyContent.sections_en?.[key] || ''}
+                    onChange={(e) => setPrivacyContent({
+                      ...privacyContent,
+                      sections_en: { ...privacyContent.sections_en, [key]: e.target.value }
+                    })}
+                    rows={8}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
         </motion.div>
       )}
 
@@ -542,35 +608,99 @@ export default function AdminSiteContent({ token }) {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0F0F10] border border-white/5 rounded-xl p-6"
+          className="space-y-6"
         >
-          <h3 className="font-heading text-lg font-semibold text-white mb-6 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-400" />
-            Conditions Générales d'Utilisation
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Dernière MAJ (FR)</label>
-              <input
-                type="text"
-                value={termsContent.last_update_fr}
-                onChange={(e) => setTermsContent({ ...termsContent, last_update_fr: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Dernière MAJ (EN)</label>
-              <input
-                type="text"
-                value={termsContent.last_update_en}
-                onChange={(e) => setTermsContent({ ...termsContent, last_update_en: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
-              />
+          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
+            <h3 className="font-heading text-lg font-semibold text-white mb-6 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-400" />
+              CGU - Paramètres
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Dernière MAJ (FR)</label>
+                <input
+                  type="text"
+                  value={termsContent.last_update_fr}
+                  onChange={(e) => setTermsContent({ ...termsContent, last_update_fr: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Dernière MAJ (EN)</label>
+                <input
+                  type="text"
+                  value={termsContent.last_update_en}
+                  onChange={(e) => setTermsContent({ ...termsContent, last_update_en: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                />
+              </div>
             </div>
           </div>
-          <p className="mt-4 text-xs text-gray-500">
-            Note : Les sections détaillées des CGU sont générées automatiquement avec les informations de la société.
-          </p>
+
+          {/* Terms Sections Editor */}
+          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
+            <h4 className="font-heading text-md font-semibold text-white mb-4">Sections détaillées (FR)</h4>
+            {[
+              { key: 'services', label: '3. Services proposés' },
+              { key: 'intellectual_property', label: '4. Propriété intellectuelle' },
+              { key: 'liability', label: '5. Responsabilité' },
+              { key: 'disputes', label: '6. Droit applicable et litiges' }
+            ].map(({ key, label }) => (
+              <div key={key} className="mb-4">
+                <button
+                  type="button"
+                  onClick={() => setExpandedSections({ ...expandedSections, [`terms_fr_${key}`]: !expandedSections[`terms_fr_${key}`] })}
+                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-white py-2"
+                >
+                  {label}
+                  {expandedSections[`terms_fr_${key}`] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+                {expandedSections[`terms_fr_${key}`] && (
+                  <textarea
+                    value={termsContent.sections_fr?.[key] || ''}
+                    onChange={(e) => setTermsContent({
+                      ...termsContent,
+                      sections_fr: { ...termsContent.sections_fr, [key]: e.target.value }
+                    })}
+                    rows={8}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
+            <h4 className="font-heading text-md font-semibold text-white mb-4">Sections détaillées (EN)</h4>
+            {[
+              { key: 'services', label: '3. Services Offered' },
+              { key: 'intellectual_property', label: '4. Intellectual Property' },
+              { key: 'liability', label: '5. Liability' },
+              { key: 'disputes', label: '6. Applicable Law and Disputes' }
+            ].map(({ key, label }) => (
+              <div key={key} className="mb-4">
+                <button
+                  type="button"
+                  onClick={() => setExpandedSections({ ...expandedSections, [`terms_en_${key}`]: !expandedSections[`terms_en_${key}`] })}
+                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-white py-2"
+                >
+                  {label}
+                  {expandedSections[`terms_en_${key}`] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+                {expandedSections[`terms_en_${key}`] && (
+                  <textarea
+                    value={termsContent.sections_en?.[key] || ''}
+                    onChange={(e) => setTermsContent({
+                      ...termsContent,
+                      sections_en: { ...termsContent.sections_en, [key]: e.target.value }
+                    })}
+                    rows={8}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
         </motion.div>
       )}
 
