@@ -228,6 +228,9 @@ class SolutionUpdate(BaseModel):
     chart_type: Optional[str] = None
     published: Optional[bool] = None
 
+
+# --- Helper Functions ---
+
 def verify_token(authorization: str = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing token")
@@ -237,6 +240,82 @@ def verify_token(authorization: str = Header(None)):
         return payload
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+
+async def log_audit(admin_email: str, action: str, target_type: str, target_id: str = None, details: str = None, ip: str = None):
+    """Log admin actions for audit trail"""
+    admin = await db.admins.find_one({"email": admin_email}, {"_id": 0, "id": 1})
+    log_entry = {
+        "id": str(uuid.uuid4()),
+        "admin_id": admin.get("id", "") if admin else "",
+        "admin_email": admin_email,
+        "action": action,
+        "target_type": target_type,
+        "target_id": target_id,
+        "details": details,
+        "ip_address": ip,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.audit_logs.insert_one(log_entry)
+
+
+async def send_notification_email(contact_data: dict):
+    """Send email notification for new contact form submission"""
+    if not RESEND_AVAILABLE or not RESEND_API_KEY:
+        logger.warning("Resend not configured, skipping email notification")
+        return False
+    
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="color: #1e40af; margin-bottom: 20px;">📬 Nouvelle demande de contact</h2>
+            
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Nom</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{contact_data.get('name', 'N/A')}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Email</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{contact_data.get('email', 'N/A')}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Téléphone</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{contact_data.get('phone', 'Non renseigné')}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Sujet</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{contact_data.get('subject', 'Non renseigné')}</td>
+                </tr>
+            </table>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px;">
+                <p style="font-weight: bold; color: #374151; margin-bottom: 10px;">Message :</p>
+                <p style="color: #6b7280; line-height: 1.6;">{contact_data.get('message', 'N/A')}</p>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 12px; color: #9ca3af;">
+                Reçu le {datetime.now().strftime('%d/%m/%Y à %H:%M')} | Langue: {contact_data.get('language', 'fr').upper()}
+            </p>
+        </div>
+    </body>
+    </html>
+    """
+    
+    try:
+        params = {
+            "from": "Receipty Agency <onboarding@resend.dev>",
+            "to": [NOTIFICATION_EMAIL],
+            "subject": f"[Receipty] Nouvelle demande de {contact_data.get('name', 'Inconnu')}",
+            "html": html_content
+        }
+        await asyncio.to_thread(resend.Emails.send, params)
+        logger.info(f"Notification email sent to {NOTIFICATION_EMAIL}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send notification email: {e}")
+        return False
 
 
 # --- Routes ---
