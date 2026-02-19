@@ -348,6 +348,10 @@ async def create_contact(input: ContactMessage):
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.leads.insert_one(doc)
+    
+    # Send email notification (non-blocking)
+    asyncio.create_task(send_notification_email(doc))
+    
     return {"message": "Contact message received", "id": doc["id"]}
 
 
