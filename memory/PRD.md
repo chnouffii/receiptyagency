@@ -92,15 +92,38 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
 - ✅ **Backend**: Endpoints `/api/site-content` (GET public) et `/api/admin/site-content` (GET/PUT admin)
 - ✅ **Pages dynamiques**: Contact, Privacy, Terms utilisent maintenant l'API pour afficher les infos
 
+### Phase 7 - Fonctionnalités Avancées Admin (Feb 2026)
+- ✅ **Notifications Email** (via Resend)
+  - Envoi automatique à contact@receipty.fr lors de nouvelles demandes de contact
+  - Template HTML professionnel avec infos du lead
+  - Intégration Resend avec clé API configurable
+- ✅ **Gestion des Comptes Admin** (CRUD complet)
+  - Nouvel onglet "Utilisateurs" dans le dashboard
+  - Création, modification, suppression de comptes admin
+  - Rôles : Admin / Super Admin
+  - Activation/désactivation de comptes
+  - Changement de mot de passe
+- ✅ **Logs d'Activité (Audit Trail)**
+  - Historique des actions : login, create, update, delete
+  - Filtres par email admin et type d'action
+  - Horodatage et IP de connexion
+  - Collection MongoDB: `audit_logs`
+- ✅ **Édition Textes Légaux Complets**
+  - Interface accordéon pour sections Privacy (5 sections FR/EN)
+  - Interface accordéon pour sections CGU (4 sections FR/EN)
+  - Textarea multi-lignes pour chaque paragraphe
+  - Sauvegarde dans `site_content.privacy.sections_fr/en`
+
 ## Prioritized Backlog
 ### P0 (Critical) - Done
 - All core pages implemented and functional
 - Contact form functional with database storage
 - CMS admin for site content management
+- Email notifications configured (requires RESEND_API_KEY)
+- Admin user management with audit logs
 
 ### P1 (High)
-- Email notification on new lead/contact submission
-- Admin password change functionality
+- Configurer RESEND_API_KEY pour activer les notifications email
 
 ### P2 (Medium)
 - Blog/Resources section
@@ -109,5 +132,4 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
 - Testimonials section
 
 ### Next Tasks
-- Add email notifications for new contacts (SendGrid/Resend)
-- PDF quote download feature
+- Configurer la clé API Resend (RESEND_API_KEY dans backend/.env)
