@@ -75,10 +75,28 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
 - ✅ **Backend**: Nouvel endpoint `/api/contact` pour formulaire
 - ✅ Navigation et Footer mis à jour avec nouveaux liens
 
+### Phase 6 - CMS Admin pour Contenu Site (Feb 2026)
+- ✅ **Nouvel onglet "Contenu Site"** dans le dashboard admin
+  - 4 sous-sections : Informations Contact, Informations Société, Politique Confidentialité, CGU
+- ✅ **Informations Contact éditables**:
+  - Téléphone, Email principal, Email urgent
+  - Adresse (ligne 1 et 2)
+  - Horaires FR/EN
+- ✅ **Informations Société éditables**:
+  - Nom société, Forme juridique, Capital social
+  - Co-CEO 1 et 2 : Nom, Rôle FR/EN
+  - Emails légaux : DPO, Juridique
+- ✅ **Paramètres pages légales**:
+  - Durée conservation données (années)
+  - Dates de dernière mise à jour FR/EN
+- ✅ **Backend**: Endpoints `/api/site-content` (GET public) et `/api/admin/site-content` (GET/PUT admin)
+- ✅ **Pages dynamiques**: Contact, Privacy, Terms utilisent maintenant l'API pour afficher les infos
+
 ## Prioritized Backlog
 ### P0 (Critical) - Done
 - All core pages implemented and functional
 - Contact form functional with database storage
+- CMS admin for site content management
 
 ### P1 (High)
 - Email notification on new lead/contact submission
@@ -92,5 +110,4 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
 
 ### Next Tasks
 - Add email notifications for new contacts (SendGrid/Resend)
-- Chatbot analytics dashboard in admin panel
 - PDF quote download feature
