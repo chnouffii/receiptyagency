@@ -391,16 +391,141 @@ async def delete_lead(lead_id: str, admin=Depends(verify_token)):
 
 
 @api_router.post("/admin/login")
-async def admin_login(input: AdminLogin):
+async def admin_login(input: AdminLogin, request: Request):
     admin = await db.admins.find_one({"email": input.email}, {"_id": 0})
     if not admin or not bcrypt.checkpw(input.password.encode(), admin["password"].encode()):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Check if admin is active
+    if admin.get("is_active") == False:
+        raise HTTPException(status_code=401, detail="Account disabled")
+    
     token = jwt.encode(
         {"sub": admin["email"], "exp": datetime.now(timezone.utc).timestamp() + 86400},
         JWT_SECRET,
         algorithm="HS256"
     )
-    return {"token": token, "email": admin["email"]}
+    
+    # Log the login action
+    client_ip = request.client.host if request.client else None
+    await log_audit(admin["email"], "login", "session", details="Successful login", ip=client_ip)
+    
+    return {"token": token, "email": admin["email"], "name": admin.get("name", ""), "role": admin.get("role", "admin")}
+
+
+# --- Admin Management ---
+
+@api_router.get("/admin/admins")
+async def list_admins(admin=Depends(verify_token)):
+    """List all admin accounts"""
+    admins = await db.admins.find({}, {"_id": 0, "password": 0}).sort("created_at", -1).to_list(100)
+    return admins
+
+
+@api_router.post("/admin/admins")
+async def create_admin(input: AdminCreate, request: Request, admin=Depends(verify_token)):
+    """Create a new admin account"""
+    # Check if email already exists
+    existing = await db.admins.find_one({"email": input.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already exists")
+    
+    hashed = bcrypt.hashpw(input.password.encode(), bcrypt.gensalt()).decode()
+    new_admin = {
+        "id": str(uuid.uuid4()),
+        "email": input.email,
+        "name": input.name,
+        "role": input.role,
+        "password": hashed,
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": admin["sub"]
+    }
+    await db.admins.insert_one(new_admin)
+    
+    # Log the action
+    client_ip = request.client.host if request.client else None
+    await log_audit(admin["sub"], "create", "admin", new_admin["id"], f"Created admin: {input.email}", client_ip)
+    
+    # Return without password
+    new_admin.pop("password")
+    new_admin.pop("_id", None)
+    return new_admin
+
+
+@api_router.put("/admin/admins/{admin_id}")
+async def update_admin(admin_id: str, input: AdminUpdate, request: Request, admin=Depends(verify_token)):
+    """Update an admin account"""
+    updates = {}
+    if input.email is not None:
+        # Check if new email already exists (for another user)
+        existing = await db.admins.find_one({"email": input.email, "id": {"$ne": admin_id}})
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already exists")
+        updates["email"] = input.email
+    if input.name is not None:
+        updates["name"] = input.name
+    if input.role is not None:
+        updates["role"] = input.role
+    if input.is_active is not None:
+        updates["is_active"] = input.is_active
+    if input.password is not None:
+        updates["password"] = bcrypt.hashpw(input.password.encode(), bcrypt.gensalt()).decode()
+    
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    result = await db.admins.update_one({"id": admin_id}, {"$set": updates})
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Admin not found")
+    
+    # Log the action
+    client_ip = request.client.host if request.client else None
+    await log_audit(admin["sub"], "update", "admin", admin_id, f"Updated fields: {list(updates.keys())}", client_ip)
+    
+    updated = await db.admins.find_one({"id": admin_id}, {"_id": 0, "password": 0})
+    return updated
+
+
+@api_router.delete("/admin/admins/{admin_id}")
+async def delete_admin(admin_id: str, request: Request, admin=Depends(verify_token)):
+    """Delete an admin account"""
+    # Prevent self-deletion
+    target = await db.admins.find_one({"id": admin_id}, {"_id": 0})
+    if target and target.get("email") == admin["sub"]:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    
+    result = await db.admins.delete_one({"id": admin_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Admin not found")
+    
+    # Log the action
+    client_ip = request.client.host if request.client else None
+    await log_audit(admin["sub"], "delete", "admin", admin_id, f"Deleted admin: {target.get('email', 'unknown')}", client_ip)
+    
+    return {"message": "Admin deleted"}
+
+
+# --- Audit Logs ---
+
+@api_router.get("/admin/audit-logs")
+async def get_audit_logs(
+    admin=Depends(verify_token),
+    limit: int = Query(100, ge=1, le=500),
+    admin_email: str = Query("", description="Filter by admin email"),
+    action: str = Query("", description="Filter by action type")
+):
+    """Get audit logs"""
+    query = {}
+    if admin_email:
+        query["admin_email"] = admin_email
+    if action:
+        query["action"] = action
+    
+    logs = await db.audit_logs.find(query, {"_id": 0}).sort("created_at", -1).to_list(limit)
+    return logs
 
 
 @api_router.get("/admin/stats")
