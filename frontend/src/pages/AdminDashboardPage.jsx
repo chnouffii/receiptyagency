@@ -77,6 +77,10 @@ export default function AdminDashboardPage() {
               <Settings className="w-4 h-4" />
               {lang === 'fr' ? 'Contenu Site' : 'Site Content'}
             </TabsTrigger>
+            <TabsTrigger value="users" data-testid="tab-users" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 gap-2 text-sm">
+              <UserCog className="w-4 h-4" />
+              {lang === 'fr' ? 'Utilisateurs' : 'Users'}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="leads">
@@ -93,6 +97,9 @@ export default function AdminDashboardPage() {
           </TabsContent>
           <TabsContent value="content">
             <AdminSiteContent token={token} />
+          </TabsContent>
+          <TabsContent value="users">
+            <AdminUserManagement token={token} />
           </TabsContent>
         </Tabs>
       </div>
