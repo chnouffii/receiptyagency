@@ -1,15 +1,163 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Phone, Mail, MapPin, Clock, Building2, FileText, Shield, RefreshCw } from 'lucide-react';
+import { Save, Phone, Mail, MapPin, Clock, Building2, FileText, Shield, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+// Default section texts for legal pages
+const DEFAULT_PRIVACY_SECTIONS = {
+  fr: {
+    data_collected: `Nous collectons les données suivantes via notre formulaire de contact :
+
+• Données d'identification : Nom complet, adresse email professionnelle
+• Données de contact : Numéro de téléphone (optionnel)
+• Données de communication : Sujet et contenu de votre message
+• Données techniques : Langue de préférence, date et heure de soumission
+
+Ces données sont collectées uniquement lorsque vous les soumettez volontairement via notre formulaire de contact.`,
+    purpose: `Vos données personnelles sont traitées pour les finalités suivantes :
+
+• Prospection commerciale : Répondre à vos demandes d'information et de devis
+• Gestion de la relation client : Suivi de vos projets et communications
+• Amélioration de nos services : Analyse anonymisée des besoins clients
+• Obligations légales : Conservation des données pour raisons comptables et fiscales
+
+La base légale de ce traitement est votre consentement explicite (Article 6.1.a du RGPD) et notre intérêt légitime à répondre à vos demandes (Article 6.1.f du RGPD).`,
+    storage: `Vos données sont stockées de manière sécurisée :
+
+• Base de données : MongoDB hébergée sur des serveurs sécurisés
+• Chiffrement : Toutes les communications sont chiffrées via HTTPS/TLS
+• Accès restreint : Seuls les administrateurs autorisés ont accès aux données
+• Durée de conservation : Vos données sont conservées pendant 3 ans à compter de votre dernier contact
+
+Nous ne transférons pas vos données en dehors de l'Union Européenne.`,
+    rights: `Conformément au RGPD, vous disposez des droits suivants :
+
+• Droit d'accès (Art. 15) : Obtenir une copie de vos données personnelles
+• Droit de rectification (Art. 16) : Corriger des données inexactes
+• Droit à l'effacement (Art. 17) : Demander la suppression de vos données
+• Droit à la limitation (Art. 18) : Limiter le traitement de vos données
+• Droit à la portabilité (Art. 20) : Recevoir vos données dans un format structuré
+• Droit d'opposition (Art. 21) : Vous opposer au traitement de vos données`,
+    cookies: `Notre site utilise des cookies strictement nécessaires au fonctionnement :
+
+• Cookies de session : Maintien de votre session de navigation
+• Cookies de préférence : Mémorisation de votre choix de langue
+
+Nous n'utilisons pas de cookies publicitaires ni de traceurs tiers.`
+  },
+  en: {
+    data_collected: `We collect the following data through our contact form:
+
+• Identification data: Full name, professional email address
+• Contact data: Phone number (optional)
+• Communication data: Subject and content of your message
+• Technical data: Language preference, submission date and time
+
+This data is collected only when you voluntarily submit it through our contact form.`,
+    purpose: `Your personal data is processed for the following purposes:
+
+• Commercial prospecting: Responding to your information and quote requests
+• Customer relationship management: Tracking your projects and communications
+• Service improvement: Anonymous analysis of customer needs
+• Legal obligations: Data retention for accounting and tax purposes
+
+The legal basis for this processing is your explicit consent (Article 6.1.a of GDPR) and our legitimate interest in responding to your requests (Article 6.1.f of GDPR).`,
+    storage: `Your data is stored securely:
+
+• Database: MongoDB hosted on secure servers
+• Encryption: All communications are encrypted via HTTPS/TLS
+• Restricted access: Only authorized administrators have access to data
+• Retention period: Your data is kept for 3 years from your last contact
+
+We do not transfer your data outside the European Union.`,
+    rights: `Under the GDPR, you have the following rights:
+
+• Right of access (Art. 15): Obtain a copy of your personal data
+• Right to rectification (Art. 16): Correct inaccurate data
+• Right to erasure (Art. 17): Request deletion of your data
+• Right to restriction (Art. 18): Limit the processing of your data
+• Right to portability (Art. 20): Receive your data in a structured format
+• Right to object (Art. 21): Object to the processing of your data`,
+    cookies: `Our website uses strictly necessary cookies:
+
+• Session cookies: Maintaining your browsing session
+• Preference cookies: Remembering your language choice
+
+We do not use advertising cookies or third-party trackers.`
+  }
+};
+
+const DEFAULT_TERMS_SECTIONS = {
+  fr: {
+    services: `Nous proposons des services d'intégration d'intelligence artificielle pour les entreprises :
+
+• Receipty Talent : Automatisation des processus RH et recrutement
+• Receipty Spend : Gestion et optimisation des dépenses
+• Web-on-Demand : Développement de plateformes web sur mesure
+
+Les audits et diagnostics réalisés sont fournis à titre informatif et de conseil. Ils constituent une analyse basée sur les informations fournies par le client et ne garantissent pas des résultats spécifiques.`,
+    intellectual_property: `L'ensemble du contenu présent sur le site (textes, graphiques, logos, images, vidéos, structure, base de données) est la propriété exclusive de Receipty Agency ou de ses partenaires et est protégé par les lois françaises et internationales relatives à la propriété intellectuelle.
+
+Toute reproduction, représentation, modification, publication, transmission, totale ou partielle du site ou de son contenu, par quelque procédé que ce soit, est interdite sans autorisation préalable écrite.
+
+Une utilisation du contenu à des fins personnelles et non commerciales est tolérée sous réserve du respect des droits de propriété intellectuelle.`,
+    liability: `Nous nous efforçons de fournir des informations exactes et à jour sur notre site. Toutefois, nous ne pouvons garantir l'exactitude, la complétude ou l'actualité des informations diffusées.
+
+Nous déclinons toute responsabilité pour :
+• Les dommages directs ou indirects résultant de l'utilisation du site
+• Les interruptions temporaires du site pour maintenance
+• La présence de virus ou d'éléments nuisibles sur le site
+• Les contenus de sites tiers accessibles via des liens hypertextes
+
+Le client reste seul responsable de l'utilisation qu'il fait des services et conseils fournis.`,
+    disputes: `Ces CGU sont régies par le droit français.
+
+En cas de litige relatif à l'interprétation ou l'exécution de ces CGU, les parties s'engagent à rechercher une solution amiable avant toute action judiciaire.
+
+À défaut de résolution amiable, tout litige sera soumis aux tribunaux compétents de Strasbourg, France.
+
+Conformément aux articles L.616-1 et R.616-1 du code de la consommation, tout consommateur a le droit de recourir gratuitement à un médiateur de la consommation.`
+  },
+  en: {
+    services: `We provide artificial intelligence integration services for businesses:
+
+• Receipty Talent: HR and recruitment process automation
+• Receipty Spend: Expense management and optimization
+• Web-on-Demand: Custom web platform development
+
+Audits and diagnostics are provided for informational and advisory purposes. They constitute an analysis based on information provided by the client and do not guarantee specific results.`,
+    intellectual_property: `All content on the website (texts, graphics, logos, images, videos, structure, database) is the exclusive property of Receipty Agency or its partners and is protected by French and international intellectual property laws.
+
+Any reproduction, representation, modification, publication, transmission, in whole or in part, of the site or its content, by any means whatsoever, is prohibited without prior written authorization.
+
+Use of content for personal and non-commercial purposes is tolerated subject to respect for intellectual property rights.`,
+    liability: `We strive to provide accurate and up-to-date information on our site. However, we cannot guarantee the accuracy, completeness or timeliness of the information provided.
+
+We disclaim all liability for:
+• Direct or indirect damages resulting from the use of the site
+• Temporary interruptions of the site for maintenance
+• The presence of viruses or harmful elements on the site
+• Content of third-party sites accessible via hyperlinks
+
+The client remains solely responsible for the use made of the services and advice provided.`,
+    disputes: `These Terms of Service are governed by French law.
+
+In case of dispute relating to the interpretation or execution of these Terms, the parties agree to seek an amicable solution before any legal action.
+
+In the absence of amicable resolution, any dispute will be submitted to the competent courts of Strasbourg, France.
+
+In accordance with articles L.616-1 and R.616-1 of the French Consumer Code, any consumer has the right to use a consumer mediator free of charge.`
+  }
+};
+
 export default function AdminSiteContent({ token }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState('contact');
+  const [expandedSections, setExpandedSections] = useState({});
   
   const [contactInfo, setContactInfo] = useState({
     phone: '+33 3 88 00 00 00',
@@ -38,12 +186,16 @@ export default function AdminSiteContent({ token }) {
   const [privacyContent, setPrivacyContent] = useState({
     data_retention_years: '3',
     last_update_fr: 'Février 2026',
-    last_update_en: 'February 2026'
+    last_update_en: 'February 2026',
+    sections_fr: DEFAULT_PRIVACY_SECTIONS.fr,
+    sections_en: DEFAULT_PRIVACY_SECTIONS.en
   });
 
   const [termsContent, setTermsContent] = useState({
     last_update_fr: 'Février 2026',
-    last_update_en: 'February 2026'
+    last_update_en: 'February 2026',
+    sections_fr: DEFAULT_TERMS_SECTIONS.fr,
+    sections_en: DEFAULT_TERMS_SECTIONS.en
   });
 
   const fetchContent = useCallback(async () => {
@@ -53,8 +205,20 @@ export default function AdminSiteContent({ token }) {
       });
       if (res.data.contact) setContactInfo(res.data.contact);
       if (res.data.company) setCompanyInfo(res.data.company);
-      if (res.data.privacy) setPrivacyContent(res.data.privacy);
-      if (res.data.terms) setTermsContent(res.data.terms);
+      if (res.data.privacy) {
+        setPrivacyContent({
+          ...res.data.privacy,
+          sections_fr: res.data.privacy.sections_fr || DEFAULT_PRIVACY_SECTIONS.fr,
+          sections_en: res.data.privacy.sections_en || DEFAULT_PRIVACY_SECTIONS.en
+        });
+      }
+      if (res.data.terms) {
+        setTermsContent({
+          ...res.data.terms,
+          sections_fr: res.data.terms.sections_fr || DEFAULT_TERMS_SECTIONS.fr,
+          sections_en: res.data.terms.sections_en || DEFAULT_TERMS_SECTIONS.en
+        });
+      }
     } catch (err) {
       console.error('Error fetching content:', err);
     } finally {
