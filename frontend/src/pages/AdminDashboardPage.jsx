@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogOut, Users, MessageCircle, BookOpen, Layers, Settings } from 'lucide-react';
+import { LogOut, Users, MessageCircle, BookOpen, Layers, Settings, UserCog } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import AdminLeadsTab from './admin/AdminLeadsTab';
@@ -9,6 +9,7 @@ import AdminChatAnalytics from './admin/AdminChatAnalytics';
 import AdminCaseStudies from './admin/AdminCaseStudies';
 import AdminSolutions from './admin/AdminSolutions';
 import AdminSiteContent from './admin/AdminSiteContent';
+import AdminUserManagement from './admin/AdminUserManagement';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
