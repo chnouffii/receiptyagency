@@ -958,7 +958,7 @@ async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends
     pdf.cell(0, 8, 'DESCRIPTION DES SERVICES', ln=True)
     pdf.set_font('Helvetica', '', 10)
     pdf.set_text_color(40, 40, 40)
-    pdf.multi_cell(0, 6, input.service_description)
+    pdf.multi_cell(0, 6, sanitize_text(input.service_description))
     pdf.ln(10)
     
     # Price table
@@ -970,7 +970,7 @@ async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends
     pdf.set_fill_color(30, 64, 175)
     pdf.set_text_color(255, 255, 255)
     pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(120, 10, 'Désignation', border=1, fill=True, align='C')
+    pdf.cell(120, 10, 'Designation', border=1, fill=True, align='C')
     pdf.cell(35, 10, 'Montant', border=1, fill=True, align='C', ln=True)
     
     # Table rows
