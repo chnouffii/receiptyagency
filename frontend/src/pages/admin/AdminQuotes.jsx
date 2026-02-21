@@ -1,0 +1,385 @@
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { FileText, Download, Euro, Calculator, Trash2, Eye, RefreshCw, Plus, User, Building2, Mail } from 'lucide-react';
+import { toast } from 'sonner';
+import axios from 'axios';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+export default function AdminQuotes({ token }) {
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [quotes, setQuotes] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  
+  const [form, setForm] = useState({
+    client_name: '',
+    client_email: '',
+    client_company: '',
+    service_description: '',
+    price_ht: '',
+    notes: ''
+  });
+
+  // Real-time calculation
+  const priceHT = parseFloat(form.price_ht) || 0;
+  const tvaRate = 0.20;
+  const tvaAmount = Math.round(priceHT * tvaRate * 100) / 100;
+  const priceTTC = Math.round((priceHT + tvaAmount) * 100) / 100;
+
+  const fetchQuotes = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/admin/quotes`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setQuotes(res.data);
+    } catch (err) {
+      console.error('Error fetching quotes:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => { fetchQuotes(); }, [fetchQuotes]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!form.client_name || !form.service_description || !form.price_ht) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    if (priceHT <= 0) {
+      toast.error('Le prix HT doit être supérieur à 0');
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const response = await axios.post(`${API}/admin/quotes/generate`, {
+        client_name: form.client_name,
+        client_email: form.client_email,
+        client_company: form.client_company,
+        service_description: form.service_description,
+        price_ht: priceHT,
+        notes: form.notes
+      }, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        responseType: 'blob'
+      });
+
+      // Create download link
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Extract filename from Content-Disposition header or use default
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = 'Devis.pdf';
+      if (contentDisposition) {
+        const matches = contentDisposition.match(/filename="(.+)"/);
+        if (matches) filename = matches[1];
+      }
+      
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success('Devis généré et téléchargé avec succès !');
+      
+      // Reset form and refresh list
+      setForm({
+        client_name: '',
+        client_email: '',
+        client_company: '',
+        service_description: '',
+        price_ht: '',
+        notes: ''
+      });
+      setShowForm(false);
+      fetchQuotes();
+    } catch (err) {
+      console.error('Error generating quote:', err);
+      toast.error('Erreur lors de la génération du devis');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleDelete = async (quote) => {
+    if (!confirm(`Supprimer le devis ${quote.quote_number} ?`)) return;
+    try {
+      await axios.delete(`${API}/admin/quotes/${quote.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Devis supprimé');
+      fetchQuotes();
+    } catch (err) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <RefreshCw className="w-6 h-6 text-blue-400 animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h3 className="font-heading text-lg font-semibold text-white">Génération de Devis PDF</h3>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg px-4 py-2 text-sm font-medium transition-all"
+          data-testid="new-quote-btn"
+        >
+          <Plus className="w-4 h-4" />
+          Nouveau devis
+        </button>
+      </div>
+
+      {/* Form */}
+      {showForm && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[#0F0F10] border border-white/10 rounded-xl p-6"
+        >
+          <h4 className="font-heading text-md font-semibold text-white mb-6 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-blue-400" />
+            Créer un nouveau devis
+          </h4>
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Client Information */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2 flex items-center gap-1">
+                  <User className="w-3 h-3" />
+                  Nom du client <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.client_name}
+                  onChange={(e) => setForm({ ...form, client_name: e.target.value })}
+                  placeholder="Jean Dupont"
+                  data-testid="quote-client-name"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2 flex items-center gap-1">
+                  <Building2 className="w-3 h-3" />
+                  Société
+                </label>
+                <input
+                  type="text"
+                  value={form.client_company}
+                  onChange={(e) => setForm({ ...form, client_company: e.target.value })}
+                  placeholder="Entreprise SAS"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2 flex items-center gap-1">
+                  <Mail className="w-3 h-3" />
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={form.client_email}
+                  onChange={(e) => setForm({ ...form, client_email: e.target.value })}
+                  placeholder="client@email.com"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Service Description */}
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">
+                Description des services <span className="text-red-400">*</span>
+              </label>
+              <textarea
+                value={form.service_description}
+                onChange={(e) => setForm({ ...form, service_description: e.target.value })}
+                placeholder="Décrivez en détail les services proposés..."
+                rows={4}
+                data-testid="quote-service-desc"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y"
+                required
+              />
+            </div>
+
+            {/* Price and Calculation */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2 flex items-center gap-1">
+                  <Euro className="w-3 h-3" />
+                  Prix HT (€) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={form.price_ht}
+                  onChange={(e) => setForm({ ...form, price_ht: e.target.value })}
+                  placeholder="1000.00"
+                  data-testid="quote-price-ht"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                  required
+                />
+              </div>
+              
+              {/* Real-time Price Calculation */}
+              <div className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-blue-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Calculator className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm font-medium text-white">Calcul automatique</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Prix HT</span>
+                    <span className="text-white font-mono">{formatPrice(priceHT)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">TVA (20%)</span>
+                    <span className="text-white font-mono">{formatPrice(tvaAmount)}</span>
+                  </div>
+                  <div className="border-t border-white/10 pt-2 flex justify-between">
+                    <span className="text-white font-semibold">Total TTC</span>
+                    <span className="text-blue-400 font-bold font-mono">{formatPrice(priceTTC)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Notes additionnelles</label>
+              <textarea
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                placeholder="Conditions particulières, remarques..."
+                rows={2}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y"
+              />
+            </div>
+
+            {/* Submit */}
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="px-4 py-2.5 text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                disabled={generating}
+                data-testid="generate-quote-btn"
+                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-lg px-6 py-2.5 font-semibold text-sm transition-all"
+              >
+                {generating ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Génération...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    Générer et Télécharger
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      )}
+
+      {/* Quotes List */}
+      <div className="bg-[#0F0F10] border border-white/5 rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/5">
+          <h4 className="text-sm font-medium text-gray-400">Historique des devis ({quotes.length})</h4>
+        </div>
+        
+        {quotes.length === 0 ? (
+          <div className="px-4 py-12 text-center">
+            <FileText className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-500">Aucun devis généré</p>
+            <p className="text-gray-600 text-sm mt-1">Créez votre premier devis en cliquant sur "Nouveau devis"</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/5">
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">N° Devis</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Client</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Montant TTC</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Date</th>
+                  <th className="text-right text-xs font-medium text-gray-500 uppercase px-4 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quotes.map((quote) => (
+                  <tr key={quote.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                    <td className="px-4 py-3">
+                      <span className="text-sm font-mono text-blue-400">{quote.quote_number}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div>
+                        <p className="text-sm text-white">{quote.client_name}</p>
+                        {quote.client_company && (
+                          <p className="text-xs text-gray-500">{quote.client_company}</p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-sm font-semibold text-emerald-400">{formatPrice(quote.price_ttc)}</span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-400">
+                      {formatDate(quote.created_at)}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => handleDelete(quote)}
+                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                        title="Supprimer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
