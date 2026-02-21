@@ -156,6 +156,15 @@ class AuditLog(BaseModel):
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
+class QuoteCreate(BaseModel):
+    client_name: str
+    client_email: Optional[str] = ""
+    client_company: Optional[str] = ""
+    service_description: str
+    price_ht: float
+    notes: Optional[str] = ""
+
+
 class ChatMessageInput(BaseModel):
     session_id: str
     message: str
