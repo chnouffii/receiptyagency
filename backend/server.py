@@ -998,7 +998,7 @@ async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends
         pdf.set_text_color(80, 80, 80)
         pdf.cell(0, 6, 'Notes :', ln=True)
         pdf.set_font('Helvetica', 'I', 9)
-        pdf.multi_cell(0, 5, input.notes)
+        pdf.multi_cell(0, 5, sanitize_text(input.notes))
     
     # Payment conditions
     pdf.ln(10)
