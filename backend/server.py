@@ -812,6 +812,45 @@ async def update_site_content(content: dict, admin=Depends(verify_token)):
 
 # --- Quote/Devis PDF Generation ---
 
+def sanitize_text(text):
+    """Remove or replace problematic Unicode characters for PDF"""
+    replacements = {
+        '•': '-',
+        '–': '-',
+        '—': '-',
+        ''': "'",
+        ''': "'",
+        '"': '"',
+        '"': '"',
+        '…': '...',
+        'é': 'e',
+        'è': 'e',
+        'ê': 'e',
+        'ë': 'e',
+        'à': 'a',
+        'â': 'a',
+        'ä': 'a',
+        'ù': 'u',
+        'û': 'u',
+        'ü': 'u',
+        'ô': 'o',
+        'ö': 'o',
+        'î': 'i',
+        'ï': 'i',
+        'ç': 'c',
+        'É': 'E',
+        'È': 'E',
+        'Ê': 'E',
+        'À': 'A',
+        'Ô': 'O',
+        'Ç': 'C',
+        '€': 'EUR',
+    }
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    return text
+
+
 class QuotePDF(FPDF):
     def __init__(self, company_info: dict, contact_info: dict):
         super().__init__()
@@ -831,7 +870,8 @@ class QuotePDF(FPDF):
         self.set_xy(140, 10)
         self.set_font('Helvetica', '', 9)
         self.set_text_color(80, 80, 80)
-        self.multi_cell(60, 4, f"{self.contact_info.get('address_line1', '1 Place de la Gare')}\n{self.contact_info.get('address_line2', '67000 Strasbourg, France')}\n{self.contact_info.get('email', 'contact@receipty.ai')}\n{self.contact_info.get('phone', '+33 3 88 00 00 00')}", align='R')
+        address = f"{self.contact_info.get('address_line1', '1 Place de la Gare')}\n{self.contact_info.get('address_line2', '67000 Strasbourg, France')}\n{self.contact_info.get('email', 'contact@receipty.ai')}\n{self.contact_info.get('phone', '+33 3 88 00 00 00')}"
+        self.multi_cell(60, 4, sanitize_text(address), align='R')
         
         # Line separator
         self.set_y(35)
@@ -844,8 +884,9 @@ class QuotePDF(FPDF):
         self.set_y(-25)
         self.set_font('Helvetica', 'I', 8)
         self.set_text_color(120, 120, 120)
-        self.cell(0, 4, f"{self.company_info.get('name', 'Receipty Agency')} - {self.company_info.get('legal_form', 'SARL en cours de formation')}", ln=True, align='C')
-        self.cell(0, 4, f"SIRET: En cours d'immatriculation | TVA Intracommunautaire: En attente", ln=True, align='C')
+        company_text = f"{self.company_info.get('name', 'Receipty Agency')} - {self.company_info.get('legal_form', 'SARL en cours de formation')}"
+        self.cell(0, 4, sanitize_text(company_text), ln=True, align='C')
+        self.cell(0, 4, "SIRET: En cours d'immatriculation | TVA Intracommunautaire: En attente", ln=True, align='C')
         self.cell(0, 4, f"Page {self.page_no()}", align='C')
 
 
