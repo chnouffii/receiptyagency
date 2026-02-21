@@ -966,7 +966,7 @@ async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends
     pdf.cell(0, 8, 'CONDITIONS', ln=True)
     pdf.set_font('Helvetica', '', 9)
     pdf.set_text_color(80, 80, 80)
-    pdf.multi_cell(0, 5, "• Acompte de 30% à la commande\n• Solde à la livraison\n• Paiement par virement bancaire\n• Ce devis est valable 30 jours à compter de sa date d'émission")
+    pdf.multi_cell(0, 5, "- Acompte de 30% a la commande\n- Solde a la livraison\n- Paiement par virement bancaire\n- Ce devis est valable 30 jours a compter de sa date d'emission")
     
     # Signature area
     pdf.ln(15)
