@@ -114,16 +114,33 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
   - Textarea multi-lignes pour chaque paragraphe
   - Sauvegarde dans `site_content.privacy.sections_fr/en`
 
+### Phase 8 - Module Devis PDF (Feb 2026)
+- ✅ **Génération de Devis PDF** (fpdf2)
+  - Nouvel onglet "Devis" dans le dashboard admin
+  - Formulaire : client (nom, société, email), description services, prix HT, notes
+  - Calcul automatique en temps réel : TVA (20%), Total TTC
+  - PDF professionnel avec :
+    - En-tête : Logo RECEIPTY, adresse Strasbourg
+    - Numéro de devis auto-généré (DEV-YYYYMM-XXXX)
+    - Tableau des prix : HT, TVA, TTC
+    - Conditions de paiement
+    - Zone de signature
+  - Endpoints : `/api/admin/quotes/generate` (POST), `/api/admin/quotes` (GET, DELETE)
+  - Collection MongoDB: `quotes`
+  - Historique des devis avec suppression
+
 ## Prioritized Backlog
 ### P0 (Critical) - Done
 - All core pages implemented and functional
 - Contact form functional with database storage
 - CMS admin for site content management
-- Email notifications configured (requires RESEND_API_KEY)
+- Email notifications (Resend API configurée)
 - Admin user management with audit logs
+- PDF Quote generation module
 
 ### P1 (High)
-- Configurer RESEND_API_KEY pour activer les notifications email
+- Ajouter un logo image au PDF (actuellement texte)
+- Export CSV des devis
 
 ### P2 (Medium)
 - Blog/Resources section
@@ -132,4 +149,4 @@ Build 'Receipty Agency', an ultra-modern AI integration agency portal with Dark 
 - Testimonials section
 
 ### Next Tasks
-- Configurer la clé API Resend (RESEND_API_KEY dans backend/.env)
+- Ajouter un logo image au header du PDF
