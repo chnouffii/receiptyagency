@@ -82,6 +82,10 @@ export default function AdminDashboardPage() {
               <UserCog className="w-4 h-4" />
               {lang === 'fr' ? 'Utilisateurs' : 'Users'}
             </TabsTrigger>
+            <TabsTrigger value="quotes" data-testid="tab-quotes" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 gap-2 text-sm">
+              <FileText className="w-4 h-4" />
+              {lang === 'fr' ? 'Devis' : 'Quotes'}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="leads">
@@ -101,6 +105,9 @@ export default function AdminDashboardPage() {
           </TabsContent>
           <TabsContent value="users">
             <AdminUserManagement token={token} />
+          </TabsContent>
+          <TabsContent value="quotes">
+            <AdminQuotes token={token} />
           </TabsContent>
         </Tabs>
       </div>
