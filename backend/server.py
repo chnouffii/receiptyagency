@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, Header, Query, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -23,6 +23,13 @@ try:
     RESEND_AVAILABLE = True
 except ImportError:
     RESEND_AVAILABLE = False
+
+# PDF generation
+try:
+    from fpdf import FPDF
+    FPDF_AVAILABLE = True
+except ImportError:
+    FPDF_AVAILABLE = False
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
