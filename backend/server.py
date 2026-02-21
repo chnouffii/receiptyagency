@@ -932,10 +932,10 @@ async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends
     # Quote number and date
     pdf.set_xy(10, 55)
     pdf.set_font('Helvetica', 'B', 10)
-    pdf.cell(95, 8, f"Devis N° : {quote_number}", border=0)
+    pdf.cell(95, 8, f"Devis N. : {quote_number}", border=0)
     pdf.cell(95, 8, f"Date : {datetime.now().strftime('%d/%m/%Y')}", border=0, align='R', ln=True)
     pdf.set_font('Helvetica', '', 10)
-    pdf.cell(95, 6, f"Validité : 30 jours", ln=True)
+    pdf.cell(95, 6, "Validite : 30 jours", ln=True)
     pdf.ln(10)
     
     # Client info box
@@ -945,9 +945,9 @@ async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends
     pdf.cell(0, 8, 'DESTINATAIRE', ln=True)
     pdf.set_font('Helvetica', '', 10)
     pdf.set_text_color(40, 40, 40)
-    pdf.cell(0, 6, f"Nom : {input.client_name}", ln=True)
+    pdf.cell(0, 6, sanitize_text(f"Nom : {input.client_name}"), ln=True)
     if input.client_company:
-        pdf.cell(0, 6, f"Société : {input.client_company}", ln=True)
+        pdf.cell(0, 6, sanitize_text(f"Societe : {input.client_company}"), ln=True)
     if input.client_email:
         pdf.cell(0, 6, f"Email : {input.client_email}", ln=True)
     pdf.ln(10)
