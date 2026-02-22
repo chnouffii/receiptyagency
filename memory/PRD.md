@@ -41,6 +41,11 @@ Full-stack website for Receipty Agency - An AI integration and automation agency
 - [x] Email Notifications via Resend (new contacts)
 - [x] PDF Quote Generator with professional formatting
 - [x] **Audit & ROI Optimizer** with AI-powered reports
+- [x] **Lead → Quote Connection** (Feb 22, 2026)
+  - Create quote directly from a lead
+  - Auto-fill client information
+  - Track quote-lead relationship
+  - Auto-update lead status to "qualified"
 
 ### Backend Refactoring (Complete - Feb 22, 2026)
 - [x] Modular architecture: `server.py` split into route modules
@@ -105,7 +110,15 @@ Full-stack website for Receipty Agency - An AI integration and automation agency
 
 ## Changelog
 
-### Feb 22, 2026
+### Feb 22, 2026 (Session 2)
+- **Lead → Quote Connection**: Implemented workflow to create quotes directly from leads
+  - Added "Create Quote" button on each lead row
+  - Auto-fill quote form with lead data (name, email, company, category, price)
+  - Store `lead_id` reference in quotes collection
+  - Auto-update lead status to "qualified" when quote is created
+  - Visual indicators (link icon) on leads with quotes and quotes linked to leads
+
+### Feb 22, 2026 (Session 1)
 - Fixed AI generation bug in Audit & ROI module (send_message_async → send_message)
 - Refactored backend from 1600+ lines to modular architecture
 - Fixed GET /api/leads validation error (unified Lead model for contacts)
