@@ -123,6 +123,11 @@ Full-stack website for Receipty Agency - An AI integration and automation agency
 ## Changelog
 
 ### Feb 22, 2026 (Session 2)
+- **Manual Lead Creation**: Added ability to create leads from admin panel
+  - "Nouveau" button opens form with contact and business fields
+  - Tracks source as "admin" with created_by audit trail
+  - Visual indicators on leads with existing audits/quotes (purple/green icons)
+
 - **Lead → Audit → Quote Workflow**: Implemented full CRM pipeline
   - Added "Create Audit" button on each lead row (purple FileSearch icon)
   - Auto-fill audit form with lead data (company, email, sector mapping)
