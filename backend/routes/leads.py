@@ -1,9 +1,10 @@
 """Leads and Contact routes"""
 from fastapi import APIRouter, Depends, HTTPException, Query
-from typing import List
+from typing import List, Optional
 import uuid
 import asyncio
 from datetime import datetime, timezone
+from pydantic import BaseModel
 
 from models.schemas import Lead, LeadCreate, LeadStatusUpdate, ContactMessage
 from utils.helpers import verify_token, send_notification_email
@@ -14,6 +15,42 @@ router = APIRouter()
 def get_db():
     from server import db
     return db
+
+
+class AdminLeadCreate(BaseModel):
+    name: str
+    email: str
+    company: str = ""
+    phone: str = ""
+    category: str = ""
+    estimated_setup: float = 0
+    estimated_monthly: float = 0
+    notes: str = ""
+
+
+@router.post("/admin/leads")
+async def create_lead_admin(input: AdminLeadCreate, admin=Depends(verify_token)):
+    """Create a new lead from admin panel"""
+    db = get_db()
+    lead_doc = {
+        "id": str(uuid.uuid4()),
+        "name": input.name,
+        "email": input.email,
+        "company": input.company,
+        "phone": input.phone,
+        "category": input.category,
+        "estimated_setup": input.estimated_setup,
+        "estimated_monthly": input.estimated_monthly,
+        "notes": input.notes,
+        "status": "new",
+        "type": "lead",
+        "source": "admin",
+        "created_by": admin["sub"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.leads.insert_one(lead_doc)
+    lead_doc.pop("_id", None)
+    return lead_doc
 
 
 @router.post("/leads", response_model=Lead)
