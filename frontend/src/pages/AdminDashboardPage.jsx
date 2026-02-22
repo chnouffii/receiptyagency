@@ -52,9 +52,20 @@ export default function AdminDashboardPage() {
     setActiveTab('quotes');
   };
 
+  // Handler to create audit from lead
+  const handleCreateAuditFromLead = (lead) => {
+    setAuditFromLead(lead);
+    setActiveTab('audit');
+  };
+
   // Clear quote data after use
   const clearQuoteFromLead = () => {
     setQuoteFromLead(null);
+  };
+
+  // Clear audit data after use
+  const clearAuditFromLead = () => {
+    setAuditFromLead(null);
   };
 
   return (
