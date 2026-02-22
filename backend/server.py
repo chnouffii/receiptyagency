@@ -165,6 +165,27 @@ class QuoteCreate(BaseModel):
     notes: Optional[str] = ""
 
 
+class AuditCreate(BaseModel):
+    # Client info
+    client_name: str
+    client_city: str = ""
+    client_sector: str = ""
+    client_email: str = ""
+    
+    # Technical diagnosis
+    problem_description: str
+    
+    # Financial parameters
+    hours_lost_per_week: float
+    hourly_cost: float
+    
+    # Complexity
+    complexity: str = "medium"  # low, medium, high
+    
+    # Optional notes
+    notes: str = ""
+
+
 class ChatMessageInput(BaseModel):
     session_id: str
     message: str
