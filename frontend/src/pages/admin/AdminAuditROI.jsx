@@ -527,7 +527,24 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                   Fermer
                 </button>
                 <button
-                  onClick={() => toast.info('Fonctionnalité: Convertir en devis - À venir')}
+                  onClick={() => {
+                    if (onCreateQuote && selectedAudit) {
+                      // Create a lead-like object from the audit for the quote form
+                      const quoteData = {
+                        id: selectedAudit.lead_id || null,
+                        name: selectedAudit.client_name,
+                        email: selectedAudit.client_email,
+                        company: selectedAudit.client_name,
+                        category: selectedAudit.client_sector,
+                        message: `Basé sur l'audit ${selectedAudit.audit_number}\n\nProblème identifié: ${selectedAudit.problem_description}\n\nÉconomies annuelles estimées: ${formatPrice(selectedAudit.annual_savings)}`,
+                        estimated_setup: selectedAudit.strategy?.suggested_prices?.business || 0,
+                        audit_id: selectedAudit.id,
+                        audit_number: selectedAudit.audit_number
+                      };
+                      onCreateQuote(quoteData);
+                      toast.success('Redirection vers le formulaire de devis...');
+                    }
+                  }}
                   className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg px-4 py-2 text-sm font-medium transition-all"
                 >
                   <FileText className="w-4 h-4" />
