@@ -87,6 +87,10 @@ export default function AdminDashboardPage() {
               <FileText className="w-4 h-4" />
               {lang === 'fr' ? 'Devis' : 'Quotes'}
             </TabsTrigger>
+            <TabsTrigger value="audit" data-testid="tab-audit" className="data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400 gap-2 text-sm">
+              <FileSearch className="w-4 h-4" />
+              {lang === 'fr' ? 'Audit ROI' : 'Audit ROI'}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="leads">
@@ -109,6 +113,9 @@ export default function AdminDashboardPage() {
           </TabsContent>
           <TabsContent value="quotes">
             <AdminQuotes token={token} />
+          </TabsContent>
+          <TabsContent value="audit">
+            <AdminAuditROI token={token} />
           </TabsContent>
         </Tabs>
       </div>
