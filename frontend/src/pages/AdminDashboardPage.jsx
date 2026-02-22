@@ -22,6 +22,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState('leads');
   const [quoteFromLead, setQuoteFromLead] = useState(null);
+  const [auditFromLead, setAuditFromLead] = useState(null);
   const token = localStorage.getItem('receipty-admin-token');
 
   const fetchStats = useCallback(async () => {
