@@ -1,16 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Download, Euro, Calculator, Trash2, Eye, RefreshCw, Plus, User, Building2, Mail } from 'lucide-react';
+import { FileText, Download, Euro, Calculator, Trash2, Eye, RefreshCw, Plus, User, Building2, Mail, Link2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-export default function AdminQuotes({ token }) {
+export default function AdminQuotes({ token, leadData, onLeadDataUsed }) {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [quotes, setQuotes] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [linkedLead, setLinkedLead] = useState(null);
   
   const [form, setForm] = useState({
     client_name: '',
@@ -18,8 +19,31 @@ export default function AdminQuotes({ token }) {
     client_company: '',
     service_description: '',
     price_ht: '',
-    notes: ''
+    notes: '',
+    lead_id: null
   });
+
+  // Pre-fill form when leadData is provided
+  useEffect(() => {
+    if (leadData) {
+      setForm({
+        client_name: leadData.name || '',
+        client_email: leadData.email || '',
+        client_company: leadData.company || '',
+        service_description: leadData.category ? `Solution ${leadData.category}\n\nBesoins identifiés: ${leadData.message || 'À préciser'}` : '',
+        price_ht: leadData.estimated_setup || '',
+        notes: leadData.message || '',
+        lead_id: leadData.id
+      });
+      setLinkedLead(leadData);
+      setShowForm(true);
+      toast.info(`Création de devis pour ${leadData.name}`);
+      // Clear the leadData from parent after using it
+      if (onLeadDataUsed) {
+        onLeadDataUsed();
+      }
+    }
+  }, [leadData, onLeadDataUsed]);
 
   // Real-time calculation
   const priceHT = parseFloat(form.price_ht) || 0;
