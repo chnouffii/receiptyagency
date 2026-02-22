@@ -20,6 +20,8 @@ export default function AdminDashboardPage() {
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [activeTab, setActiveTab] = useState('leads');
+  const [quoteFromLead, setQuoteFromLead] = useState(null);
   const token = localStorage.getItem('receipty-admin-token');
 
   const fetchStats = useCallback(async () => {
@@ -43,6 +45,17 @@ export default function AdminDashboardPage() {
     navigate('/admin');
   };
 
+  // Handler to create quote from lead
+  const handleCreateQuoteFromLead = (lead) => {
+    setQuoteFromLead(lead);
+    setActiveTab('quotes');
+  };
+
+  // Clear quote data after use
+  const clearQuoteFromLead = () => {
+    setQuoteFromLead(null);
+  };
+
   return (
     <div data-testid="admin-dashboard" className="pt-24 bg-[#050505] min-h-screen">
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -57,7 +70,7 @@ export default function AdminDashboardPage() {
           </button>
         </div>
 
-        <Tabs defaultValue="leads" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="bg-[#0F0F10] border border-white/5 mb-8 h-11">
             <TabsTrigger value="leads" data-testid="tab-leads" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 gap-2 text-sm">
               <Users className="w-4 h-4" />
@@ -94,7 +107,7 @@ export default function AdminDashboardPage() {
           </TabsList>
 
           <TabsContent value="leads">
-            <AdminLeadsTab token={token} stats={stats} onRefresh={fetchStats} />
+            <AdminLeadsTab token={token} stats={stats} onRefresh={fetchStats} onCreateQuote={handleCreateQuoteFromLead} />
           </TabsContent>
           <TabsContent value="chat">
             <AdminChatAnalytics token={token} />
@@ -112,7 +125,7 @@ export default function AdminDashboardPage() {
             <AdminUserManagement token={token} />
           </TabsContent>
           <TabsContent value="quotes">
-            <AdminQuotes token={token} />
+            <AdminQuotes token={token} leadData={quoteFromLead} onLeadDataUsed={clearQuoteFromLead} />
           </TabsContent>
           <TabsContent value="audit">
             <AdminAuditROI token={token} />
