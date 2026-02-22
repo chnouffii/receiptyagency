@@ -171,6 +171,14 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <button 
+                        onClick={() => onCreateAudit && onCreateAudit(lead)} 
+                        data-testid={`create-audit-${lead.id}`} 
+                        className="p-2 text-gray-600 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-all"
+                        title={lang === 'fr' ? 'Créer un audit ROI' : 'Create ROI audit'}
+                      >
+                        <FileSearch className="w-4 h-4" />
+                      </button>
+                      <button 
                         onClick={() => onCreateQuote && onCreateQuote(lead)} 
                         data-testid={`create-quote-${lead.id}`} 
                         className="p-2 text-gray-600 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all"
