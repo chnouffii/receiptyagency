@@ -126,8 +126,10 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed }) {
         client_company: '',
         service_description: '',
         price_ht: '',
-        notes: ''
+        notes: '',
+        lead_id: null
       });
+      setLinkedLead(null);
       setShowForm(false);
       fetchQuotes();
     } catch (err) {
