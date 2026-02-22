@@ -3,20 +3,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FileSearch, Download, Plus, Trash2, RefreshCw, Calculator, TrendingUp, 
   Lock, DollarSign, Target, Building2, MapPin, Briefcase, Clock, Euro,
-  AlertTriangle, CheckCircle, ChevronDown, ChevronUp, FileText, Sparkles
+  AlertTriangle, CheckCircle, ChevronDown, ChevronUp, FileText, Sparkles, Link2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-export default function AdminAuditROI({ token }) {
+export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreateQuote }) {
   const [loading, setLoading] = useState(true);
   const [audits, setAudits] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [selectedAudit, setSelectedAudit] = useState(null);
   const [showStrategy, setShowStrategy] = useState(false);
+  const [linkedLead, setLinkedLead] = useState(null);
   
   const [form, setForm] = useState({
     client_name: '',
@@ -27,8 +28,42 @@ export default function AdminAuditROI({ token }) {
     hours_lost_per_week: '',
     hourly_cost: '',
     complexity: 'medium',
-    notes: ''
+    notes: '',
+    lead_id: null
   });
+
+  // Pre-fill form when leadData is provided
+  useEffect(() => {
+    if (leadData) {
+      // Map category to sector
+      const sectorMap = {
+        'Receipty Talent': 'RH / Recrutement',
+        'Receipty Spend': 'Finance / Comptabilité',
+        'Web-on-Demand': 'Digital / Web',
+        'Talent': 'RH / Recrutement'
+      };
+      
+      setForm({
+        client_name: leadData.company || leadData.name || '',
+        client_city: '',
+        client_sector: sectorMap[leadData.category] || leadData.category || '',
+        client_email: leadData.email || '',
+        problem_description: leadData.message || `Processus manuel à optimiser pour ${leadData.company || leadData.name}`,
+        hours_lost_per_week: '',
+        hourly_cost: '45',
+        complexity: 'medium',
+        notes: `Lead: ${leadData.name} - ${leadData.email}`,
+        lead_id: leadData.id
+      });
+      setLinkedLead(leadData);
+      setShowForm(true);
+      toast.info(`Création d'audit pour ${leadData.name}`);
+      
+      if (onLeadDataUsed) {
+        onLeadDataUsed();
+      }
+    }
+  }, [leadData, onLeadDataUsed]);
 
   // Real-time cost calculation
   const hoursPerWeek = parseFloat(form.hours_lost_per_week) || 0;
