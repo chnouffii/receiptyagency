@@ -119,7 +119,7 @@ export default function AdminDashboardPage() {
           </TabsList>
 
           <TabsContent value="leads">
-            <AdminLeadsTab token={token} stats={stats} onRefresh={fetchStats} onCreateQuote={handleCreateQuoteFromLead} />
+            <AdminLeadsTab token={token} stats={stats} onRefresh={fetchStats} onCreateQuote={handleCreateQuoteFromLead} onCreateAudit={handleCreateAuditFromLead} />
           </TabsContent>
           <TabsContent value="chat">
             <AdminChatAnalytics token={token} />
