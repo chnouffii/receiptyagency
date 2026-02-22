@@ -217,12 +217,20 @@ async def create_audit(input: AuditCreate, request: Request, admin=Depends(verif
             "closing_arguments": closing_args
         },
         "notes": input.notes,
+        "lead_id": input.lead_id,
         "status": "draft",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "created_by": admin["sub"]
     }
     
     await db.audits.insert_one(audit_doc)
+    
+    # Update lead status if linked
+    if input.lead_id:
+        await db.leads.update_one(
+            {"id": input.lead_id},
+            {"$set": {"status": "contacted", "has_audit": True, "audit_id": audit_doc["id"]}}
+        )
     
     client_ip = request.client.host if request.client else None
     await log_audit(db, admin["sub"], "create", "audit", audit_doc["id"], f"Created audit {audit_number} for {input.client_name}", client_ip)
