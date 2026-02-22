@@ -116,6 +116,15 @@ Full-stack website for Receipty Agency - An AI integration and automation agency
 ## Changelog
 
 ### Feb 22, 2026 (Session 2)
+- **Lead → Audit → Quote Workflow**: Implemented full CRM pipeline
+  - Added "Create Audit" button on each lead row (purple FileSearch icon)
+  - Auto-fill audit form with lead data (company, email, sector mapping)
+  - Store `lead_id` reference in audits collection
+  - Auto-update lead status to "contacted" when audit is created
+  - "Convert to Quote" button now functional: transfers audit data to quote form
+  - Visual indicators (link icon) on audits linked to leads
+  - Complete workflow: Lead → Audit → Quote → Conversion
+
 - **Lead → Quote Connection**: Implemented workflow to create quotes directly from leads
   - Added "Create Quote" button on each lead row
   - Auto-fill quote form with lead data (name, email, company, category, price)
