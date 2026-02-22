@@ -10,15 +10,18 @@ class Lead(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     email: str
-    company: str
+    company: str = ""
     phone: str = ""
-    category: str
+    category: str = ""
     company_size: int = 10
     features: List[str] = []
     estimated_setup: float = 0
     estimated_monthly: float = 0
     language: str = "fr"
     status: str = "new"
+    type: str = "lead"
+    subject: str = ""
+    message: str = ""
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
