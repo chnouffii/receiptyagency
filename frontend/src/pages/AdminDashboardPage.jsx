@@ -140,7 +140,7 @@ export default function AdminDashboardPage() {
             <AdminQuotes token={token} leadData={quoteFromLead} onLeadDataUsed={clearQuoteFromLead} />
           </TabsContent>
           <TabsContent value="audit">
-            <AdminAuditROI token={token} />
+            <AdminAuditROI token={token} leadData={auditFromLead} onLeadDataUsed={clearAuditFromLead} onCreateQuote={handleCreateQuoteFromLead} />
           </TabsContent>
         </Tabs>
       </div>
