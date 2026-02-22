@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { Trash2, Users, UserPlus, UserCheck, Trophy, DollarSign, CalendarClock, Search, Download, Filter, FileText, CheckCircle, FileSearch } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trash2, Users, UserPlus, UserCheck, Trophy, DollarSign, CalendarClock, Search, Download, Filter, FileText, CheckCircle, FileSearch, Plus, X, Building2, Mail, Phone, Euro, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../../context/LanguageContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
@@ -17,12 +17,45 @@ const STATUS_COLORS = {
   converted: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
 };
 
+const CATEGORIES = [
+  { value: 'Receipty Talent', label: 'Receipty Talent (RH)' },
+  { value: 'Receipty Spend', label: 'Receipty Spend (Finance)' },
+  { value: 'Web-on-Demand', label: 'Web-on-Demand' },
+  { value: 'Autre', label: 'Autre' },
+];
+
 export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, onCreateAudit }) {
   const { t, lang } = useLanguage();
   const [leads, setLeads] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
   const headers = { Authorization: `Bearer ${token}` };
+
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    company: '',
+    phone: '',
+    category: '',
+    estimated_setup: '',
+    estimated_monthly: '',
+    notes: ''
+  });
+
+  const resetForm = () => {
+    setForm({
+      name: '',
+      email: '',
+      company: '',
+      phone: '',
+      category: '',
+      estimated_setup: '',
+      estimated_monthly: '',
+      notes: ''
+    });
+  };
 
   const fetchLeads = useCallback(async () => {
     const params = {};
@@ -35,6 +68,38 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
   }, [searchQuery, statusFilter, token]);
 
   useEffect(() => { fetchLeads(); }, [fetchLeads]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.name || !form.email) {
+      toast.error(lang === 'fr' ? 'Nom et email requis' : 'Name and email required');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await axios.post(`${API}/admin/leads`, {
+        name: form.name,
+        email: form.email,
+        company: form.company,
+        phone: form.phone,
+        category: form.category,
+        estimated_setup: parseFloat(form.estimated_setup) || 0,
+        estimated_monthly: parseFloat(form.estimated_monthly) || 0,
+        notes: form.notes
+      }, { headers });
+      
+      toast.success(lang === 'fr' ? 'Lead créé avec succès' : 'Lead created successfully');
+      resetForm();
+      setShowForm(false);
+      fetchLeads();
+      onRefresh();
+    } catch (err) {
+      toast.error(lang === 'fr' ? 'Erreur lors de la création' : 'Error creating lead');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const updateStatus = async (leadId, status) => {
     try {
@@ -91,6 +156,200 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
         ))}
       </div>
 
+      {/* New Lead Form */}
+      <AnimatePresence>
+        {showForm && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-6 overflow-hidden"
+          >
+            <div className="bg-[#0F0F10] border border-white/10 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-heading text-md font-semibold text-white flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-blue-400" />
+                  {lang === 'fr' ? 'Nouveau Lead' : 'New Lead'}
+                </h3>
+                <button 
+                  onClick={() => { setShowForm(false); resetForm(); }}
+                  className="p-2 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Contact Info */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-400 mb-3 flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    {lang === 'fr' ? 'Informations Contact' : 'Contact Information'}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1.5">
+                        {lang === 'fr' ? 'Nom *' : 'Name *'}
+                      </label>
+                      <input
+                        type="text"
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        placeholder="Jean Dupont"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1.5">Email *</label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                        <input
+                          type="email"
+                          value={form.email}
+                          onChange={(e) => setForm({ ...form, email: e.target.value })}
+                          placeholder="jean@entreprise.fr"
+                          className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1.5">
+                        {lang === 'fr' ? 'Entreprise' : 'Company'}
+                      </label>
+                      <div className="relative">
+                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                        <input
+                          type="text"
+                          value={form.company}
+                          onChange={(e) => setForm({ ...form, company: e.target.value })}
+                          placeholder="Entreprise SAS"
+                          className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1.5">
+                        {lang === 'fr' ? 'Téléphone' : 'Phone'}
+                      </label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                        <input
+                          type="tel"
+                          value={form.phone}
+                          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                          placeholder="+33 6 12 34 56 78"
+                          className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Business Info */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-400 mb-3 flex items-center gap-2">
+                    <Tag className="w-4 h-4" />
+                    {lang === 'fr' ? 'Informations Commerciales' : 'Business Information'}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1.5">
+                        {lang === 'fr' ? 'Catégorie' : 'Category'}
+                      </label>
+                      <select
+                        value={form.category}
+                        onChange={(e) => setForm({ ...form, category: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                      >
+                        <option value="">{lang === 'fr' ? 'Sélectionner...' : 'Select...'}</option>
+                        {CATEGORIES.map((cat) => (
+                          <option key={cat.value} value={cat.value}>{cat.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1.5">
+                        {lang === 'fr' ? 'Budget Setup (€)' : 'Setup Budget (€)'}
+                      </label>
+                      <div className="relative">
+                        <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                        <input
+                          type="number"
+                          min="0"
+                          step="100"
+                          value={form.estimated_setup}
+                          onChange={(e) => setForm({ ...form, estimated_setup: e.target.value })}
+                          placeholder="5000"
+                          className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1.5">
+                        {lang === 'fr' ? 'Budget Mensuel (€)' : 'Monthly Budget (€)'}
+                      </label>
+                      <div className="relative">
+                        <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                        <input
+                          type="number"
+                          min="0"
+                          step="50"
+                          value={form.estimated_monthly}
+                          onChange={(e) => setForm({ ...form, estimated_monthly: e.target.value })}
+                          placeholder="500"
+                          className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1.5">
+                    {lang === 'fr' ? 'Notes (optionnel)' : 'Notes (optional)'}
+                  </label>
+                  <textarea
+                    value={form.notes}
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    placeholder={lang === 'fr' ? 'Informations additionnelles sur le prospect...' : 'Additional information about the prospect...'}
+                    rows={2}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y"
+                  />
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => { setShowForm(false); resetForm(); }}
+                    className="px-4 py-2.5 text-sm text-gray-400 hover:text-white transition-colors"
+                  >
+                    {lang === 'fr' ? 'Annuler' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-lg px-5 py-2.5 font-medium text-sm transition-all"
+                  >
+                    {saving ? (
+                      <span className="animate-pulse">{lang === 'fr' ? 'Création...' : 'Creating...'}</span>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        {lang === 'fr' ? 'Créer le lead' : 'Create Lead'}
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="rounded-xl border border-white/5 bg-[#0F0F10] overflow-hidden">
         <div className="p-4 border-b border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h2 className="font-heading text-lg font-semibold text-white">{t.admin.leads}</h2>
@@ -113,6 +372,14 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
             </Select>
             <button onClick={exportCSV} data-testid="admin-export-csv-btn" className="flex items-center gap-1.5 h-9 px-3 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-all duration-200">
               <Download className="w-3.5 h-3.5" /> CSV
+            </button>
+            <button 
+              onClick={() => setShowForm(true)} 
+              data-testid="admin-new-lead-btn" 
+              className="flex items-center gap-1.5 h-9 px-4 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-all duration-200"
+            >
+              <Plus className="w-4 h-4" />
+              {lang === 'fr' ? 'Nouveau' : 'New'}
             </button>
           </div>
         </div>
@@ -142,6 +409,11 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                       {lead.has_quote && (
                         <span title="Devis créé" className="text-emerald-400">
                           <CheckCircle className="w-3.5 h-3.5" />
+                        </span>
+                      )}
+                      {lead.has_audit && (
+                        <span title="Audit créé" className="text-purple-400">
+                          <FileSearch className="w-3.5 h-3.5" />
                         </span>
                       )}
                     </div>
