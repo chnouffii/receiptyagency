@@ -51,6 +51,13 @@ Full-stack website for Receipty Agency - An AI integration and automation agency
   - Auto-fill audit form with lead data
   - Convert audit to quote with suggested pricing
   - Full CRM workflow: Lead → Audit → Quote → Conversion
+- [x] **Manual Lead Creation** (Feb 22, 2026)
+  - "Nouveau" button in admin leads panel
+  - Form with contact info (name, email, company, phone)
+  - Business info (category, setup budget, monthly budget)
+  - Notes field for additional context
+  - Source tracking (admin vs website)
+  - Visual indicators for leads with audits/quotes
 
 ### Backend Refactoring (Complete - Feb 22, 2026)
 - [x] Modular architecture: `server.py` split into route modules
