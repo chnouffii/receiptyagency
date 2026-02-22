@@ -107,6 +107,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
       setSelectedAudit(res.data);
       setShowStrategy(true);
       setShowForm(false);
+      setLinkedLead(null);
       setForm({
         client_name: '',
         client_city: '',
@@ -116,7 +117,8 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
         hours_lost_per_week: '',
         hourly_cost: '',
         complexity: 'medium',
-        notes: ''
+        notes: '',
+        lead_id: null
       });
       fetchAudits();
     } catch (err) {
