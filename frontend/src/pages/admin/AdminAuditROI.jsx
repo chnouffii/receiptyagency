@@ -594,7 +594,14 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                     </td>
                     <td className="px-4 py-3">
                       <div>
-                        <p className="text-sm text-white">{audit.client_name}</p>
+                        <p className="text-sm text-white flex items-center gap-2">
+                          {audit.client_name}
+                          {audit.lead_id && (
+                            <span title="Lié à un lead" className="text-purple-400">
+                              <Link2 className="w-3.5 h-3.5" />
+                            </span>
+                          )}
+                        </p>
                         {audit.client_sector && (
                           <p className="text-xs text-gray-500">{audit.client_sector}</p>
                         )}
