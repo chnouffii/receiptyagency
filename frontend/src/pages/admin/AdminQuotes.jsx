@@ -87,7 +87,8 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed }) {
         client_company: form.client_company,
         service_description: form.service_description,
         price_ht: priceHT,
-        notes: form.notes
+        notes: form.notes,
+        lead_id: form.lead_id
       }, {
         headers: { 
           Authorization: `Bearer ${token}`,
