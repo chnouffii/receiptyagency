@@ -103,6 +103,7 @@ class AuditCreate(BaseModel):
     hourly_cost: float
     complexity: str = "medium"
     notes: str = ""
+    lead_id: Optional[str] = None
 
 
 class ChatMessageInput(BaseModel):
