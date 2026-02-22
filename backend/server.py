@@ -1174,12 +1174,11 @@ async def generate_ai_audit_content(problem: str, sector: str, complexity: str, 
     try:
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
-            model="anthropic/claude-sonnet-4-20250514"
-        )
+            session_id=f"audit-{uuid.uuid4()}",
+            system_message="Tu es un consultant expert en automatisation et IA pour les entreprises. Tu fournis des analyses strategiques et des recommandations professionnelles."
+        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
         
-        prompt = f"""Tu es un consultant expert en automatisation et IA pour les entreprises.
-
-Contexte de l'audit:
+        prompt = f"""Contexte de l'audit:
 - Secteur: {sector}
 - Probleme identifie: {problem}
 - Complexite estimee: {complexity}
@@ -1200,10 +1199,8 @@ Explique les economies potentielles sur 1 et 2 ans
 
 Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS de prix ou de tarifs."""
 
-        response = await chat.send_message_async(
-            message=UserMessage(text=prompt)
-        )
-        return response.text
+        response = await chat.send_message(UserMessage(text=prompt))
+        return response
     except Exception as e:
         logger.error(f"AI generation error: {e}")
         return None
@@ -1214,12 +1211,11 @@ async def generate_closing_arguments(annual_savings: float, suggested_prices: di
     try:
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
-            model="anthropic/claude-sonnet-4-20250514"
-        )
+            session_id=f"closing-{uuid.uuid4()}",
+            system_message="Tu es un expert en negociation commerciale B2B pour une agence IA. Tu fournis des arguments de vente percutants et professionnels."
+        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
         
-        prompt = f"""Tu es un expert en negociation commerciale B2B pour une agence IA.
-
-Contexte:
+        prompt = f"""Contexte:
 - Economie annuelle pour le client: {annual_savings:.2f} EUR
 - Prix suggeres: Essentiel {suggested_prices['essential']:.0f} EUR, Business {suggested_prices['business']:.0f} EUR, Premium {suggested_prices['premium']:.0f} EUR
 - Secteur du client: {sector}
@@ -1233,10 +1229,8 @@ Exemple de style:
 
 Reponds uniquement avec les 3 arguments, sans introduction."""
 
-        response = await chat.send_message_async(
-            message=UserMessage(text=prompt)
-        )
-        return response.text
+        response = await chat.send_message(UserMessage(text=prompt))
+        return response
     except Exception as e:
         logger.error(f"AI closing generation error: {e}")
         return "- Le projet s'autofinance rapidement\n- ROI garanti des la premiere annee\n- Solution sur-mesure adaptee a votre secteur"
