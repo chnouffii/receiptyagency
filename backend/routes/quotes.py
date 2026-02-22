@@ -194,11 +194,19 @@ async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends
         "tva_amount": tva_amount,
         "price_ttc": price_ttc,
         "notes": input.notes,
+        "lead_id": input.lead_id,
         "status": "draft",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "created_by": admin["sub"]
     }
     await db.quotes.insert_one(quote_doc)
+    
+    # Update lead status if linked
+    if input.lead_id:
+        await db.leads.update_one(
+            {"id": input.lead_id},
+            {"$set": {"status": "qualified", "has_quote": True, "quote_id": quote_doc["id"]}}
+        )
     
     client_ip = request.client.host if request.client else None
     await log_audit(db, admin["sub"], "create", "quote", quote_doc["id"], f"Generated quote {quote_number} for {input.client_name}", client_ip)

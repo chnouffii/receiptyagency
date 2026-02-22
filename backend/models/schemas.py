@@ -90,6 +90,7 @@ class QuoteCreate(BaseModel):
     service_description: str
     price_ht: float
     notes: Optional[str] = ""
+    lead_id: Optional[str] = None
 
 
 class AuditCreate(BaseModel):
