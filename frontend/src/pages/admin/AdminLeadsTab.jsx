@@ -136,12 +136,27 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote }
             <TableBody>
               {leads.map((lead) => (
                 <TableRow key={lead.id} className="border-white/5 hover:bg-white/[0.02]">
-                  <TableCell className="text-white font-medium text-sm">{lead.name}</TableCell>
+                  <TableCell className="text-white font-medium text-sm">
+                    <div className="flex items-center gap-2">
+                      {lead.name}
+                      {lead.has_quote && (
+                        <span title="Devis créé" className="text-emerald-400">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-gray-400 text-sm">{lead.email}</TableCell>
-                  <TableCell className="text-gray-400 text-sm">{lead.company}</TableCell>
-                  <TableCell><Badge variant="outline" className="text-xs text-blue-400 border-blue-500/30 capitalize">{lead.category}</Badge></TableCell>
-                  <TableCell className="font-mono text-sm text-gray-300">{lead.estimated_setup} EUR</TableCell>
-                  <TableCell className="font-mono text-sm text-gray-300">{lead.estimated_monthly} EUR/mo</TableCell>
+                  <TableCell className="text-gray-400 text-sm">{lead.company || '-'}</TableCell>
+                  <TableCell>
+                    {lead.category ? (
+                      <Badge variant="outline" className="text-xs text-blue-400 border-blue-500/30 capitalize">{lead.category}</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs text-gray-500 border-gray-500/30">{lead.type || 'contact'}</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="font-mono text-sm text-gray-300">{lead.estimated_setup || 0} EUR</TableCell>
+                  <TableCell className="font-mono text-sm text-gray-300">{lead.estimated_monthly || 0} EUR/mo</TableCell>
                   <TableCell>
                     <Select value={lead.status} onValueChange={(val) => updateStatus(lead.id, val)}>
                       <SelectTrigger className={`w-[130px] h-8 text-xs border ${STATUS_COLORS[lead.status] || ''} bg-transparent`} data-testid={`status-select-${lead.id}`}><SelectValue /></SelectTrigger>
@@ -154,7 +169,19 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote }
                     </Select>
                   </TableCell>
                   <TableCell>
-                    <button onClick={() => deleteLead(lead.id)} data-testid={`delete-lead-${lead.id}`} className="text-gray-600 hover:text-red-400 transition-colors duration-200"><Trash2 className="w-4 h-4" /></button>
+                    <div className="flex items-center gap-1">
+                      <button 
+                        onClick={() => onCreateQuote && onCreateQuote(lead)} 
+                        data-testid={`create-quote-${lead.id}`} 
+                        className="p-2 text-gray-600 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all"
+                        title={lang === 'fr' ? 'Créer un devis' : 'Create quote'}
+                      >
+                        <FileText className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => deleteLead(lead.id)} data-testid={`delete-lead-${lead.id}`} className="p-2 text-gray-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
