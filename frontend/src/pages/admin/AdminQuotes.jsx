@@ -193,10 +193,18 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed }) {
           animate={{ opacity: 1, y: 0 }}
           className="bg-[#0F0F10] border border-white/10 rounded-xl p-6"
         >
-          <h4 className="font-heading text-md font-semibold text-white mb-6 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-400" />
-            Créer un nouveau devis
-          </h4>
+          <div className="flex items-center justify-between mb-6">
+            <h4 className="font-heading text-md font-semibold text-white flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-400" />
+              Créer un nouveau devis
+            </h4>
+            {linkedLead && (
+              <div className="flex items-center gap-2 text-sm bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-1.5">
+                <Link2 className="w-4 h-4 text-blue-400" />
+                <span className="text-blue-300">Lié au lead: <strong>{linkedLead.name}</strong></span>
+              </div>
+            )}
+          </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Client Information */}
