@@ -387,7 +387,14 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed }) {
                     </td>
                     <td className="px-4 py-3">
                       <div>
-                        <p className="text-sm text-white">{quote.client_name}</p>
+                        <p className="text-sm text-white flex items-center gap-2">
+                          {quote.client_name}
+                          {quote.lead_id && (
+                            <span title="Lié à un lead" className="text-blue-400">
+                              <Link2 className="w-3.5 h-3.5" />
+                            </span>
+                          )}
+                        </p>
                         {quote.client_company && (
                           <p className="text-xs text-gray-500">{quote.client_company}</p>
                         )}
