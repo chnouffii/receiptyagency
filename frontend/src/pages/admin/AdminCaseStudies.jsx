@@ -242,18 +242,32 @@ export default function AdminCaseStudies({ token }) {
 
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="text-xs text-gray-500 mb-1.5 block">Categorie</label>
-                <select value={form.category} onChange={(e) => updateField('category', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg text-white text-sm h-10 px-3 outline-none">
-                  <option value="Receipty Talent" className="bg-[#0F0F10]">Receipty Talent</option>
-                  <option value="Receipty Spend" className="bg-[#0F0F10]">Receipty Spend</option>
-                  <option value="Web-on-Demand" className="bg-[#0F0F10]">Web-on-Demand</option>
+                <label className="text-xs text-gray-500 mb-1.5 block">Catégorie (Solution)</label>
+                <select 
+                  value={form.category} 
+                  onChange={(e) => updateField('category', e.target.value)} 
+                  className="w-full bg-white/5 border border-white/10 rounded-lg text-white text-sm h-10 px-3 outline-none focus:border-blue-500/50 transition-all"
+                >
+                  {solutions.length > 0 ? (
+                    solutions.map((sol) => (
+                      <option key={sol.id} value={lang === 'fr' ? sol.name_fr : (sol.name_en || sol.name_fr)} className="bg-[#0F0F10]">
+                        {lang === 'fr' ? sol.name_fr : (sol.name_en || sol.name_fr)}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Receipty Talent" className="bg-[#0F0F10]">Receipty Talent</option>
+                      <option value="Receipty Spend" className="bg-[#0F0F10]">Receipty Spend</option>
+                      <option value="Web-on-Demand" className="bg-[#0F0F10]">Web-on-Demand</option>
+                    </>
+                  )}
                 </select>
               </div>
               <FormField label="ROI" value={form.roi} onChange={(e) => updateField('roi', e.target.value)} placeholder="+340% efficacite" />
               <div className="flex items-end">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.published} onChange={(e) => updateField('published', e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-600" />
-                  <span className="text-sm text-gray-400">{lang === 'fr' ? 'Publiee' : 'Published'}</span>
+                  <span className="text-sm text-gray-400">{lang === 'fr' ? 'Publiée' : 'Published'}</span>
                 </label>
               </div>
             </div>
