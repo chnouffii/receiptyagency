@@ -136,18 +136,31 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
         responseType: 'blob'
       });
       
+      // Check if we received valid PDF data
+      if (response.data.size === 0) {
+        throw new Error('Empty PDF received');
+      }
+      
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
+      
+      // Create and trigger download
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Audit_${audit.audit_number}.pdf`;
+      link.style.display = 'none';
+      link.setAttribute('download', `Audit_${audit.audit_number}.pdf`);
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
       
       toast.success('PDF téléchargé');
     } catch (err) {
+      console.error('Error downloading PDF:', err);
       toast.error('Erreur lors du téléchargement');
     }
   };
