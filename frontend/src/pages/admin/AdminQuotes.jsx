@@ -291,7 +291,7 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed }) {
                 </label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="any"
                   min="0"
                   value={form.price_ht}
                   onChange={(e) => setForm({ ...form, price_ht: e.target.value })}

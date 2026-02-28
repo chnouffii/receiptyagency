@@ -328,7 +328,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                     <label className="block text-xs text-gray-500 mb-1.5">Heures perdues / semaine *</label>
                     <input
                       type="number"
-                      step="0.5"
+                      step="any"
                       min="0"
                       value={form.hours_lost_per_week}
                       onChange={(e) => setForm({ ...form, hours_lost_per_week: e.target.value })}
@@ -341,7 +341,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                     <label className="block text-xs text-gray-500 mb-1.5">Coût horaire employé (€) *</label>
                     <input
                       type="number"
-                      step="0.01"
+                      step="any"
                       min="0"
                       value={form.hourly_cost}
                       onChange={(e) => setForm({ ...form, hourly_cost: e.target.value })}
