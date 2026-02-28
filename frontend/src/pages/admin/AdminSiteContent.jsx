@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Phone, Mail, MapPin, Clock, Building2, FileText, Shield, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Save, Phone, Mail, MapPin, Clock, Building2, FileText, Shield, RefreshCw, ChevronDown, ChevronUp, Plus, X, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
