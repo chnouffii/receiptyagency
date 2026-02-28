@@ -270,6 +270,7 @@ export default function AdminSiteContent({ token }) {
   const sections = [
     { id: 'contact', label: 'Informations Contact', icon: Phone },
     { id: 'company', label: 'Informations Société', icon: Building2 },
+    { id: 'trusted', label: 'Entreprises Confiance', icon: Building2 },
     { id: 'privacy', label: 'Politique Confidentialité', icon: Shield },
     { id: 'terms', label: 'CGU', icon: FileText }
   ];
