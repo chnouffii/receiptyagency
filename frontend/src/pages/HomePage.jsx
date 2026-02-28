@@ -100,7 +100,7 @@ export default function HomePage() {
             transition={{ delay: 1, duration: 0.6 }}
           >
             <Link
-              to="/quote"
+              to="/contact"
               data-testid="hero-cta-button"
               className="group flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full px-8 py-4 font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:scale-105"
             >
