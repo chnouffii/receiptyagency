@@ -210,6 +210,9 @@ export default function AdminSiteContent({ token }) {
       });
       if (res.data.contact) setContactInfo(res.data.contact);
       if (res.data.company) setCompanyInfo(res.data.company);
+      if (res.data.trusted_companies && res.data.trusted_companies.length > 0) {
+        setTrustedCompanies(res.data.trusted_companies);
+      }
       if (res.data.privacy) {
         setPrivacyContent({
           ...res.data.privacy,
