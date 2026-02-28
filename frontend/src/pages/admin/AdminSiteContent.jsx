@@ -183,6 +183,11 @@ export default function AdminSiteContent({ token }) {
     legal_email: 'juridique@receipty.ai'
   });
 
+  const [trustedCompanies, setTrustedCompanies] = useState([
+    'GlobalTech', 'BioPharm', 'NeoRetail', 'MedStaff', 'InvestCorp'
+  ]);
+  const [newCompany, setNewCompany] = useState('');
+
   const [privacyContent, setPrivacyContent] = useState({
     data_retention_years: '3',
     last_update_fr: 'Février 2026',
