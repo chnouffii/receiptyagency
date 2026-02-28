@@ -242,6 +242,7 @@ export default function AdminSiteContent({ token }) {
       await axios.put(`${API}/admin/site-content`, {
         contact: contactInfo,
         company: companyInfo,
+        trusted_companies: trustedCompanies,
         privacy: privacyContent,
         terms: termsContent
       }, {
@@ -253,6 +254,17 @@ export default function AdminSiteContent({ token }) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const addCompany = () => {
+    if (newCompany.trim() && !trustedCompanies.includes(newCompany.trim())) {
+      setTrustedCompanies([...trustedCompanies, newCompany.trim()]);
+      setNewCompany('');
+    }
+  };
+
+  const removeCompany = (index) => {
+    setTrustedCompanies(trustedCompanies.filter((_, i) => i !== index));
   };
 
   const sections = [
