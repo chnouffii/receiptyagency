@@ -278,7 +278,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                         <input
                           type="number"
                           min="0"
-                          step="100"
+                          step="any"
                           value={form.estimated_setup}
                           onChange={(e) => setForm({ ...form, estimated_setup: e.target.value })}
                           placeholder="5000"
@@ -295,7 +295,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                         <input
                           type="number"
                           min="0"
-                          step="50"
+                          step="any"
                           value={form.estimated_monthly}
                           onChange={(e) => setForm({ ...form, estimated_monthly: e.target.value })}
                           placeholder="500"
