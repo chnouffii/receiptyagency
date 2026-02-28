@@ -140,7 +140,7 @@ export default function CaseStudyDetailPage() {
         )}
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.5 }} className="mt-16 pt-10 border-t border-white/5">
-          <Link to="/quote" data-testid="case-detail-cta" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full px-8 py-4 font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:scale-105">
+          <Link to="/contact" data-testid="case-detail-cta" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full px-8 py-4 font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:scale-105">
             {sectionLabel.cta} <ArrowRight className="w-4 h-4" />
           </Link>
         </motion.div>
