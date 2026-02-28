@@ -112,20 +112,30 @@ async def send_notification_email(contact_data: dict):
 
 
 def sanitize_text(text):
-    """Remove or replace problematic Unicode characters for PDF"""
+    """Sanitize text for PDF - fpdf2 with Helvetica supports basic Latin-1 characters"""
+    if not text:
+        return ""
+    
+    # Replace special Unicode characters that Helvetica doesn't support
     replacements = {
-        '\u2022': '-', '\u2013': '-', '\u2014': '-',
-        '\u2018': "'", '\u2019': "'", '\u201c': '"', '\u201d': '"',
-        '\u2026': '...',
-        'e': 'e', 'e': 'e', 'e': 'e', 'e': 'e',
-        'a': 'a', 'a': 'a', 'a': 'a',
-        'u': 'u', 'u': 'u', 'u': 'u',
-        'o': 'o', 'o': 'o', 'i': 'i', 'i': 'i', 'c': 'c',
-        'E': 'E', 'E': 'E', 'E': 'E', 'A': 'A', 'O': 'O', 'C': 'C',
-        '\u20ac': 'EUR',
+        '\u2022': '-',      # bullet
+        '\u2013': '-',      # en dash
+        '\u2014': '-',      # em dash
+        '\u2018': "'",      # left single quote
+        '\u2019': "'",      # right single quote
+        '\u201c': '"',      # left double quote
+        '\u201d': '"',      # right double quote
+        '\u2026': '...',    # ellipsis
+        '\u20ac': 'EUR',    # euro sign (use text instead)
+        '\u00a0': ' ',      # non-breaking space
+        '€': 'EUR',         # euro sign
     }
+    
     for old, new in replacements.items():
         text = text.replace(old, new)
+    
+    # Keep accented characters - fpdf2 Helvetica supports ISO-8859-1 (Latin-1)
+    # which includes: àâäéèêëïîôùûüç and their uppercase versions
     return text
 
 
