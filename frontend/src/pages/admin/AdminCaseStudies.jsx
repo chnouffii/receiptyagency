@@ -55,6 +55,7 @@ function ArrayField({ label, items, onChange }) {
 export default function AdminCaseStudies({ token }) {
   const { lang } = useLanguage();
   const [cases, setCases] = useState([]);
+  const [solutions, setSolutions] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCase, setEditingCase] = useState(null);
   const [form, setForm] = useState({ ...EMPTY_CASE });
@@ -67,7 +68,17 @@ export default function AdminCaseStudies({ token }) {
     } catch {}
   }, []);
 
-  useEffect(() => { fetchCases(); }, [fetchCases]);
+  const fetchSolutions = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/solutions?published_only=false`);
+      setSolutions(res.data);
+    } catch {}
+  }, []);
+
+  useEffect(() => { 
+    fetchCases(); 
+    fetchSolutions();
+  }, [fetchCases, fetchSolutions]);
 
   const openCreate = () => {
     setEditingCase(null);
