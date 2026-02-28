@@ -82,7 +82,10 @@ export default function AdminCaseStudies({ token }) {
 
   const openCreate = () => {
     setEditingCase(null);
-    setForm({ ...EMPTY_CASE, results_fr: [''], results_en: [''], tags: [''], tech: [''] });
+    const defaultCategory = solutions.length > 0 
+      ? (lang === 'fr' ? solutions[0].name_fr : (solutions[0].name_en || solutions[0].name_fr))
+      : 'Receipty Talent';
+    setForm({ ...EMPTY_CASE, category: defaultCategory, results_fr: [''], results_en: [''], tags: [''], tech: [''] });
     setDialogOpen(true);
   };
 
