@@ -97,25 +97,39 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed }) {
         responseType: 'blob'
       });
 
+      // Check if we received valid PDF data
+      if (response.data.size === 0) {
+        throw new Error('Empty PDF received');
+      }
+
       // Create download link
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
+      
+      // Create and trigger download
       const link = document.createElement('a');
       link.href = url;
+      link.style.display = 'none';
       
-      // Extract filename from Content-Disposition header or use default
+      // Extract filename from Content-Disposition header or use default with timestamp
       const contentDisposition = response.headers['content-disposition'];
-      let filename = 'Devis.pdf';
+      let filename = `Devis_${new Date().toISOString().split('T')[0]}.pdf`;
       if (contentDisposition) {
-        const matches = contentDisposition.match(/filename="(.+)"/);
-        if (matches) filename = matches[1];
+        const matches = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (matches && matches[1]) {
+          filename = matches[1].replace(/['"]/g, '');
+        }
       }
       
-      link.download = filename;
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
 
       toast.success('Devis généré et téléchargé avec succès !');
       
