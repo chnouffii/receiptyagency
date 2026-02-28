@@ -1,13 +1,61 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Brain, Zap, TrendingUp } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import axios from 'axios';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+// Infinite scrolling marquee component
+function TrustedCompaniesMarquee({ companies }) {
+  if (!companies || companies.length === 0) return null;
+  
+  // Duplicate companies for seamless loop
+  const duplicatedCompanies = [...companies, ...companies, ...companies];
+  
+  return (
+    <div className="relative overflow-hidden">
+      {/* Gradient masks */}
+      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050505] to-transparent z-10" />
+      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050505] to-transparent z-10" />
+      
+      {/* Scrolling container */}
+      <div className="flex animate-marquee">
+        {duplicatedCompanies.map((name, index) => (
+          <div
+            key={`${name}-${index}`}
+            className="flex-shrink-0 px-8 md:px-12"
+          >
+            <span className="font-heading text-sm md:text-base font-bold text-gray-400 tracking-wide whitespace-nowrap opacity-50 hover:opacity-80 transition-opacity">
+              {name}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function HomePage() {
   const { t, lang } = useLanguage();
   const featuresRef = useRef(null);
   const featuresInView = useInView(featuresRef, { once: true, margin: '-100px' });
+  const [trustedCompanies, setTrustedCompanies] = useState(['GlobalTech', 'BioPharm', 'NeoRetail', 'MedStaff', 'InvestCorp']);
+
+  useEffect(() => {
+    const fetchTrustedCompanies = async () => {
+      try {
+        const res = await axios.get(`${API}/site-content`);
+        if (res.data.trusted_companies && res.data.trusted_companies.length > 0) {
+          setTrustedCompanies(res.data.trusted_companies);
+        }
+      } catch (err) {
+        // Keep default companies on error
+      }
+    };
+    fetchTrustedCompanies();
+  }, []);
 
   const featureItems = [
     { icon: Brain, ...t.features.ai },
@@ -68,19 +116,15 @@ export default function HomePage() {
             </Link>
           </motion.div>
 
-          {/* Trust logos */}
+          {/* Trust logos with infinite scroll */}
           <motion.div
             className="mt-24 pt-12 border-t border-white/5"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.4, duration: 0.8 }}
           >
-            <p className="text-xs text-gray-600 uppercase tracking-widest mb-6">{t.hero.trusted}</p>
-            <div className="flex items-center justify-center gap-12 opacity-30">
-              {['GlobalTech', 'BioPharm', 'NeoRetail', 'MedStaff', 'InvestCorp'].map((name) => (
-                <span key={name} className="font-heading text-sm font-bold text-gray-400 tracking-wide">{name}</span>
-              ))}
-            </div>
+            <p className="text-xs text-gray-600 uppercase tracking-widest mb-8">{t.hero.trusted}</p>
+            <TrustedCompaniesMarquee companies={trustedCompanies} />
           </motion.div>
         </div>
       </section>
