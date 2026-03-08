@@ -72,7 +72,7 @@ function getIconComponent(iconName) {
   return map[iconName] || Users;
 }
 
-export default function AdminSolutions({ token }) {
+export default function AdminSolutions({ token, isDark }) {
   const { lang } = useLanguage();
   const [solutions, setSolutions] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);

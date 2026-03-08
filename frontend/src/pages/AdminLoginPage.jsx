@@ -4,12 +4,14 @@ import { motion } from 'framer-motion';
 import { Shield, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function AdminLoginPage() {
   const { t } = useLanguage();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,20 +34,20 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div data-testid="admin-login-page" className="pt-24 bg-[#050505] min-h-screen flex items-center justify-center">
+    <div data-testid="admin-login-page" className={`pt-24 min-h-screen flex items-center justify-center transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md mx-auto px-6"
       >
-        <div className="rounded-2xl border border-white/5 bg-[#0F0F10] p-8">
+        <div className={`rounded-2xl border p-8 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-lg'}`}>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center">
               <Shield className="w-5 h-5 text-blue-400" />
             </div>
             <div>
-              <h1 className="font-heading text-xl font-bold text-white">{t.admin.login_title}</h1>
+              <h1 className={`font-heading text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.admin.login_title}</h1>
               <p className="text-sm text-gray-500">{t.admin.login_subtitle}</p>
             </div>
           </div>
@@ -54,11 +56,15 @@ export default function AdminLoginPage() {
             <div>
               <label className="text-xs text-gray-500 mb-1.5 block">{t.admin.email}</label>
               <input
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 data-testid="admin-email-input"
-                className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 rounded-lg text-white placeholder:text-gray-600 h-12 px-4 text-sm outline-none transition-all duration-200"
+                className={`w-full rounded-lg h-12 px-4 text-sm outline-none transition-all duration-200 ${
+                  isDark 
+                    ? 'bg-white/5 border border-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 text-white placeholder:text-gray-600' 
+                    : 'bg-gray-50 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-900 placeholder:text-gray-400'
+                }`}
                 required
               />
             </div>
@@ -69,7 +75,11 @@ export default function AdminLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 data-testid="admin-password-input"
-                className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 rounded-lg text-white placeholder:text-gray-600 h-12 px-4 text-sm outline-none transition-all duration-200"
+                className={`w-full rounded-lg h-12 px-4 text-sm outline-none transition-all duration-200 ${
+                  isDark 
+                    ? 'bg-white/5 border border-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 text-white placeholder:text-gray-600' 
+                    : 'bg-gray-50 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-900 placeholder:text-gray-400'
+                }`}
                 required
               />
             </div>

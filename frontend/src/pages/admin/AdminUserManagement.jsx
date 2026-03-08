@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-export default function AdminUserManagement({ token }) {
+export default function AdminUserManagement({ token, isDark }) {
   const [loading, setLoading] = useState(true);
   const [admins, setAdmins] = useState([]);
   const [logs, setLogs] = useState([]);

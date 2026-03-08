@@ -10,7 +10,7 @@ import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreateQuote }) {
+export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreateQuote, isDark }) {
   const [loading, setLoading] = useState(true);
   const [audits, setAudits] = useState([]);
   const [showForm, setShowForm] = useState(false);

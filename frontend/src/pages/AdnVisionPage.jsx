@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
 
 function AnimatedCounter({ target, suffix = '', inView }) {
@@ -33,6 +34,7 @@ function AnimatedCounter({ target, suffix = '', inView }) {
 
 export default function AdnVisionPage() {
   const { t } = useLanguage();
+  const { isDark } = useTheme();
   const statsRef = useRef(null);
   const statsInView = useInView(statsRef, { once: true, margin: '-80px' });
   const teamRef = useRef(null);
@@ -47,7 +49,7 @@ export default function AdnVisionPage() {
   const colors = ['bg-blue-600', 'bg-cyan-500', 'bg-indigo-500', 'bg-sky-500'];
 
   return (
-    <div data-testid="adn-page" className="pt-24 bg-[#050505] min-h-screen">
+    <div data-testid="adn-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
       {/* Manifesto */}
       <section className="max-w-5xl mx-auto px-6 py-16 md:py-24">
         <motion.div
@@ -55,10 +57,10 @@ export default function AdnVisionPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight">
+          <h1 className={`font-heading text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
             {t.adn.title}
           </h1>
-          <p className="mt-6 text-base md:text-lg text-gray-400 max-w-3xl leading-relaxed">
+          <p className={`mt-6 text-base md:text-lg max-w-3xl leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             {t.adn.subtitle}
           </p>
         </motion.div>
@@ -69,7 +71,7 @@ export default function AdnVisionPage() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3, duration: 0.6 }}
         >
-          <p className="text-lg md:text-xl text-gray-300 leading-relaxed italic font-light">
+          <p className={`text-lg md:text-xl leading-relaxed italic font-light ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             "{t.adn.manifesto}"
           </p>
         </motion.blockquote>
@@ -84,11 +86,13 @@ export default function AdnVisionPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={statsInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: i * 0.15, duration: 0.5 }}
-              className="flex flex-col items-start rounded-2xl border border-white/5 bg-white/[0.02] p-8"
+              className={`flex flex-col items-start rounded-2xl border p-8 ${
+                isDark ? 'border-white/5 bg-white/[0.02]' : 'border-gray-200 bg-white shadow-sm'
+              }`}
               data-testid={`stat-card-${i}`}
             >
               <AnimatedCounter target={stat.value} suffix={stat.suffix} inView={statsInView} />
-              <span className="mt-3 text-sm text-gray-500 font-medium">{stat.label}</span>
+              <span className={`mt-3 text-sm font-medium ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>{stat.label}</span>
             </motion.div>
           ))}
         </div>
@@ -97,7 +101,7 @@ export default function AdnVisionPage() {
       {/* Team Grid - Bento Style */}
       <section ref={teamRef} className="max-w-6xl mx-auto px-6 py-16 md:py-24">
         <motion.h2
-          className="font-heading text-2xl sm:text-3xl font-bold text-white mb-12"
+          className={`font-heading text-2xl sm:text-3xl font-bold mb-12 ${isDark ? 'text-white' : 'text-gray-900'}`}
           initial={{ opacity: 0 }}
           animate={teamInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.5 }}
@@ -114,19 +118,21 @@ export default function AdnVisionPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={teamInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ delay: i * 0.15, duration: 0.5 }}
-                className={`${spans[i]} group relative overflow-hidden rounded-2xl border border-white/5 bg-[#0F0F10] p-8 transition-all duration-300 hover:border-blue-500/20`}
+                className={`${spans[i]} group relative overflow-hidden rounded-2xl border p-8 transition-all duration-300 hover:border-blue-500/20 ${
+                  isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'
+                }`}
                 data-testid={`team-member-${i}`}
               >
                 <div className="flex items-start gap-5">
-                  <Avatar className="w-14 h-14 border border-white/10">
+                  <Avatar className={`w-14 h-14 border ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
                     <AvatarFallback className={`${colors[i]} text-white font-heading font-bold text-lg`}>
                       {member.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="font-heading text-lg font-semibold text-white">{member.name}</h3>
+                    <h3 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{member.name}</h3>
                     <p className="text-sm text-blue-400 font-medium mt-0.5">{member.role}</p>
-                    <p className="text-sm text-gray-500 mt-2 leading-relaxed">{member.desc}</p>
+                    <p className={`text-sm mt-2 leading-relaxed ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>{member.desc}</p>
                   </div>
                 </div>
               </motion.div>

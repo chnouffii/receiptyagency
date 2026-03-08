@@ -3,12 +3,14 @@ import { motion } from 'framer-motion';
 import { Send, Phone, Mail, MapPin, Clock, Zap, PhoneCall } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function ContactPage() {
   const { t, lang } = useLanguage();
+  const { isDark } = useTheme();
   const [siteContent, setSiteContent] = useState(null);
   const [form, setForm] = useState({
     name: '',
@@ -67,7 +69,7 @@ export default function ContactPage() {
 
   if (submitted) {
     return (
-      <div data-testid="contact-success" className="pt-24 bg-[#050505] min-h-screen flex items-center justify-center">
+      <div data-testid="contact-success" className={`pt-24 min-h-screen flex items-center justify-center transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }} 
           animate={{ opacity: 1, scale: 1 }} 
@@ -76,15 +78,15 @@ export default function ContactPage() {
           <div className="w-16 h-16 rounded-full bg-emerald-600/20 flex items-center justify-center mx-auto mb-6">
             <Send className="w-8 h-8 text-emerald-400" />
           </div>
-          <h2 className="font-heading text-2xl font-bold text-white">{t.contact.success}</h2>
-          <p className="mt-3 text-gray-400">{t.contact.success_desc}</p>
+          <h2 className={`font-heading text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.contact.success}</h2>
+          <p className={`mt-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t.contact.success_desc}</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div data-testid="contact-page" className="pt-24 bg-[#050505] min-h-screen">
+    <div data-testid="contact-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-20">
         {/* Header */}
         <motion.div 
@@ -93,10 +95,10 @@ export default function ContactPage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12 md:mb-16"
         >
-          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
+          <h1 className={`font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
             {t.contact.title}
           </h1>
-          <p className="mt-4 text-base text-gray-400 max-w-2xl mx-auto">
+          <p className={`mt-4 text-base max-w-2xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             {t.contact.subtitle}
           </p>
         </motion.div>
@@ -111,17 +113,17 @@ export default function ContactPage() {
           >
             <form 
               onSubmit={handleSubmit}
-              className="bg-white rounded-xl shadow-[0_4px_30px_rgba(0,0,0,0.3)] p-6 sm:p-8"
+              className={`rounded-xl p-6 sm:p-8 ${isDark ? 'bg-[#0F0F10] border border-white/10' : 'bg-white shadow-[0_4px_30px_rgba(0,0,0,0.1)]'}`}
               data-testid="contact-form"
             >
-              <h2 className="font-heading text-xl font-semibold text-gray-900 mb-6">
+              <h2 className={`font-heading text-xl font-semibold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {t.contact.form_title}
               </h2>
 
               <div className="space-y-5">
                 {/* Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     {t.contact.name} <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -131,14 +133,18 @@ export default function ContactPage() {
                     onChange={handleChange}
                     placeholder={t.contact.name_placeholder}
                     data-testid="contact-input-name"
-                    className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl text-gray-900 placeholder:text-gray-400 h-12 px-4 text-sm outline-none transition-all duration-200"
+                    className={`w-full rounded-xl h-12 px-4 text-sm outline-none transition-all duration-200 ${
+                      isDark 
+                        ? 'bg-white/5 border border-white/10 focus:border-blue-500/50 text-white placeholder:text-gray-600' 
+                        : 'bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-gray-900 placeholder:text-gray-400'
+                    }`}
                     required
                   />
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     {t.contact.email} <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -148,14 +154,18 @@ export default function ContactPage() {
                     onChange={handleChange}
                     placeholder={t.contact.email_placeholder}
                     data-testid="contact-input-email"
-                    className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl text-gray-900 placeholder:text-gray-400 h-12 px-4 text-sm outline-none transition-all duration-200"
+                    className={`w-full rounded-xl h-12 px-4 text-sm outline-none transition-all duration-200 ${
+                      isDark 
+                        ? 'bg-white/5 border border-white/10 focus:border-blue-500/50 text-white placeholder:text-gray-600' 
+                        : 'bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-gray-900 placeholder:text-gray-400'
+                    }`}
                     required
                   />
                 </div>
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     {t.contact.phone}
                   </label>
                   <input
@@ -165,13 +175,17 @@ export default function ContactPage() {
                     onChange={handleChange}
                     placeholder="+33 6 12 34 56 78"
                     data-testid="contact-input-phone"
-                    className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl text-gray-900 placeholder:text-gray-400 h-12 px-4 text-sm outline-none transition-all duration-200"
+                    className={`w-full rounded-xl h-12 px-4 text-sm outline-none transition-all duration-200 ${
+                      isDark 
+                        ? 'bg-white/5 border border-white/10 focus:border-blue-500/50 text-white placeholder:text-gray-600' 
+                        : 'bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-gray-900 placeholder:text-gray-400'
+                    }`}
                   />
                 </div>
 
                 {/* Subject */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     {t.contact.subject}
                   </label>
                   <input
@@ -181,13 +195,17 @@ export default function ContactPage() {
                     onChange={handleChange}
                     placeholder={t.contact.subject_placeholder}
                     data-testid="contact-input-subject"
-                    className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl text-gray-900 placeholder:text-gray-400 h-12 px-4 text-sm outline-none transition-all duration-200"
+                    className={`w-full rounded-xl h-12 px-4 text-sm outline-none transition-all duration-200 ${
+                      isDark 
+                        ? 'bg-white/5 border border-white/10 focus:border-blue-500/50 text-white placeholder:text-gray-600' 
+                        : 'bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-gray-900 placeholder:text-gray-400'
+                    }`}
                   />
                 </div>
 
                 {/* Message */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     {t.contact.message} <span className="text-red-500">*</span>
                   </label>
                   <textarea
@@ -197,7 +215,11 @@ export default function ContactPage() {
                     placeholder={t.contact.message_placeholder}
                     rows={5}
                     data-testid="contact-input-message"
-                    className="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl text-gray-900 placeholder:text-gray-400 px-4 py-3 text-sm outline-none transition-all duration-200 resize-none"
+                    className={`w-full rounded-xl px-4 py-3 text-sm outline-none transition-all duration-200 resize-none ${
+                      isDark 
+                        ? 'bg-white/5 border border-white/10 focus:border-blue-500/50 text-white placeholder:text-gray-600' 
+                        : 'bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-gray-900 placeholder:text-gray-400'
+                    }`}
                     required
                   />
                 </div>
@@ -230,8 +252,8 @@ export default function ContactPage() {
             className="space-y-6"
           >
             {/* Contact Info Card */}
-            <div className="bg-[#0F0F10] border border-white/10 rounded-xl p-6 sm:p-8">
-              <h2 className="font-heading text-xl font-semibold text-white mb-6">
+            <div className={`rounded-xl p-6 sm:p-8 ${isDark ? 'bg-[#0F0F10] border border-white/10' : 'bg-white border border-gray-200 shadow-sm'}`}>
+              <h2 className={`font-heading text-xl font-semibold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {t.contact.info_title}
               </h2>
               
@@ -241,8 +263,8 @@ export default function ContactPage() {
                     <Phone className="w-5 h-5 text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">{t.contact.phone_label}</p>
-                    <a href={`tel:${contact.phone.replace(/\s/g, '')}`} className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                    <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.contact.phone_label}</p>
+                    <a href={`tel:${contact.phone.replace(/\s/g, '')}`} className={`text-sm transition-colors ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600 hover:text-blue-600'}`}>
                       {contact.phone}
                     </a>
                   </div>
@@ -253,8 +275,8 @@ export default function ContactPage() {
                     <Mail className="w-5 h-5 text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">{t.contact.email_label}</p>
-                    <a href={`mailto:${contact.email}`} className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                    <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.contact.email_label}</p>
+                    <a href={`mailto:${contact.email}`} className={`text-sm transition-colors ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600 hover:text-blue-600'}`}>
                       {contact.email}
                     </a>
                   </div>
@@ -265,8 +287,8 @@ export default function ContactPage() {
                     <MapPin className="w-5 h-5 text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">{t.contact.address_label}</p>
-                    <p className="text-sm text-gray-400">
+                    <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.contact.address_label}</p>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       {contact.address_line1}<br />
                       {contact.address_line2}
                     </p>
@@ -278,8 +300,8 @@ export default function ContactPage() {
                     <Clock className="w-5 h-5 text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">{t.contact.hours_label}</p>
-                    <p className="text-sm text-gray-400">
+                    <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.contact.hours_label}</p>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       {lang === 'fr' ? contact.hours_fr : contact.hours_en}
                     </p>
                   </div>

@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Database, Lock, UserCheck, Mail, FileText } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function PrivacyPolicyPage() {
   const { lang } = useLanguage();
+  const { isDark } = useTheme();
   const [siteContent, setSiteContent] = useState(null);
 
   useEffect(() => {
@@ -197,7 +199,7 @@ You also have the right to lodge a complaint with the CNIL (Commission Nationale
   const t = content[lang] || content.fr;
 
   return (
-    <div data-testid="privacy-page" className="pt-24 bg-[#050505] min-h-screen">
+    <div data-testid="privacy-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20">
         {/* Header */}
         <motion.div
@@ -210,12 +212,12 @@ You also have the right to lodge a complaint with the CNIL (Commission Nationale
             <div className="w-12 h-12 rounded-xl bg-blue-600/10 flex items-center justify-center">
               <Shield className="w-6 h-6 text-blue-400" />
             </div>
-            <h1 className="font-heading text-3xl sm:text-4xl font-bold text-white">
+            <h1 className={`font-heading text-3xl sm:text-4xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
               {t.title}
             </h1>
           </div>
           <p className="text-sm text-gray-500">{t.lastUpdate}</p>
-          <p className="mt-6 text-gray-400 leading-relaxed">{t.intro}</p>
+          <p className={`mt-6 leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t.intro}</p>
         </motion.div>
 
         {/* Sections */}
@@ -226,19 +228,19 @@ You also have the right to lodge a complaint with the CNIL (Commission Nationale
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-[#0F0F10] border border-white/5 rounded-xl p-6 sm:p-8"
+              className={`rounded-xl p-6 sm:p-8 ${isDark ? 'bg-[#0F0F10] border border-white/5' : 'bg-white border border-gray-200 shadow-sm'}`}
             >
               <div className="flex items-start gap-4 mb-4">
                 <div className="w-10 h-10 rounded-lg bg-blue-600/10 flex items-center justify-center flex-shrink-0">
                   <section.icon className="w-5 h-5 text-blue-400" />
                 </div>
-                <h2 className="font-heading text-lg font-semibold text-white">
+                <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {section.title}
                 </h2>
               </div>
-              <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-line pl-14">
+              <div className={`text-sm leading-relaxed whitespace-pre-line pl-14 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 {section.content.split('**').map((part, i) => 
-                  i % 2 === 1 ? <strong key={i} className="text-white font-medium">{part}</strong> : part
+                  i % 2 === 1 ? <strong key={i} className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{part}</strong> : part
                 )}
               </div>
             </motion.div>

@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-export default function AdminQuotes({ token, leadData, onLeadDataUsed }) {
+export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark }) {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [quotes, setQuotes] = useState([]);

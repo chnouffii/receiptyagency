@@ -7,7 +7,7 @@ import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-export default function AdminChatAnalytics({ token }) {
+export default function AdminChatAnalytics({ token, isDark }) {
   const { lang } = useLanguage();
   const [analytics, setAnalytics] = useState(null);
   const [selectedSession, setSelectedSession] = useState(null);

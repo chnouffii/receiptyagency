@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LogOut, Users, MessageCircle, BookOpen, Layers, Settings, UserCog, FileText, FileSearch } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import AdminLeadsTab from './admin/AdminLeadsTab';
 import AdminChatAnalytics from './admin/AdminChatAnalytics';
@@ -18,6 +19,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function AdminDashboardPage() {
   const { t, lang } = useLanguage();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState('leads');
@@ -69,21 +71,21 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div data-testid="admin-dashboard" className="pt-24 bg-[#050505] min-h-screen">
+    <div data-testid="admin-dashboard" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="font-heading text-2xl font-bold text-white">{t.admin.dashboard}</h1>
+          <h1 className={`font-heading text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.admin.dashboard}</h1>
           <button
             onClick={logout}
             data-testid="admin-logout-btn"
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors duration-200"
+            className={`flex items-center gap-2 text-sm transition-colors duration-200 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
           >
             <LogOut className="w-4 h-4" /> {t.admin.logout}
           </button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="bg-[#0F0F10] border border-white/5 mb-8 h-11">
+          <TabsList className={`mb-8 h-11 ${isDark ? 'bg-[#0F0F10] border border-white/5' : 'bg-white border border-gray-200 shadow-sm'}`}>
             <TabsTrigger value="leads" data-testid="tab-leads" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 gap-2 text-sm">
               <Users className="w-4 h-4" />
               {lang === 'fr' ? 'Leads' : 'Leads'}
@@ -119,28 +121,28 @@ export default function AdminDashboardPage() {
           </TabsList>
 
           <TabsContent value="leads">
-            <AdminLeadsTab token={token} stats={stats} onRefresh={fetchStats} onCreateQuote={handleCreateQuoteFromLead} onCreateAudit={handleCreateAuditFromLead} />
+            <AdminLeadsTab token={token} stats={stats} onRefresh={fetchStats} onCreateQuote={handleCreateQuoteFromLead} onCreateAudit={handleCreateAuditFromLead} isDark={isDark} />
           </TabsContent>
           <TabsContent value="chat">
-            <AdminChatAnalytics token={token} />
+            <AdminChatAnalytics token={token} isDark={isDark} />
           </TabsContent>
           <TabsContent value="cases">
-            <AdminCaseStudies token={token} />
+            <AdminCaseStudies token={token} isDark={isDark} />
           </TabsContent>
           <TabsContent value="solutions">
-            <AdminSolutions token={token} />
+            <AdminSolutions token={token} isDark={isDark} />
           </TabsContent>
           <TabsContent value="content">
-            <AdminSiteContent token={token} />
+            <AdminSiteContent token={token} isDark={isDark} />
           </TabsContent>
           <TabsContent value="users">
-            <AdminUserManagement token={token} />
+            <AdminUserManagement token={token} isDark={isDark} />
           </TabsContent>
           <TabsContent value="quotes">
-            <AdminQuotes token={token} leadData={quoteFromLead} onLeadDataUsed={clearQuoteFromLead} />
+            <AdminQuotes token={token} leadData={quoteFromLead} onLeadDataUsed={clearQuoteFromLead} isDark={isDark} />
           </TabsContent>
           <TabsContent value="audit">
-            <AdminAuditROI token={token} leadData={auditFromLead} onLeadDataUsed={clearAuditFromLead} onCreateQuote={handleCreateQuoteFromLead} />
+            <AdminAuditROI token={token} leadData={auditFromLead} onLeadDataUsed={clearAuditFromLead} onCreateQuote={handleCreateQuoteFromLead} isDark={isDark} />
           </TabsContent>
         </Tabs>
       </div>

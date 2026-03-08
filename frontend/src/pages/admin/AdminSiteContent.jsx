@@ -153,7 +153,7 @@ In accordance with articles L.616-1 and R.616-1 of the French Consumer Code, any
   }
 };
 
-export default function AdminSiteContent({ token }) {
+export default function AdminSiteContent({ token, isDark }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState('contact');

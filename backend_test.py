@@ -3,7 +3,7 @@ import sys
 import json
 from datetime import datetime
 
-BASE_URL = "https://agency-audit-test.preview.emergentagent.com/api"
+BASE_URL = "https://receipty-staging.preview.emergentagent.com/api"
 
 class ReceiptyCoreAPITester:
     def __init__(self):

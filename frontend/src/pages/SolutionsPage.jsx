@@ -3,6 +3,7 @@ import { motion, useInView } from 'framer-motion';
 import { Users, Wallet, Globe, Cpu, ShoppingCart, Mail, Shield, BarChart3, CheckCircle2 } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { Badge } from '../components/ui/badge';
 import axios from 'axios';
 
@@ -16,9 +17,16 @@ const DEMO_DATA = {
   line: [{ m: 'Jan', v: 1.2 }, { m: 'Feb', v: 2.1 }, { m: 'Mar', v: 3.8 }, { m: 'Apr', v: 5.2 }, { m: 'May', v: 7.5 }, { m: 'Jun', v: 10.2 }],
 };
 
-const chartStyle = { grid: 'rgba(255,255,255,0.03)', tick: '#475569', tooltip: { backgroundColor: '#0F0F10', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' } };
-
-function MiniDashboard({ chartType }) {
+function MiniDashboard({ chartType, isDark }) {
+  const chartStyle = { 
+    grid: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.05)', 
+    tick: isDark ? '#475569' : '#94A3B8', 
+    tooltip: { 
+      backgroundColor: isDark ? '#0F0F10' : '#FFFFFF', 
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', 
+      borderRadius: '8px' 
+    } 
+  };
   const type = chartType || 'area';
   const data = DEMO_DATA[type] || DEMO_DATA.area;
   return (
@@ -56,7 +64,7 @@ function MiniDashboard({ chartType }) {
   );
 }
 
-function SolutionCard({ sol, index, lang }) {
+function SolutionCard({ sol, index, lang, isDark }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const Icon = ICON_MAP[sol.icon] || Users;
@@ -71,7 +79,9 @@ function SolutionCard({ sol, index, lang }) {
       initial={{ opacity: 0, y: 30 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ delay: index * 0.15, duration: 0.5 }}
-      className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#0F0F10] transition-all duration-300 hover:border-blue-500/20"
+      className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 hover:border-blue-500/20 ${
+        isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'
+      }`}
       data-testid={`solution-card-${index}`}
     >
       <div className="p-8">
@@ -80,14 +90,14 @@ function SolutionCard({ sol, index, lang }) {
             <Icon className="w-6 h-6 text-blue-400" />
           </div>
           <div>
-            <h3 className="font-heading text-xl font-bold text-white">{name}</h3>
+            <h3 className={`font-heading text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{name}</h3>
             <Badge variant="outline" className="mt-1 text-xs text-blue-400 border-blue-500/30">{tag}</Badge>
           </div>
         </div>
-        <p className="text-sm text-gray-400 leading-relaxed mb-6">{desc}</p>
+        <p className={`text-sm leading-relaxed mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{desc}</p>
         <div className="grid grid-cols-2 gap-2">
           {features.map((feature, i) => (
-            <div key={i} className="flex items-center gap-2 text-sm text-gray-500">
+            <div key={i} className={`flex items-center gap-2 text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
               <CheckCircle2 className="w-3.5 h-3.5 text-blue-500/60 flex-shrink-0" />
               <span>{feature}</span>
             </div>
@@ -95,9 +105,11 @@ function SolutionCard({ sol, index, lang }) {
         </div>
       </div>
       <div className="px-8 pb-8">
-        <div className="rounded-xl border border-white/5 bg-black/40 backdrop-blur-sm p-4">
-          <p className="text-xs text-gray-600 font-mono uppercase tracking-wider mb-1">Performance Dashboard</p>
-          <MiniDashboard chartType={sol.chart_type} />
+        <div className={`rounded-xl border backdrop-blur-sm p-4 ${
+          isDark ? 'border-white/5 bg-black/40' : 'border-gray-200 bg-gray-50'
+        }`}>
+          <p className={`text-xs font-mono uppercase tracking-wider mb-1 ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>Performance Dashboard</p>
+          <MiniDashboard chartType={sol.chart_type} isDark={isDark} />
         </div>
       </div>
     </motion.div>
@@ -106,6 +118,7 @@ function SolutionCard({ sol, index, lang }) {
 
 export default function SolutionsPage() {
   const { t, lang } = useLanguage();
+  const { isDark } = useTheme();
   const [solutions, setSolutions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -117,11 +130,11 @@ export default function SolutionsPage() {
   }, []);
 
   return (
-    <div data-testid="solutions-page" className="pt-24 bg-[#050505] min-h-screen">
+    <div data-testid="solutions-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
       <section className="max-w-6xl mx-auto px-6 py-16 md:py-24">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mb-16">
-          <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight">{t.solutions.title}</h1>
-          <p className="mt-6 text-base md:text-lg text-gray-400 max-w-2xl">{t.solutions.subtitle}</p>
+          <h1 className={`font-heading text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.solutions.title}</h1>
+          <p className={`mt-6 text-base md:text-lg max-w-2xl ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t.solutions.subtitle}</p>
         </motion.div>
 
         {loading ? (
@@ -131,7 +144,7 @@ export default function SolutionsPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {solutions.map((sol, i) => (
-              <SolutionCard key={sol.id} sol={sol} index={i} lang={lang} />
+              <SolutionCard key={sol.id} sol={sol} index={i} lang={lang} isDark={isDark} />
             ))}
           </div>
         )}

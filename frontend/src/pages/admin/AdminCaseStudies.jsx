@@ -52,7 +52,7 @@ function ArrayField({ label, items, onChange }) {
   );
 }
 
-export default function AdminCaseStudies({ token }) {
+export default function AdminCaseStudies({ token, isDark }) {
   const { lang } = useLanguage();
   const [cases, setCases] = useState([]);
   const [solutions, setSolutions] = useState([]);
