@@ -3,6 +3,7 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { LanguageProvider } from "./context/LanguageContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import HomePage from "./pages/HomePage";
@@ -36,7 +37,9 @@ function AdminLayout({ children }) {
   );
 }
 
-function App() {
+function AppContent() {
+  const { isDark } = useTheme();
+
   useEffect(() => {
     document.documentElement.classList.add("dark");
 
@@ -76,26 +79,34 @@ function App() {
   }, []);
 
   return (
-    <LanguageProvider>
-      <div className="App min-h-screen bg-[#050505] text-white">
-        <BrowserRouter>
-          <Toaster theme="dark" position="top-right" richColors />
-          <Routes>
-            <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
-            <Route path="/adn" element={<AppLayout><AdnVisionPage /></AppLayout>} />
-            <Route path="/solutions" element={<AppLayout><SolutionsPage /></AppLayout>} />
-            <Route path="/cases" element={<AppLayout><CaseStudiesPage /></AppLayout>} />
-            <Route path="/cases/:id" element={<AppLayout><CaseStudyDetailPage /></AppLayout>} />
-            <Route path="/contact" element={<AppLayout><ContactPage /></AppLayout>} />
-            <Route path="/privacy" element={<AppLayout><PrivacyPolicyPage /></AppLayout>} />
-            <Route path="/terms" element={<AppLayout><TermsPage /></AppLayout>} />
-            <Route path="/admin" element={<AdminLayout><AdminLoginPage /></AdminLayout>} />
-            <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboardPage /></AdminLayout>} />
-          </Routes>
-          <ChatWidget />
-        </BrowserRouter>
-      </div>
-    </LanguageProvider>
+    <div className={`App min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505] text-white' : 'bg-[#F9FAFB] text-gray-900'}`}>
+      <BrowserRouter>
+        <Toaster theme={isDark ? "dark" : "light"} position="top-right" richColors />
+        <Routes>
+          <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
+          <Route path="/adn" element={<AppLayout><AdnVisionPage /></AppLayout>} />
+          <Route path="/solutions" element={<AppLayout><SolutionsPage /></AppLayout>} />
+          <Route path="/cases" element={<AppLayout><CaseStudiesPage /></AppLayout>} />
+          <Route path="/cases/:id" element={<AppLayout><CaseStudyDetailPage /></AppLayout>} />
+          <Route path="/contact" element={<AppLayout><ContactPage /></AppLayout>} />
+          <Route path="/privacy" element={<AppLayout><PrivacyPolicyPage /></AppLayout>} />
+          <Route path="/terms" element={<AppLayout><TermsPage /></AppLayout>} />
+          <Route path="/admin" element={<AdminLayout><AdminLoginPage /></AdminLayout>} />
+          <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboardPage /></AdminLayout>} />
+        </Routes>
+        <ChatWidget />
+      </BrowserRouter>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
 
