@@ -59,6 +59,15 @@ Full-stack website for Receipty Agency - An AI integration and automation agency
   - Source tracking (admin vs website)
   - Visual indicators for leads with audits/quotes
 
+### Phase 5: UI/UX Enhancements (Complete - Mar 8, 2026)
+- [x] **Dual Theme System (Light/Dark Mode)**
+  - Theme toggle button in navbar
+  - Theme persistence via localStorage
+  - Full support on all public pages (Home, Solutions, Contact, ADN/Vision, Case Studies, Privacy, Terms)
+  - Full support on admin pages (Login, Dashboard with all tabs)
+  - CSS variables for consistent theming
+  - Mobile-responsive theme toggle
+
 ### Backend Refactoring (Complete - Feb 22, 2026)
 - [x] Modular architecture: `server.py` split into route modules
 - [x] Routes: `auth.py`, `leads.py`, `chat.py`, `content.py`, `quotes.py`, `audits.py`
