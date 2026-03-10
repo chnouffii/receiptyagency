@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   Target, TrendingUp, DollarSign, Award, Plus, Edit2, Trash2,
   LogOut, Clock, CheckCircle, XCircle, ArrowUp, Zap, BarChart3, User,
-  FileText, FileSearch, Eye, Calendar, Building2
+  FileText, FileSearch, Eye, Calendar, Building2, Download, RefreshCw,
+  Euro, AlertTriangle, Sparkles, Calculator
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../../context/LanguageContext';
@@ -39,6 +40,23 @@ export default function CloserDashboard() {
   const [quotes, setQuotes] = useState([]);
   const [audits, setAudits] = useState([]);
   const [loadingModule, setLoadingModule] = useState(false);
+  
+  // Quote creation state
+  const [showQuoteForm, setShowQuoteForm] = useState(false);
+  const [generatingQuote, setGeneratingQuote] = useState(false);
+  const [quoteForm, setQuoteForm] = useState({
+    client_name: '', client_email: '', client_company: '',
+    service_description: '', price_ht: '', notes: ''
+  });
+  
+  // Audit creation state
+  const [showAuditForm, setShowAuditForm] = useState(false);
+  const [generatingAudit, setGeneratingAudit] = useState(false);
+  const [auditForm, setAuditForm] = useState({
+    client_name: '', client_city: '', client_sector: '', client_email: '',
+    problem_description: '', hours_lost_per_week: '', hourly_cost: '45',
+    complexity: 'medium', notes: ''
+  });
 
   const token = localStorage.getItem('receipty-admin-token');
   const headers = { Authorization: `Bearer ${token}` };
@@ -176,6 +194,76 @@ export default function CloserDashboard() {
   const resetForm = () => {
     setDealForm({ client_name: '', client_email: '', amount_ht: '', notes: '' });
   };
+
+  // Quote creation handler
+  const handleCreateQuote = async (e) => {
+    e.preventDefault();
+    if (!quoteForm.client_name || !quoteForm.service_description || !quoteForm.price_ht) {
+      toast.error(lang === 'fr' ? 'Remplissez tous les champs obligatoires' : 'Fill all required fields');
+      return;
+    }
+    setGeneratingQuote(true);
+    try {
+      const response = await axios.post(`${API}/closer/quotes/generate`, {
+        ...quoteForm,
+        price_ht: parseFloat(quoteForm.price_ht)
+      }, { headers, responseType: 'blob' });
+      
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Devis_${new Date().toISOString().split('T')[0]}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(lang === 'fr' ? 'Devis généré et téléchargé !' : 'Quote generated and downloaded!');
+      setShowQuoteForm(false);
+      setQuoteForm({ client_name: '', client_email: '', client_company: '', service_description: '', price_ht: '', notes: '' });
+      fetchQuotes();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Error');
+    } finally {
+      setGeneratingQuote(false);
+    }
+  };
+
+  // Audit creation handler
+  const handleCreateAudit = async (e) => {
+    e.preventDefault();
+    if (!auditForm.client_name || !auditForm.problem_description || !auditForm.hours_lost_per_week || !auditForm.hourly_cost) {
+      toast.error(lang === 'fr' ? 'Remplissez tous les champs obligatoires' : 'Fill all required fields');
+      return;
+    }
+    setGeneratingAudit(true);
+    try {
+      await axios.post(`${API}/closer/audits`, {
+        ...auditForm,
+        hours_lost_per_week: parseFloat(auditForm.hours_lost_per_week),
+        hourly_cost: parseFloat(auditForm.hourly_cost)
+      }, { headers });
+      
+      toast.success(lang === 'fr' ? 'Audit créé avec succès !' : 'Audit created successfully!');
+      setShowAuditForm(false);
+      setAuditForm({ client_name: '', client_city: '', client_sector: '', client_email: '', problem_description: '', hours_lost_per_week: '', hourly_cost: '45', complexity: 'medium', notes: '' });
+      fetchAudits();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Error');
+    } finally {
+      setGeneratingAudit(false);
+    }
+  };
+
+  // Real-time calculations
+  const quoteHT = parseFloat(quoteForm.price_ht) || 0;
+  const quoteTVA = quoteHT * 0.20;
+  const quoteTTC = quoteHT + quoteTVA;
+  
+  const auditHoursPerWeek = parseFloat(auditForm.hours_lost_per_week) || 0;
+  const auditHourlyCost = parseFloat(auditForm.hourly_cost) || 0;
+  const auditAnnualLoss = auditHoursPerWeek * 52 * auditHourlyCost;
 
   const logout = () => {
     localStorage.removeItem('receipty-admin-token');
@@ -500,126 +588,505 @@ export default function CloserDashboard() {
 
         {/* QUOTES TAB */}
         {activeTab === 'quotes' && (
-          <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
-            <div className={`p-4 border-b ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
+          <div className="space-y-6">
+            {/* Header with Create button */}
+            <div className="flex justify-between items-center">
               <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {lang === 'fr' ? 'Devis' : 'Quotes'}
-                {!permissions.can_view_all_data && (
-                  <span className="ml-2 text-xs text-gray-500">({lang === 'fr' ? 'Mes devis uniquement' : 'My quotes only'})</span>
-                )}
+                {lang === 'fr' ? 'Génération de Devis PDF' : 'PDF Quote Generation'}
               </h2>
+              <button
+                onClick={() => setShowQuoteForm(!showQuoteForm)}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg px-4 py-2 text-sm font-medium transition-all"
+                data-testid="closer-new-quote-btn"
+              >
+                <Plus className="w-4 h-4" />
+                {lang === 'fr' ? 'Nouveau devis' : 'New quote'}
+              </button>
             </div>
-            
-            {loadingModule ? (
-              <div className="p-12 text-center text-gray-500">{lang === 'fr' ? 'Chargement...' : 'Loading...'}</div>
-            ) : quotes.length === 0 ? (
-              <div className="p-12 text-center">
-                <FileText className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-500">{lang === 'fr' ? 'Aucun devis' : 'No quotes'}</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-white/5">
-                {quotes.map((quote, index) => (
-                  <motion.div
-                    key={quote.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.03 }}
-                    className={`p-4 ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-gray-50'}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                          <FileText className="w-5 h-5 text-blue-400" />
-                        </div>
-                        <div>
-                          <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {quote.company_name || quote.contact_name || 'Sans nom'}
-                          </h3>
-                          <p className="text-xs text-gray-500">{quote.contact_email}</p>
-                        </div>
+
+            {/* Quote Creation Form */}
+            <AnimatePresence>
+              {showQuoteForm && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className={`rounded-xl border p-6 ${isDark ? 'border-white/10 bg-[#0F0F10]' : 'border-gray-200 bg-white'}`}
+                >
+                  <form onSubmit={handleCreateQuote} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className={`block text-sm mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {lang === 'fr' ? 'Nom du client' : 'Client name'} *
+                        </label>
+                        <input
+                          type="text"
+                          value={quoteForm.client_name}
+                          onChange={(e) => setQuoteForm({ ...quoteForm, client_name: e.target.value })}
+                          placeholder="Jean Dupont"
+                          className={`w-full rounded-lg px-4 py-2.5 text-sm outline-none ${
+                            isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                          }`}
+                          required
+                        />
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className={`font-mono font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {(quote.total_setup || 0).toLocaleString()}€
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            + {(quote.total_monthly || 0).toLocaleString()}€/mois
-                          </p>
-                        </div>
-                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                          {quote.category || 'N/A'}
-                        </Badge>
+                      <div>
+                        <label className={`block text-sm mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {lang === 'fr' ? 'Société' : 'Company'}
+                        </label>
+                        <input
+                          type="text"
+                          value={quoteForm.client_company}
+                          onChange={(e) => setQuoteForm({ ...quoteForm, client_company: e.target.value })}
+                          placeholder="Entreprise SAS"
+                          className={`w-full rounded-lg px-4 py-2.5 text-sm outline-none ${
+                            isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                          }`}
+                        />
+                      </div>
+                      <div>
+                        <label className={`block text-sm mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Email</label>
+                        <input
+                          type="email"
+                          value={quoteForm.client_email}
+                          onChange={(e) => setQuoteForm({ ...quoteForm, client_email: e.target.value })}
+                          placeholder="client@email.com"
+                          className={`w-full rounded-lg px-4 py-2.5 text-sm outline-none ${
+                            isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                          }`}
+                        />
                       </div>
                     </div>
-                  </motion.div>
-                ))}
+
+                    <div>
+                      <label className={`block text-sm mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {lang === 'fr' ? 'Description des services' : 'Service description'} *
+                      </label>
+                      <textarea
+                        value={quoteForm.service_description}
+                        onChange={(e) => setQuoteForm({ ...quoteForm, service_description: e.target.value })}
+                        placeholder={lang === 'fr' ? 'Décrivez les services proposés...' : 'Describe the services...'}
+                        rows={4}
+                        className={`w-full rounded-lg px-4 py-3 text-sm outline-none resize-y ${
+                          isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                        }`}
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className={`block text-sm mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {lang === 'fr' ? 'Prix HT (€)' : 'Price excl. VAT (€)'} *
+                        </label>
+                        <input
+                          type="number"
+                          step="any"
+                          min="0"
+                          value={quoteForm.price_ht}
+                          onChange={(e) => setQuoteForm({ ...quoteForm, price_ht: e.target.value })}
+                          placeholder="1000.00"
+                          className={`w-full rounded-lg px-4 py-2.5 text-sm outline-none ${
+                            isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                          }`}
+                          required
+                        />
+                      </div>
+                      
+                      {/* Real-time calculation */}
+                      <div className={`rounded-xl p-4 ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Calculator className="w-4 h-4 text-blue-400" />
+                          <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            {lang === 'fr' ? 'Calcul automatique' : 'Automatic calculation'}
+                          </span>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">{lang === 'fr' ? 'Prix HT' : 'Price excl. VAT'}</span>
+                            <span className={`font-mono ${isDark ? 'text-white' : 'text-gray-900'}`}>{quoteHT.toLocaleString()}€</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">TVA (20%)</span>
+                            <span className={`font-mono ${isDark ? 'text-white' : 'text-gray-900'}`}>{quoteTVA.toLocaleString()}€</span>
+                          </div>
+                          <div className={`border-t pt-2 flex justify-between ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
+                            <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Total TTC</span>
+                            <span className="font-bold font-mono text-blue-400">{quoteTTC.toLocaleString()}€</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowQuoteForm(false)}
+                        className={`px-4 py-2.5 text-sm transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                      >
+                        {lang === 'fr' ? 'Annuler' : 'Cancel'}
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={generatingQuote}
+                        className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-lg px-6 py-2.5 font-semibold text-sm transition-all"
+                      >
+                        {generatingQuote ? (
+                          <><RefreshCw className="w-4 h-4 animate-spin" />{lang === 'fr' ? 'Génération...' : 'Generating...'}</>
+                        ) : (
+                          <><Download className="w-4 h-4" />{lang === 'fr' ? 'Générer et Télécharger' : 'Generate and Download'}</>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Quotes List */}
+            <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
+              <div className={`p-4 border-b ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
+                <h4 className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {lang === 'fr' ? `Historique des devis (${quotes.length})` : `Quote history (${quotes.length})`}
+                </h4>
               </div>
-            )}
+              
+              {loadingModule ? (
+                <div className="p-12 text-center text-gray-500">{lang === 'fr' ? 'Chargement...' : 'Loading...'}</div>
+              ) : quotes.length === 0 ? (
+                <div className="p-12 text-center">
+                  <FileText className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-500">{lang === 'fr' ? 'Aucun devis' : 'No quotes'}</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-white/5">
+                  {quotes.map((quote, index) => (
+                    <motion.div
+                      key={quote.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.03 }}
+                      className={`p-4 ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-gray-50'}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-blue-400" />
+                          </div>
+                          <div>
+                            <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              {quote.company_name || quote.contact_name || quote.client_name || 'Sans nom'}
+                            </h3>
+                            <p className="text-xs text-gray-500">{quote.contact_email || quote.client_email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className={`font-mono font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              {(quote.total_setup || quote.price_ttc || 0).toLocaleString()}€
+                            </p>
+                            {quote.total_monthly > 0 && (
+                              <p className="text-xs text-gray-500">+ {(quote.total_monthly || 0).toLocaleString()}€/mois</p>
+                            )}
+                          </div>
+                          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                            {quote.category || quote.quote_number || 'N/A'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* AUDITS TAB */}
         {activeTab === 'audits' && (
-          <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
-            <div className={`p-4 border-b ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
+          <div className="space-y-6">
+            {/* Header with Create button */}
+            <div className="flex justify-between items-center">
               <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {lang === 'fr' ? 'Audits ROI' : 'ROI Audits'}
-                {!permissions.can_view_all_data && (
-                  <span className="ml-2 text-xs text-gray-500">({lang === 'fr' ? 'Mes audits uniquement' : 'My audits only'})</span>
-                )}
+                {lang === 'fr' ? 'Audit & ROI Optimizer' : 'Audit & ROI Optimizer'}
               </h2>
+              <button
+                onClick={() => setShowAuditForm(!showAuditForm)}
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg px-4 py-2 text-sm font-medium transition-all"
+                data-testid="closer-new-audit-btn"
+              >
+                <Plus className="w-4 h-4" />
+                {lang === 'fr' ? 'Nouvel audit' : 'New audit'}
+              </button>
             </div>
-            
-            {loadingModule ? (
-              <div className="p-12 text-center text-gray-500">{lang === 'fr' ? 'Chargement...' : 'Loading...'}</div>
-            ) : audits.length === 0 ? (
-              <div className="p-12 text-center">
-                <FileSearch className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-500">{lang === 'fr' ? 'Aucun audit' : 'No audits'}</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-white/5">
-                {audits.map((audit, index) => (
-                  <motion.div
-                    key={audit.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.03 }}
-                    className={`p-4 ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-gray-50'}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                          <FileSearch className="w-5 h-5 text-purple-400" />
+
+            {/* Audit Creation Form */}
+            <AnimatePresence>
+              {showAuditForm && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className={`rounded-xl border p-6 ${isDark ? 'border-white/10 bg-[#0F0F10]' : 'border-gray-200 bg-white'}`}
+                >
+                  <div className="flex items-center gap-2 mb-6">
+                    <Sparkles className="w-5 h-5 text-purple-400" />
+                    <h4 className={`font-heading text-md font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {lang === 'fr' ? 'Créer un nouvel audit' : 'Create a new audit'}
+                    </h4>
+                  </div>
+                  
+                  <form onSubmit={handleCreateAudit} className="space-y-6">
+                    {/* Client Information */}
+                    <div>
+                      <h5 className={`text-sm font-medium mb-3 flex items-center gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <Building2 className="w-4 h-4" />
+                        {lang === 'fr' ? 'Informations Client' : 'Client Information'}
+                      </h5>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                          <label className={`block text-xs mb-1.5 ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                            {lang === 'fr' ? 'Nom / Entreprise' : 'Name / Company'} *
+                          </label>
+                          <input
+                            type="text"
+                            value={auditForm.client_name}
+                            onChange={(e) => setAuditForm({ ...auditForm, client_name: e.target.value })}
+                            placeholder="Entreprise SAS"
+                            className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
+                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            }`}
+                            required
+                          />
                         </div>
                         <div>
-                          <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {audit.company_name || 'Audit'}
-                          </h3>
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Building2 className="w-3 h-3" />
-                            {audit.company_size || 'N/A'} employés
-                          </div>
+                          <label className={`block text-xs mb-1.5 ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                            {lang === 'fr' ? 'Ville' : 'City'}
+                          </label>
+                          <input
+                            type="text"
+                            value={auditForm.client_city}
+                            onChange={(e) => setAuditForm({ ...auditForm, client_city: e.target.value })}
+                            placeholder="Strasbourg"
+                            className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
+                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            }`}
+                          />
                         </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-xs text-gray-500">{lang === 'fr' ? 'ROI estimé' : 'Estimated ROI'}</p>
-                          <p className="font-mono font-bold text-emerald-400">
-                            +{(audit.estimated_roi || 0).toLocaleString()}%
-                          </p>
+                        <div>
+                          <label className={`block text-xs mb-1.5 ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                            {lang === 'fr' ? 'Secteur' : 'Sector'}
+                          </label>
+                          <input
+                            type="text"
+                            value={auditForm.client_sector}
+                            onChange={(e) => setAuditForm({ ...auditForm, client_sector: e.target.value })}
+                            placeholder="RH, Finance, Logistique..."
+                            className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
+                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            }`}
+                          />
                         </div>
-                        <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                          {audit.category || 'N/A'}
-                        </Badge>
+                        <div>
+                          <label className={`block text-xs mb-1.5 ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>Email</label>
+                          <input
+                            type="email"
+                            value={auditForm.client_email}
+                            onChange={(e) => setAuditForm({ ...auditForm, client_email: e.target.value })}
+                            placeholder="contact@client.com"
+                            className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
+                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            }`}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </motion.div>
-                ))}
+
+                    {/* Problem Description */}
+                    <div>
+                      <h5 className={`text-sm font-medium mb-3 flex items-center gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <AlertTriangle className="w-4 h-4" />
+                        {lang === 'fr' ? 'Diagnostic Technique' : 'Technical Diagnosis'}
+                      </h5>
+                      <textarea
+                        value={auditForm.problem_description}
+                        onChange={(e) => setAuditForm({ ...auditForm, problem_description: e.target.value })}
+                        placeholder={lang === 'fr' 
+                          ? "Décrivez le problème manuel identifié chez le client...\nEx: Saisie manuelle des factures, tri des CV, gestion des emails..."
+                          : "Describe the manual problem identified..."
+                        }
+                        rows={4}
+                        className={`w-full rounded-lg px-4 py-3 text-sm outline-none resize-y ${
+                          isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                        }`}
+                        required
+                      />
+                    </div>
+
+                    {/* Financial Parameters */}
+                    <div>
+                      <h5 className={`text-sm font-medium mb-3 flex items-center gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <Euro className="w-4 h-4" />
+                        {lang === 'fr' ? 'Paramètres Financiers' : 'Financial Parameters'}
+                      </h5>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className={`block text-xs mb-1.5 ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                            {lang === 'fr' ? 'Heures perdues / semaine' : 'Hours lost / week'} *
+                          </label>
+                          <input
+                            type="number"
+                            step="any"
+                            min="0"
+                            value={auditForm.hours_lost_per_week}
+                            onChange={(e) => setAuditForm({ ...auditForm, hours_lost_per_week: e.target.value })}
+                            placeholder="10"
+                            className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
+                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            }`}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className={`block text-xs mb-1.5 ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                            {lang === 'fr' ? 'Coût horaire employé (€)' : 'Hourly employee cost (€)'} *
+                          </label>
+                          <input
+                            type="number"
+                            step="any"
+                            min="0"
+                            value={auditForm.hourly_cost}
+                            onChange={(e) => setAuditForm({ ...auditForm, hourly_cost: e.target.value })}
+                            placeholder="35"
+                            className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
+                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            }`}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className={`block text-xs mb-1.5 ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                            {lang === 'fr' ? 'Complexité estimée' : 'Estimated complexity'}
+                          </label>
+                          <select
+                            value={auditForm.complexity}
+                            onChange={(e) => setAuditForm({ ...auditForm, complexity: e.target.value })}
+                            className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
+                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            }`}
+                          >
+                            <option value="low">{lang === 'fr' ? 'Basse (85% réduction)' : 'Low (85% reduction)'}</option>
+                            <option value="medium">{lang === 'fr' ? 'Moyenne (75% réduction)' : 'Medium (75% reduction)'}</option>
+                            <option value="high">{lang === 'fr' ? 'Haute (65% réduction)' : 'High (65% reduction)'}</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Real-time calculation preview */}
+                    {auditAnnualLoss > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`rounded-xl p-4 ${isDark ? 'bg-red-500/10 border border-red-500/30' : 'bg-red-50 border border-red-200'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isDark ? 'bg-red-500/20' : 'bg-red-100'}`}>
+                            <AlertTriangle className="w-5 h-5 text-red-400" />
+                          </div>
+                          <div>
+                            <p className={`text-xs ${isDark ? 'text-red-300' : 'text-red-600'}`}>
+                              {lang === 'fr' ? "Coût de l'inaction estimé" : 'Estimated cost of inaction'}
+                            </p>
+                            <p className="text-xl font-bold text-red-400">{auditAnnualLoss.toLocaleString()}€ / {lang === 'fr' ? 'an' : 'year'}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Submit */}
+                    <div className="flex gap-3 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowAuditForm(false)}
+                        className={`px-4 py-2.5 text-sm transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                      >
+                        {lang === 'fr' ? 'Annuler' : 'Cancel'}
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={generatingAudit}
+                        className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white rounded-lg px-6 py-2.5 font-semibold text-sm transition-all"
+                      >
+                        {generatingAudit ? (
+                          <><RefreshCw className="w-4 h-4 animate-spin" />{lang === 'fr' ? 'Génération IA...' : 'AI Generation...'}</>
+                        ) : (
+                          <><Sparkles className="w-4 h-4" />{lang === 'fr' ? "Générer l'audit" : 'Generate audit'}</>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Audits List */}
+            <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
+              <div className={`p-4 border-b ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
+                <h4 className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {lang === 'fr' ? `Historique des audits (${audits.length})` : `Audit history (${audits.length})`}
+                </h4>
               </div>
-            )}
+              
+              {loadingModule ? (
+                <div className="p-12 text-center text-gray-500">{lang === 'fr' ? 'Chargement...' : 'Loading...'}</div>
+              ) : audits.length === 0 ? (
+                <div className="p-12 text-center">
+                  <FileSearch className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-500">{lang === 'fr' ? 'Aucun audit' : 'No audits'}</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-white/5">
+                  {audits.map((audit, index) => (
+                    <motion.div
+                      key={audit.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.03 }}
+                      className={`p-4 ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-gray-50'}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                            <FileSearch className="w-5 h-5 text-purple-400" />
+                          </div>
+                          <div>
+                            <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              {audit.client_name || audit.company_name || 'Audit'}
+                            </h3>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <Building2 className="w-3 h-3" />
+                              {audit.client_sector || audit.company_size || 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500">{lang === 'fr' ? 'Économies/an' : 'Savings/year'}</p>
+                            <p className="font-mono font-bold text-emerald-400">
+                              +{(audit.annual_savings || audit.estimated_roi || 0).toLocaleString()}€
+                            </p>
+                          </div>
+                          <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                            {audit.audit_number || audit.category || 'N/A'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -8,7 +8,8 @@ import os
 from models.schemas import (
     UserRole, DealCreate, DealUpdate, Deal, DealStatus,
     CommissionTierCreate, CommissionTierUpdate, CommissionTier,
-    CloserCreate, CloserUpdate, CloserStats, CloserPermissions
+    CloserCreate, CloserUpdate, CloserStats, CloserPermissions,
+    AuditCreate, QuoteCreate
 )
 from utils.helpers import verify_token, log_audit
 
@@ -764,3 +765,296 @@ async def get_closer_activity(closer_id: str, limit: int = 50, token_data=Depend
         "closer": closer,
         "activity": logs
     }
+
+
+# ============== CLOSER CREATE AUDIT & QUOTE ==============
+
+@router.post("/closer/audits")
+async def closer_create_audit(request: Request, token_data=Depends(verify_token)):
+    """Create a new audit (Closer with audits permission)"""
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    
+    db = get_db()
+    user = await db.admins.find_one({"email": token_data["sub"]}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    permissions = user.get("permissions", {"modules": [], "can_view_all_data": False})
+    
+    # Check if closer has audits permission
+    if "audits" not in permissions.get("modules", []) and not is_admin_role(user.get("role", "")):
+        raise HTTPException(status_code=403, detail="No access to audits module")
+    
+    # Parse body
+    body = await request.json()
+    input_data = AuditCreate(**body)
+    
+    # Calculate ROI
+    hours_per_year = input_data.hours_lost_per_week * 52
+    annual_loss = round(hours_per_year * input_data.hourly_cost, 2)
+    
+    reduction_factors = {"low": 0.85, "medium": 0.75, "high": 0.65}
+    reduction = reduction_factors.get(input_data.complexity, 0.75)
+    hours_after = round(input_data.hours_lost_per_week * (1 - reduction), 1)
+    annual_savings = round(annual_loss * reduction, 2)
+    
+    roi_year1 = annual_savings
+    roi_year2 = annual_savings * 2
+    
+    suggested_prices = {
+        "essential": round(annual_savings * 0.15, 2),
+        "business": round(annual_savings * 0.25, 2),
+        "premium": round(annual_savings * 0.40, 2)
+    }
+    
+    monthly_fixed_costs = 120
+    profitability = {
+        "essential_months": round(suggested_prices["essential"] / monthly_fixed_costs, 1),
+        "business_months": round(suggested_prices["business"] / monthly_fixed_costs, 1),
+        "premium_months": round(suggested_prices["premium"] / monthly_fixed_costs, 1)
+    }
+    
+    audit_count = await db.audits.count_documents({})
+    audit_number = f"AUD-{datetime.now(timezone.utc).strftime('%Y%m')}-{str(audit_count + 1).zfill(4)}"
+    
+    # Generate AI report
+    ai_report = None
+    closing_args = "- Le projet s'autofinance rapidement\n- ROI garanti des la premiere annee\n- Solution sur-mesure adaptee a votre secteur"
+    
+    try:
+        EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
+        if EMERGENT_LLM_KEY:
+            chat = LlmChat(
+                api_key=EMERGENT_LLM_KEY,
+                session_id=f"audit-{uuid.uuid4()}",
+                system_message="Tu es un consultant expert en automatisation et IA pour les entreprises. Tu fournis des analyses strategiques et des recommandations professionnelles."
+            ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+            
+            prompt = f"""Contexte de l'audit:
+- Secteur: {input_data.client_sector}
+- Probleme identifie: {input_data.problem_description}
+- Complexite estimee: {input_data.complexity}
+- Perte annuelle due au processus manuel: {annual_loss:.2f} EUR
+
+Genere un rapport d'audit structure avec:
+1. RESUME EXECUTIF (2-3 phrases)
+2. SOLUTION RECOMMANDEE (bullet points)
+3. PROJECTION DES GAINS (phrase simple)
+
+Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS de prix ou de tarifs."""
+
+            from emergentintegrations.llm.chat import UserMessage
+            ai_report = await chat.send_message(UserMessage(text=prompt))
+    except Exception as e:
+        import logging
+        logging.error(f"AI generation error for closer audit: {e}")
+    
+    audit_doc = {
+        "id": str(uuid.uuid4()),
+        "audit_number": audit_number,
+        "client_name": input_data.client_name,
+        "client_city": input_data.client_city,
+        "client_sector": input_data.client_sector,
+        "client_email": input_data.client_email,
+        "problem_description": input_data.problem_description,
+        "complexity": input_data.complexity,
+        "hours_lost_per_week": input_data.hours_lost_per_week,
+        "hourly_cost": input_data.hourly_cost,
+        "hours_per_year": hours_per_year,
+        "annual_loss": annual_loss,
+        "hours_after_optimization": hours_after,
+        "annual_savings": annual_savings,
+        "roi_year1": roi_year1,
+        "roi_year2": roi_year2,
+        "ai_report": ai_report,
+        "strategy": {
+            "suggested_prices": suggested_prices,
+            "profitability": profitability,
+            "closing_arguments": closing_args
+        },
+        "notes": input_data.notes,
+        "lead_id": input_data.lead_id,
+        "status": "draft",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": token_data["sub"]
+    }
+    
+    await db.audits.insert_one(audit_doc)
+    
+    # Log activity
+    ip, user_agent = get_request_info(request)
+    await log_audit(db, token_data["sub"], "create", "audit", audit_doc["id"], f"Created audit {audit_number} for {input_data.client_name}", ip, user_agent)
+    
+    return {k: v for k, v in audit_doc.items() if k != "_id"}
+
+
+@router.post("/closer/quotes/generate")
+async def closer_generate_quote(request: Request, token_data=Depends(verify_token)):
+    """Generate a quote PDF (Closer with quotes permission)"""
+    from fastapi.responses import Response
+    
+    try:
+        from fpdf import FPDF
+        FPDF_AVAILABLE = True
+    except ImportError:
+        FPDF_AVAILABLE = False
+    
+    db = get_db()
+    user = await db.admins.find_one({"email": token_data["sub"]}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    permissions = user.get("permissions", {"modules": [], "can_view_all_data": False})
+    
+    # Check if closer has quotes permission
+    if "quotes" not in permissions.get("modules", []) and not is_admin_role(user.get("role", "")):
+        raise HTTPException(status_code=403, detail="No access to quotes module")
+    
+    if not FPDF_AVAILABLE:
+        raise HTTPException(status_code=500, detail="PDF generation not available")
+    
+    # Parse body
+    body = await request.json()
+    input_data = QuoteCreate(**body)
+    
+    price_ht = round(input_data.price_ht, 2)
+    tva_rate = 0.20
+    tva_amount = round(price_ht * tva_rate, 2)
+    price_ttc = round(price_ht + tva_amount, 2)
+    
+    quote_count = await db.quotes.count_documents({})
+    quote_number = f"DEV-{datetime.now(timezone.utc).strftime('%Y%m')}-{str(quote_count + 1).zfill(4)}"
+    
+    # Get site content for PDF
+    from utils.helpers import get_default_site_content, sanitize_text
+    site_content = await db.site_content.find_one({"type": "main"}, {"_id": 0})
+    if not site_content:
+        site_content = get_default_site_content()
+    
+    company_info = site_content.get('company', {})
+    contact_info = site_content.get('contact', {})
+    
+    # Create PDF
+    class QuotePDF(FPDF):
+        def header(self):
+            self.set_font('Helvetica', 'B', 24)
+            self.set_text_color(30, 64, 175)
+            self.cell(0, 15, 'RECEIPTY', ln=True, align='L')
+            self.set_font('Helvetica', '', 10)
+            self.set_text_color(100, 100, 100)
+            self.cell(0, 5, 'Agence IA & Automatisation', ln=True, align='L')
+            self.set_xy(140, 10)
+            self.set_font('Helvetica', '', 9)
+            self.set_text_color(80, 80, 80)
+            address = f"{contact_info.get('address_line1', '1 Place de la Gare')}\n{contact_info.get('address_line2', '67000 Strasbourg, France')}\n{contact_info.get('email', 'contact@receipty.ai')}"
+            self.multi_cell(60, 4, sanitize_text(address), align='R')
+            self.set_y(35)
+            self.set_draw_color(30, 64, 175)
+            self.set_line_width(0.5)
+            self.line(10, 35, 200, 35)
+            self.ln(10)
+        
+        def footer(self):
+            self.set_y(-25)
+            self.set_font('Helvetica', 'I', 8)
+            self.set_text_color(120, 120, 120)
+            self.cell(0, 4, sanitize_text(f"{company_info.get('name', 'Receipty Agency')} - {company_info.get('legal_form', 'SARL')}"), ln=True, align='C')
+            self.cell(0, 4, f"Page {self.page_no()}", align='C')
+    
+    pdf = QuotePDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=30)
+    
+    # Title
+    pdf.set_font('Helvetica', 'B', 20)
+    pdf.set_text_color(30, 30, 30)
+    pdf.cell(0, 15, 'DEVIS', ln=True, align='C')
+    
+    # Quote info
+    pdf.set_font('Helvetica', 'B', 10)
+    pdf.set_text_color(60, 60, 60)
+    pdf.set_xy(10, 55)
+    pdf.cell(95, 8, f"Devis N. : {quote_number}", border=0)
+    pdf.cell(95, 8, f"Date : {datetime.now(timezone.utc).strftime('%d/%m/%Y')}", border=0, align='R', ln=True)
+    pdf.ln(10)
+    
+    # Client info
+    pdf.set_font('Helvetica', 'B', 11)
+    pdf.set_text_color(30, 64, 175)
+    pdf.cell(0, 8, 'DESTINATAIRE', ln=True)
+    pdf.set_font('Helvetica', '', 10)
+    pdf.set_text_color(40, 40, 40)
+    pdf.cell(0, 6, sanitize_text(f"Nom : {input_data.client_name}"), ln=True)
+    if input_data.client_company:
+        pdf.cell(0, 6, sanitize_text(f"Societe : {input_data.client_company}"), ln=True)
+    if input_data.client_email:
+        pdf.cell(0, 6, f"Email : {input_data.client_email}", ln=True)
+    pdf.ln(10)
+    
+    # Service description
+    pdf.set_font('Helvetica', 'B', 11)
+    pdf.set_text_color(30, 64, 175)
+    pdf.cell(0, 8, 'DESCRIPTION DES SERVICES', ln=True)
+    pdf.set_font('Helvetica', '', 10)
+    pdf.set_text_color(40, 40, 40)
+    pdf.multi_cell(0, 6, sanitize_text(input_data.service_description))
+    pdf.ln(10)
+    
+    # Price table
+    pdf.set_font('Helvetica', 'B', 11)
+    pdf.set_text_color(30, 64, 175)
+    pdf.cell(0, 8, 'TARIFICATION', ln=True)
+    
+    pdf.set_fill_color(30, 64, 175)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font('Helvetica', 'B', 10)
+    pdf.cell(120, 10, 'Designation', border=1, fill=True, align='C')
+    pdf.cell(35, 10, 'Montant', border=1, fill=True, align='C', ln=True)
+    
+    pdf.set_fill_color(255, 255, 255)
+    pdf.set_text_color(40, 40, 40)
+    pdf.set_font('Helvetica', '', 10)
+    
+    pdf.cell(120, 10, 'Montant HT', border=1, align='L')
+    pdf.cell(35, 10, f"{price_ht:,.2f} EUR".replace(',', ' '), border=1, align='R', ln=True)
+    
+    pdf.cell(120, 10, 'TVA (20%)', border=1, align='L')
+    pdf.cell(35, 10, f"{tva_amount:,.2f} EUR".replace(',', ' '), border=1, align='R', ln=True)
+    
+    pdf.set_fill_color(30, 64, 175)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font('Helvetica', 'B', 11)
+    pdf.cell(120, 12, 'TOTAL TTC', border=1, fill=True, align='L')
+    pdf.cell(35, 12, f"{price_ttc:,.2f} EUR".replace(',', ' '), border=1, fill=True, align='R', ln=True)
+    
+    # Save to DB
+    quote_doc = {
+        "id": str(uuid.uuid4()),
+        "quote_number": quote_number,
+        "client_name": input_data.client_name,
+        "client_email": input_data.client_email,
+        "client_company": input_data.client_company,
+        "service_description": input_data.service_description,
+        "price_ht": price_ht,
+        "tva_rate": tva_rate,
+        "tva_amount": tva_amount,
+        "price_ttc": price_ttc,
+        "notes": input_data.notes,
+        "lead_id": input_data.lead_id,
+        "status": "draft",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": token_data["sub"]
+    }
+    await db.quotes.insert_one(quote_doc)
+    
+    # Log activity
+    ip, user_agent = get_request_info(request)
+    await log_audit(db, token_data["sub"], "create", "quote", quote_doc["id"], f"Generated quote {quote_number} for {input_data.client_name}", ip, user_agent)
+    
+    pdf_bytes = pdf.output()
+    
+    return Response(
+        content=bytes(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="Devis_{quote_number}.pdf"'}
+    )
