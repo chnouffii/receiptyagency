@@ -5,6 +5,13 @@ import uuid
 from datetime import datetime, timezone
 
 
+# ============== ROLES ==============
+class UserRole:
+    ADMIN = "admin"
+    SUPER_ADMIN = "super_admin"
+    CLOSER = "closer"
+
+
 class Lead(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -184,3 +191,111 @@ class SolutionUpdate(BaseModel):
     icon: Optional[str] = None
     chart_type: Optional[str] = None
     published: Optional[bool] = None
+
+
+
+# ============== CLOSER SYSTEM ==============
+
+class DealStatus:
+    EN_COURS = "en_cours"
+    SIGNE = "signe"
+    PERDU = "perdu"
+
+
+class DealCreate(BaseModel):
+    """Schema for creating a new deal"""
+    client_name: str
+    client_email: str = ""
+    amount_ht: float  # Montant du devis HT
+    notes: str = ""
+
+
+class DealUpdate(BaseModel):
+    """Schema for updating a deal"""
+    client_name: Optional[str] = None
+    client_email: Optional[str] = None
+    amount_ht: Optional[float] = None
+    notes: Optional[str] = None
+    status: Optional[str] = None  # Only admin can change to 'signe'
+
+
+class Deal(BaseModel):
+    """Full deal model"""
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    closer_id: str  # ID of the closer who created this deal
+    closer_email: str
+    client_name: str
+    client_email: str = ""
+    amount_ht: float
+    status: str = DealStatus.EN_COURS
+    notes: str = ""
+    commission_rate: float = 0  # Set when deal is signed
+    commission_amount: float = 0  # Set when deal is signed
+    signed_at: Optional[str] = None  # Set when deal is signed
+    validated_by: Optional[str] = None  # Admin who validated
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
+class CommissionTierCreate(BaseModel):
+    """Schema for creating a commission tier"""
+    name: str  # e.g., "Bronze", "Silver", "Gold"
+    min_deals: int  # Minimum number of signed deals to reach this tier
+    rate: float  # Commission rate (e.g., 10 for 10%, 12.5 for 12.5%)
+
+
+class CommissionTierUpdate(BaseModel):
+    """Schema for updating a commission tier"""
+    name: Optional[str] = None
+    min_deals: Optional[int] = None
+    rate: Optional[float] = None
+
+
+class CommissionTier(BaseModel):
+    """Full commission tier model"""
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    min_deals: int
+    rate: float
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
+class CloserPermissions(BaseModel):
+    """Closer permissions model"""
+    modules: List[str] = []  # List of accessible modules: leads, chat, cases, solutions, content, users, quotes, audits
+    can_view_all_data: bool = False  # Can view all data or only their own
+
+
+class CloserCreate(BaseModel):
+    """Schema for creating a closer"""
+    email: EmailStr
+    password: str
+    name: str
+    permissions: Optional[CloserPermissions] = None
+
+
+class CloserUpdate(BaseModel):
+    """Schema for updating a closer"""
+    email: Optional[EmailStr] = None
+    name: Optional[str] = None
+    password: Optional[str] = None
+    is_active: Optional[bool] = None
+    permissions: Optional[CloserPermissions] = None
+
+
+class CloserStats(BaseModel):
+    """Closer statistics"""
+    closer_id: str
+    closer_email: str
+    closer_name: str
+    total_deals: int = 0
+    deals_en_cours: int = 0
+    deals_signes: int = 0
+    deals_perdus: int = 0
+    total_ca: float = 0  # Total CA signé
+    total_commission: float = 0
+    conversion_rate: float = 0  # deals_signes / total_deals * 100
+    current_tier_name: str = ""
+    current_tier_rate: float = 0

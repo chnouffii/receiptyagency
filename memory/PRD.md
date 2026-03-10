@@ -10,7 +10,7 @@ Full-stack website for Receipty Agency - An AI integration and automation agency
 - Email: Resend API
 - AI: Emergent LLM Key (Claude Sonnet 4.5)
 
-**Preview URL:** https://receipty-staging.preview.emergentagent.com
+**Preview URL:** https://closer-dashboard-v2.preview.emergentagent.com
 
 ## Implemented Features ✅
 

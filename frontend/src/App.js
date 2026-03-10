@@ -16,6 +16,7 @@ import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsPage from "./pages/TermsPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import CloserDashboard from "./pages/admin/CloserDashboard";
 import { ChatWidget } from "./components/ChatWidget";
 
 function AppLayout({ children }) {
@@ -93,6 +94,7 @@ function AppContent() {
           <Route path="/terms" element={<AppLayout><TermsPage /></AppLayout>} />
           <Route path="/admin" element={<AdminLayout><AdminLoginPage /></AdminLayout>} />
           <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboardPage /></AdminLayout>} />
+          <Route path="/closer" element={<AdminLayout><CloserDashboard /></AdminLayout>} />
         </Routes>
         <ChatWidget />
       </BrowserRouter>
