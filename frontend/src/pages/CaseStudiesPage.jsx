@@ -90,7 +90,7 @@ export default function CaseStudiesPage() {
         {loading ? (
           <div className="text-center text-gray-500 py-20">{lang === 'fr' ? 'Chargement...' : 'Loading...'}</div>
         ) : cases.length === 0 ? (
-          <div className="text-center text-gray-500 py-20">{lang === 'fr' ? 'Aucune etude de cas pour le moment.' : 'No case studies yet.'}</div>
+          <div className="text-center text-gray-500 py-20">{lang === 'fr' ? 'Aucune étude de cas pour le moment.' : 'No case studies yet.'}</div>
         ) : (
           <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
             {cases.map((item, i) => (

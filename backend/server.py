@@ -2,8 +2,10 @@
 Receipty Agency - Main FastAPI Server
 Refactored architecture with modular routes
 """
-from fastapi import FastAPI, APIRouter
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, APIRouter, Depends
+from fastapi.responses import StreamingResponse, JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -11,14 +13,28 @@ import os
 import logging
 import csv
 import io
+import secrets
 from pathlib import Path
 from datetime import datetime, timezone
 import bcrypt
 import uuid
 
+# Logging must be configured before any module-level logger.warning() calls
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # Load environment variables
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# Validate required environment variables at startup
+_required_env = ['MONGO_URL', 'DB_NAME', 'JWT_SECRET']
+_missing = [v for v in _required_env if not os.environ.get(v)]
+if _missing:
+    raise RuntimeError(f"Missing required environment variables: {', '.join(_missing)}")
 
 # Database setup
 mongo_url = os.environ['MONGO_URL']
@@ -35,7 +51,8 @@ app = FastAPI(
 # API router with /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Import route modules
+# Import route modules and helpers
+from utils.helpers import verify_token
 from routes.leads import router as leads_router
 from routes.auth import router as auth_router
 from routes.chat import router as chat_router
@@ -62,11 +79,10 @@ async def root():
     return {"message": "Receipty Agency API", "version": "2.0.0"}
 
 
-# CSV Export endpoint (kept here for simplicity)
+# CSV Export endpoint — protected, bounded
 @api_router.get("/leads/export")
-async def export_leads_csv():
-    from utils.helpers import verify_token
-    leads = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(10000)
+async def export_leads_csv(admin=Depends(verify_token)):
+    leads = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(["Name", "Email", "Company", "Phone", "Category", "Size", "Setup EUR", "Monthly EUR", "Status", "Created"])
@@ -88,31 +104,48 @@ async def export_leads_csv():
 # Include main router
 app.include_router(api_router)
 
-# CORS middleware
+# Security headers middleware
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: StarletteRequest, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+# CORS middleware — set CORS_ORIGINS env var to restrict in production
+# e.g. CORS_ORIGINS=https://receipty.agency,https://www.receipty.agency
+_cors_env = os.environ.get('CORS_ORIGINS', '')
+if _cors_env.strip():
+    _cors_origins = [o.strip() for o in _cors_env.split(',') if o.strip()]
+else:
+    _cors_origins = ["*"]
+    logger.warning(
+        "CORS_ORIGINS not set — allowing all origins. "
+        "Set CORS_ORIGINS=https://yourdomain.com in production."
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_cors_origins,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
     expose_headers=["Content-Disposition", "Content-Type", "Content-Length"],
 )
-
-# Logging configuration
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
 
 @app.on_event("startup")
 async def startup():
     """Initialize database with default admin and seed data"""
-    # Create default admin if none exists
+    # Create default admin if none exists — password is auto-generated and logged ONCE
     existing = await db.admins.find_one({}, {"_id": 0})
     if not existing:
-        hashed = bcrypt.hashpw("Receipty2024!".encode(), bcrypt.gensalt()).decode()
+        default_password = secrets.token_urlsafe(16)
+        hashed = bcrypt.hashpw(default_password.encode(), bcrypt.gensalt()).decode()
         await db.admins.insert_one({
             "id": str(uuid.uuid4()),
             "email": "admin@receipty.ai",
@@ -122,7 +155,10 @@ async def startup():
             "is_active": True,
             "created_at": datetime.now(timezone.utc).isoformat()
         })
-        logger.info("Default admin created: admin@receipty.ai")
+        logger.warning(
+            f"Default admin created — email: admin@receipty.ai | "
+            f"password: {default_password} | CHANGE THIS IMMEDIATELY"
+        )
 
     # Seed default commission tiers if empty
     tier_count = await db.commission_tiers.count_documents({})

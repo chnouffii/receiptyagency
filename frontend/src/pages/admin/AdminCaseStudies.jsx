@@ -114,10 +114,10 @@ export default function AdminCaseStudies({ token, isDark }) {
     try {
       if (editingCase) {
         await axios.put(`${API}/admin/case-studies/${editingCase.id}`, payload, { headers });
-        toast.success(lang === 'fr' ? 'Etude de cas mise a jour' : 'Case study updated');
+        toast.success(lang === 'fr' ? 'Étude de cas mise à jour' : 'Case study updated');
       } else {
         await axios.post(`${API}/admin/case-studies`, payload, { headers });
-        toast.success(lang === 'fr' ? 'Etude de cas creee' : 'Case study created');
+        toast.success(lang === 'fr' ? 'Étude de cas créée' : 'Case study created');
       }
       setDialogOpen(false);
       fetchCases();
@@ -127,10 +127,10 @@ export default function AdminCaseStudies({ token, isDark }) {
   };
 
   const deleteCase = async (id) => {
-    if (!window.confirm(lang === 'fr' ? 'Supprimer cette etude de cas ?' : 'Delete this case study?')) return;
+    if (!window.confirm(lang === 'fr' ? 'Supprimer cette étude de cas ?' : 'Delete this case study?')) return;
     try {
       await axios.delete(`${API}/admin/case-studies/${id}`, { headers });
-      toast.success(lang === 'fr' ? 'Supprimee' : 'Deleted');
+      toast.success(lang === 'fr' ? 'Supprimée' : 'Deleted');
       fetchCases();
     } catch { toast.error('Error'); }
   };
@@ -138,7 +138,7 @@ export default function AdminCaseStudies({ token, isDark }) {
   const togglePublish = async (cs) => {
     try {
       await axios.put(`${API}/admin/case-studies/${cs.id}`, { published: !cs.published }, { headers });
-      toast.success(cs.published ? 'Depubliee' : 'Publiee');
+      toast.success(cs.published ? 'Dépubliée' : 'Publiée');
       fetchCases();
     } catch { toast.error('Error'); }
   };
@@ -150,7 +150,7 @@ export default function AdminCaseStudies({ token, isDark }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-heading text-lg font-semibold text-white">
-          {lang === 'fr' ? 'Gestion des etudes de cas' : 'Case studies management'}
+          {lang === 'fr' ? 'Gestion des études de cas' : 'Case studies management'}
           <span className="text-sm font-normal text-gray-500 ml-2">({cases.length})</span>
         </h2>
         <button
@@ -158,7 +158,7 @@ export default function AdminCaseStudies({ token, isDark }) {
           data-testid="create-case-btn"
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-200"
         >
-          <Plus className="w-4 h-4" /> {lang === 'fr' ? 'Nouvelle etude' : 'New case study'}
+          <Plus className="w-4 h-4" /> {lang === 'fr' ? 'Nouvelle étude' : 'New case study'}
         </button>
       </div>
 
@@ -204,7 +204,7 @@ export default function AdminCaseStudies({ token, isDark }) {
                 </button>
                 <button onClick={() => togglePublish(cs)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-amber-400 transition-colors duration-200">
                   {cs.published ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                  {cs.published ? (lang === 'fr' ? 'Depublier' : 'Unpublish') : (lang === 'fr' ? 'Publier' : 'Publish')}
+                  {cs.published ? (lang === 'fr' ? 'Dépublier' : 'Unpublish') : (lang === 'fr' ? 'Publier' : 'Publish')}
                 </button>
                 <button onClick={() => deleteCase(cs.id)} data-testid={`delete-case-${cs.id}`} className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-400 transition-colors duration-200 ml-auto">
                   <Trash2 className="w-3 h-3" /> {lang === 'fr' ? 'Supprimer' : 'Delete'}
@@ -220,7 +220,7 @@ export default function AdminCaseStudies({ token, isDark }) {
         <DialogContent className="bg-[#0A0A0B] border-white/10 max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-heading text-white text-lg">
-              {editingCase ? (lang === 'fr' ? 'Modifier l\'etude de cas' : 'Edit case study') : (lang === 'fr' ? 'Nouvelle etude de cas' : 'New case study')}
+              {editingCase ? (lang === 'fr' ? 'Modifier l\'étude de cas' : 'Edit case study') : (lang === 'fr' ? 'Nouvelle étude de cas' : 'New case study')}
             </DialogTitle>
           </DialogHeader>
 
@@ -266,7 +266,7 @@ export default function AdminCaseStudies({ token, isDark }) {
                   )}
                 </select>
               </div>
-              <FormField label="ROI" value={form.roi} onChange={(e) => updateField('roi', e.target.value)} placeholder="+340% efficacite" />
+              <FormField label="ROI" value={form.roi} onChange={(e) => updateField('roi', e.target.value)} placeholder="+340% efficacité" />
               <div className="flex items-end">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.published} onChange={(e) => updateField('published', e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-600" />
@@ -277,13 +277,13 @@ export default function AdminCaseStudies({ token, isDark }) {
 
             {/* Descriptions */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField label="Description (FR)" value={form.desc_fr} onChange={(e) => updateField('desc_fr', e.target.value)} multiline placeholder="Resume du projet..." />
+              <FormField label="Description (FR)" value={form.desc_fr} onChange={(e) => updateField('desc_fr', e.target.value)} multiline placeholder="Résumé du projet..." />
               <FormField label="Description (EN)" value={form.desc_en} onChange={(e) => updateField('desc_en', e.target.value)} multiline placeholder="Project summary..." />
             </div>
 
             {/* Challenge */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField label="Le Defi (FR)" value={form.challenge_fr} onChange={(e) => updateField('challenge_fr', e.target.value)} multiline placeholder="Le probleme du client..." />
+              <FormField label="Le Défi (FR)" value={form.challenge_fr} onChange={(e) => updateField('challenge_fr', e.target.value)} multiline placeholder="Le problème du client..." />
               <FormField label="The Challenge (EN)" value={form.challenge_en} onChange={(e) => updateField('challenge_en', e.target.value)} multiline placeholder="Client's problem..." />
             </div>
 
@@ -295,17 +295,17 @@ export default function AdminCaseStudies({ token, isDark }) {
 
             {/* Results */}
             <div className="grid grid-cols-2 gap-4">
-              <ArrayField label="Resultats (FR)" items={form.results_fr} onChange={(v) => updateField('results_fr', v)} />
+              <ArrayField label="Résultats (FR)" items={form.results_fr} onChange={(v) => updateField('results_fr', v)} />
               <ArrayField label="Results (EN)" items={form.results_en} onChange={(v) => updateField('results_en', v)} />
             </div>
 
             {/* Meta */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField label="Duree (FR)" value={form.duration_fr} onChange={(e) => updateField('duration_fr', e.target.value)} placeholder="8 semaines" />
+              <FormField label="Durée (FR)" value={form.duration_fr} onChange={(e) => updateField('duration_fr', e.target.value)} placeholder="8 semaines" />
               <FormField label="Duration (EN)" value={form.duration_en} onChange={(e) => updateField('duration_en', e.target.value)} placeholder="8 weeks" />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <FormField label="Equipe (FR)" value={form.team_fr} onChange={(e) => updateField('team_fr', e.target.value)} placeholder="4 consultants" />
+              <FormField label="Équipe (FR)" value={form.team_fr} onChange={(e) => updateField('team_fr', e.target.value)} placeholder="4 consultants" />
               <FormField label="Team (EN)" value={form.team_en} onChange={(e) => updateField('team_en', e.target.value)} placeholder="4 consultants" />
             </div>
 
@@ -325,7 +325,7 @@ export default function AdminCaseStudies({ token, isDark }) {
                 data-testid="save-case-btn"
                 className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white rounded-lg px-6 py-2.5 text-sm font-semibold transition-all duration-200"
               >
-                {editingCase ? (lang === 'fr' ? 'Mettre a jour' : 'Update') : (lang === 'fr' ? 'Creer' : 'Create')}
+                {editingCase ? (lang === 'fr' ? 'Mettre à jour' : 'Update') : (lang === 'fr' ? 'Créer' : 'Create')}
               </button>
             </div>
           </div>

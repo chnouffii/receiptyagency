@@ -27,7 +27,7 @@ export default function CaseStudyDetailPage() {
   }
 
   if (!cs) {
-    return <div className={`pt-24 min-h-screen flex items-center justify-center ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}><p className="text-gray-400">{lang === 'fr' ? 'Etude de cas introuvable.' : 'Case study not found.'}</p></div>;
+    return <div className={`pt-24 min-h-screen flex items-center justify-center ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}><p className="text-gray-400">{lang === 'fr' ? 'Étude de cas introuvable.' : 'Case study not found.'}</p></div>;
   }
 
   const title = lang === 'fr' ? cs.title_fr : (cs.title_en || cs.title_fr);
@@ -39,13 +39,13 @@ export default function CaseStudyDetailPage() {
   const team = lang === 'fr' ? (cs.team_fr || '') : (cs.team_en || cs.team_fr || '');
 
   const sectionLabel = {
-    challenge: lang === 'fr' ? 'Le Defi' : 'The Challenge',
+    challenge: lang === 'fr' ? 'Le Défi' : 'The Challenge',
     solution: lang === 'fr' ? 'Notre Solution' : 'Our Solution',
-    results: lang === 'fr' ? 'Resultats' : 'Results',
-    duration: lang === 'fr' ? 'Duree' : 'Duration',
-    team: lang === 'fr' ? 'Equipe' : 'Team',
+    results: lang === 'fr' ? 'Résultats' : 'Results',
+    duration: lang === 'fr' ? 'Durée' : 'Duration',
+    team: lang === 'fr' ? 'Équipe' : 'Team',
     tech: lang === 'fr' ? 'Technologies' : 'Technologies',
-    cta: lang === 'fr' ? 'Demarrer un projet similaire' : 'Start a similar project',
+    cta: lang === 'fr' ? 'Démarrer un projet similaire' : 'Start a similar project',
   };
 
   return (
@@ -53,7 +53,7 @@ export default function CaseStudyDetailPage() {
       <div className="max-w-4xl mx-auto px-6 py-16">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <Link to="/cases" className={`inline-flex items-center gap-2 text-sm transition-colors duration-200 mb-10 ${isDark ? 'text-gray-500 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`} data-testid="back-to-cases">
-            <ArrowLeft className="w-4 h-4" /> {lang === 'fr' ? 'Retour aux etudes de cas' : 'Back to case studies'}
+            <ArrowLeft className="w-4 h-4" /> {lang === 'fr' ? 'Retour aux études de cas' : 'Back to case studies'}
           </Link>
         </motion.div>
 

@@ -106,7 +106,7 @@ async def get_chat_analytics(admin=Depends(verify_token)):
     total_messages = await db.chat_messages.count_documents({})
     sessions = await db.chat_messages.aggregate([
         {"$group": {"_id": "$session_id", "count": {"$sum": 1}, "first": {"$min": "$created_at"}, "last": {"$max": "$created_at"}}}
-    ]).to_list(10000)
+    ]).to_list(1000)
     total_sessions = len(sessions)
     avg_messages = round(total_messages / total_sessions, 1) if total_sessions > 0 else 0
 
