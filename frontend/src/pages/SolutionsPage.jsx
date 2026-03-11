@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Users, Wallet, Globe, Cpu, ShoppingCart, Mail, Shield, BarChart3, CheckCircle2 } from 'lucide-react';
-import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Badge } from '../components/ui/badge';
@@ -11,58 +10,6 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const ICON_MAP = { users: Users, wallet: Wallet, globe: Globe, cpu: Cpu, 'shopping-cart': ShoppingCart, mail: Mail, shield: Shield, 'bar-chart': BarChart3 };
 
-const DEMO_DATA = {
-  area: [{ m: 'Jan', v: 120 }, { m: 'Feb', v: 180 }, { m: 'Mar', v: 250 }, { m: 'Apr', v: 310 }, { m: 'May', v: 380 }, { m: 'Jun', v: 420 }],
-  bar: [{ m: 'Jan', a: 45, b: 38 }, { m: 'Feb', a: 52, b: 41 }, { m: 'Mar', a: 48, b: 35 }, { m: 'Apr', a: 55, b: 37 }, { m: 'May', a: 51, b: 34 }, { m: 'Jun', a: 58, b: 36 }],
-  line: [{ m: 'Jan', v: 1.2 }, { m: 'Feb', v: 2.1 }, { m: 'Mar', v: 3.8 }, { m: 'Apr', v: 5.2 }, { m: 'May', v: 7.5 }, { m: 'Jun', v: 10.2 }],
-};
-
-function MiniDashboard({ chartType, isDark }) {
-  const chartStyle = { 
-    grid: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.05)', 
-    tick: isDark ? '#475569' : '#94A3B8', 
-    tooltip: { 
-      backgroundColor: isDark ? '#0F0F10' : '#FFFFFF', 
-      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', 
-      borderRadius: '8px' 
-    } 
-  };
-  const type = chartType || 'area';
-  const data = DEMO_DATA[type] || DEMO_DATA.area;
-  return (
-    <div className="h-48 w-full mt-6">
-      <ResponsiveContainer width="100%" height="100%">
-        {type === 'area' ? (
-          <AreaChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke={chartStyle.grid} />
-            <XAxis dataKey="m" tick={{ fill: chartStyle.tick, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: chartStyle.tick, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={chartStyle.tooltip} labelStyle={{ color: '#94A3B8' }} itemStyle={{ color: '#38BDF8' }} />
-            <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#007AFF" stopOpacity={0.3} /><stop offset="100%" stopColor="#007AFF" stopOpacity={0} /></linearGradient></defs>
-            <Area type="monotone" dataKey="v" stroke="#007AFF" fill="url(#areaGrad)" strokeWidth={2} />
-          </AreaChart>
-        ) : type === 'bar' ? (
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke={chartStyle.grid} />
-            <XAxis dataKey="m" tick={{ fill: chartStyle.tick, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: chartStyle.tick, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={chartStyle.tooltip} labelStyle={{ color: '#94A3B8' }} />
-            <Bar dataKey="a" fill="#475569" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="b" fill="#007AFF" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        ) : (
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke={chartStyle.grid} />
-            <XAxis dataKey="m" tick={{ fill: chartStyle.tick, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: chartStyle.tick, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={chartStyle.tooltip} labelStyle={{ color: '#94A3B8' }} itemStyle={{ color: '#38BDF8' }} />
-            <Line type="monotone" dataKey="v" stroke="#38BDF8" strokeWidth={2} dot={{ fill: '#38BDF8', r: 3 }} />
-          </LineChart>
-        )}
-      </ResponsiveContainer>
-    </div>
-  );
-}
 
 function SolutionCard({ sol, index, lang, isDark }) {
   const ref = useRef(null);
@@ -102,14 +49,6 @@ function SolutionCard({ sol, index, lang, isDark }) {
               <span>{feature}</span>
             </div>
           ))}
-        </div>
-      </div>
-      <div className="px-8 pb-8">
-        <div className={`rounded-xl border backdrop-blur-sm p-4 ${
-          isDark ? 'border-white/5 bg-black/40' : 'border-gray-200 bg-gray-50'
-        }`}>
-          <p className={`text-xs font-mono uppercase tracking-wider mb-1 ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>Performance Dashboard</p>
-          <MiniDashboard chartType={sol.chart_type} isDark={isDark} />
         </div>
       </div>
     </motion.div>
