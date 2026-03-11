@@ -19,6 +19,13 @@ from datetime import datetime, timezone
 import bcrypt
 import uuid
 
+# Logging must be configured before any module-level logger.warning() calls
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # Load environment variables
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -108,10 +115,17 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SecurityHeadersMiddleware)
 
-# CORS middleware — restrict to explicit allowed origins
-_default_origins = "http://localhost:3000,http://localhost:3001"
-_cors_origins = os.environ.get('CORS_ORIGINS', _default_origins).split(',')
-_cors_origins = [o.strip() for o in _cors_origins if o.strip()]
+# CORS middleware — set CORS_ORIGINS env var to restrict in production
+# e.g. CORS_ORIGINS=https://receipty.agency,https://www.receipty.agency
+_cors_env = os.environ.get('CORS_ORIGINS', '')
+if _cors_env.strip():
+    _cors_origins = [o.strip() for o in _cors_env.split(',') if o.strip()]
+else:
+    _cors_origins = ["*"]
+    logger.warning(
+        "CORS_ORIGINS not set — allowing all origins. "
+        "Set CORS_ORIGINS=https://yourdomain.com in production."
+    )
 
 app.add_middleware(
     CORSMiddleware,
@@ -121,14 +135,6 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type", "Accept"],
     expose_headers=["Content-Disposition", "Content-Type", "Content-Length"],
 )
-
-# Logging configuration
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
 
 @app.on_event("startup")
 async def startup():
