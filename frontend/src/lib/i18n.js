@@ -4,34 +4,34 @@ export const translations = {
       home: 'Accueil',
       adn: 'ADN & Vision',
       solutions: 'Solutions',
-      cases: 'Etudes de Cas',
+      cases: 'Études de Cas',
       contact: 'Contact',
       admin: 'Admin'
     },
     hero: {
       title: 'Nous automatisons votre entreprise.',
-      subtitle: "L'agence d'integration IA qui transforme vos processus metier en systemes intelligents.",
+      subtitle: "L'agence d'intégration IA qui transforme vos processus métier en systèmes intelligents.",
       cta: 'Lancer mon diagnostic IA',
       trusted: 'Entreprises qui nous font confiance'
     },
     features: {
-      ai: { title: 'Intelligence Artificielle', desc: 'Modeles ML sur mesure pour vos besoins' },
-      auto: { title: 'Automatisation', desc: 'Workflows intelligents et optimises' },
-      perf: { title: 'Performance', desc: 'ROI mesurable des le premier mois' }
+      ai: { title: 'Intelligence Artificielle', desc: 'Modèles ML sur mesure pour vos besoins' },
+      auto: { title: 'Automatisation', desc: 'Workflows intelligents et optimisés' },
+      perf: { title: 'Performance', desc: 'ROI mesurable dès le premier mois' }
     },
     adn: {
       title: 'ADN & Vision',
       subtitle: 'Notre expertise en International Business et Data Science au service de votre transformation digitale.',
-      manifesto: "Nous croyons que l'intelligence artificielle n'est pas un luxe, c'est une necessite competitive. Chaque processus metier peut etre optimise, chaque decision peut etre eclairee par les donnees.",
-      team: 'Notre Equipe',
+      manifesto: "Nous croyons que l'intelligence artificielle n'est pas un luxe, c'est une nécessité compétitive. Chaque processus métier peut être optimisé, chaque décision peut être éclairée par les données.",
+      team: 'Notre Équipe',
       stats: {
-        projects: 'Projets Livres',
-        hours: 'Heures Economisees',
+        projects: 'Projets Livrés',
+        hours: 'Heures Économisées',
         automation: "Taux d'Automatisation"
       },
       members: [
-        { name: 'BOTH Quentin', role: 'Co-CEO & Expert IA', desc: 'Entrepreneur visionnaire specialise en intelligence artificielle. Expert en deploiement de solutions ML/Deep Learning a grande echelle, il pilote la strategie technologique et l\'innovation produit. Certifie en Data Science et architectures cloud, il transforme les defis business complexes en systemes automatises performants.' },
-        { name: 'DE FURST Valere', role: 'Co-CEO & Strategiste Business', desc: 'Entrepreneur aguerri avec une expertise pointue en International Business et developpement strategique. Diplome en commerce international, il orchestre les partenariats cles, le developpement commercial et la croissance de l\'agence. Sa vision globale et son sens aigu du marche garantissent des solutions alignees sur les enjeux reels des entreprises.' }
+        { name: 'BOTH Quentin', role: 'Co-CEO & Expert IA', desc: 'Entrepreneur visionnaire spécialisé en intelligence artificielle. Expert en déploiement de solutions ML/Deep Learning à grande échelle, il pilote la stratégie technologique et l\'innovation produit. Certifié en Data Science et architectures cloud, il transforme les défis business complexes en systèmes automatisés performants.' },
+        { name: 'DE FURST Valère', role: 'Co-CEO & Stratégiste Business', desc: 'Entrepreneur aguerri avec une expertise pointue en International Business et développement stratégique. Diplômé en commerce international, il orchestre les partenariats clés, le développement commercial et la croissance de l\'agence. Sa vision globale et son sens aigu du marché garantissent des solutions alignées sur les enjeux réels des entreprises.' }
       ]
     },
     solutions: {
