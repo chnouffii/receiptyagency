@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Brain, Zap, TrendingUp, ChevronDown } from 'lucide-react';
+import { ArrowRight, Brain, Zap, TrendingUp, ChevronDown, HelpCircle, Plus, Minus } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import axios from 'axios';
@@ -48,41 +48,76 @@ function TrustedCompaniesMarquee({ companies, isDark }) {
   );
 }
 
-function FAQItem({ question, answer, isDark, index }) {
-  const [open, setOpen] = useState(false);
+function FAQItem({ question, answer, isDark, index, isOpen, onToggle }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.07, duration: 0.4 }}
-      className={`rounded-xl border overflow-hidden transition-colors duration-200 ${
-        isDark ? 'border-white/5 bg-white/[0.02]' : 'border-gray-200 bg-white'
+      transition={{ delay: index * 0.08, duration: 0.4 }}
+      className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${
+        isOpen 
+          ? isDark 
+            ? 'border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-purple-500/5 shadow-lg shadow-blue-500/5' 
+            : 'border-blue-300 bg-gradient-to-br from-blue-50 to-purple-50 shadow-lg shadow-blue-100'
+          : isDark 
+            ? 'border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]' 
+            : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
       }`}
     >
       <button
-        onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between px-6 py-5 text-left transition-colors duration-200 ${
-          isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-gray-50'
-        }`}
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-6 py-5 text-left"
+        data-testid={`faq-question-${index}`}
       >
-        <span className={`font-medium text-sm md:text-base pr-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          {question}
-        </span>
-        <ChevronDown className={`w-5 h-5 flex-shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''} ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+        <div className="flex items-center gap-4 flex-1 pr-4">
+          <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+            isOpen
+              ? 'bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg shadow-blue-500/25'
+              : isDark 
+                ? 'bg-white/5 group-hover:bg-white/10' 
+                : 'bg-gray-100 group-hover:bg-gray-200'
+          }`}>
+            <span className={`font-heading font-bold text-sm transition-colors duration-300 ${
+              isOpen ? 'text-white' : isDark ? 'text-gray-400' : 'text-gray-500'
+            }`}>
+              {String(index + 1).padStart(2, '0')}
+            </span>
+          </div>
+          <span className={`font-heading font-semibold text-base transition-colors duration-300 ${
+            isOpen 
+              ? isDark ? 'text-white' : 'text-gray-900'
+              : isDark ? 'text-gray-200 group-hover:text-white' : 'text-gray-700 group-hover:text-gray-900'
+          }`}>
+            {question}
+          </span>
+        </div>
+        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+          isOpen
+            ? 'bg-blue-500 rotate-0'
+            : isDark 
+              ? 'bg-white/5 group-hover:bg-white/10' 
+              : 'bg-gray-100 group-hover:bg-gray-200'
+        }`}>
+          {isOpen ? (
+            <Minus className="w-4 h-4 text-white" />
+          ) : (
+            <Plus className={`w-4 h-4 transition-colors ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
+          )}
+        </div>
       </button>
       <AnimatePresence initial={false}>
-        {open && (
+        {isOpen && (
           <motion.div
             key="answer"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
-            <div className={`px-6 pb-5 text-sm leading-relaxed border-t ${
-              isDark ? 'text-gray-400 border-white/5' : 'text-gray-600 border-gray-100'
-            }`}>
-              <p className="pt-4">{answer}</p>
+            <div className={`px-6 pb-6 pl-20`}>
+              <p className={`text-sm leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                {answer}
+              </p>
             </div>
           </motion.div>
         )}
@@ -254,38 +289,91 @@ export default function HomePage() {
 
       {/* FAQ Section */}
       {faqs.length > 0 && (
-        <section ref={faqRef} className={`relative py-24 md:py-32 transition-colors duration-300 ${
-          isDark ? 'bg-[#050505]' : 'bg-[#F9FAFB]'
-        }`}>
-          <div className={`absolute inset-x-0 top-0 h-px ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
-          <div className="max-w-3xl mx-auto px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={faqInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5 }}
-              className="mb-12"
-            >
-              <h2 className={`font-heading text-3xl sm:text-4xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {t.faq.title}
-              </h2>
-              <p className={`mt-4 text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                {t.faq.subtitle}
-              </p>
-            </motion.div>
-            <div className="flex flex-col gap-3">
-              {faqs.map((faq, i) => (
-                <FAQItem
-                  key={faq.id}
-                  question={lang === 'fr' ? faq.question_fr : (faq.question_en || faq.question_fr)}
-                  answer={lang === 'fr' ? faq.answer_fr : (faq.answer_en || faq.answer_fr)}
-                  isDark={isDark}
-                  index={i}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
+        <FAQSection faqs={faqs} lang={lang} isDark={isDark} faqRef={faqRef} faqInView={faqInView} t={t} />
       )}
     </div>
+  );
+}
+
+function FAQSection({ faqs, lang, isDark, faqRef, faqInView, t }) {
+  const [openIndex, setOpenIndex] = useState(0); // First one open by default
+
+  return (
+    <section ref={faqRef} className={`relative py-24 md:py-32 overflow-hidden transition-colors duration-300 ${
+      isDark ? 'bg-[#050505]' : 'bg-[#F9FAFB]'
+    }`}>
+      {/* Decorative elements */}
+      <div className={`absolute inset-x-0 top-0 h-px ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
+      <div className={`absolute top-20 left-10 w-72 h-72 rounded-full blur-[100px] ${
+        isDark ? 'bg-blue-600/5' : 'bg-blue-200/30'
+      }`} />
+      <div className={`absolute bottom-20 right-10 w-72 h-72 rounded-full blur-[100px] ${
+        isDark ? 'bg-purple-600/5' : 'bg-purple-200/30'
+      }`} />
+
+      <div className="relative max-w-4xl mx-auto px-6">
+        {/* Header - Always visible */}
+        <div className="text-center mb-16">
+          {/* Badge */}
+          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 ${
+            isDark 
+              ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20' 
+              : 'bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200'
+          }`}>
+            <HelpCircle className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
+            <span className={`text-sm font-bold tracking-wider ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>
+              F.A.Q
+            </span>
+          </div>
+
+          {/* Title */}
+          <h2 className={`font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 ${
+            isDark ? 'text-white' : 'text-gray-900'
+          }`}>
+            {t.faq.title}
+          </h2>
+          
+          {/* Subtitle */}
+          <p className={`text-base md:text-lg max-w-2xl mx-auto ${
+            isDark ? 'text-gray-400' : 'text-gray-600'
+          }`}>
+            {t.faq.subtitle}
+          </p>
+        </div>
+
+        {/* FAQ Items */}
+        <div className="flex flex-col gap-4">
+          {faqs.map((faq, i) => (
+            <FAQItem
+              key={faq.id}
+              question={lang === 'fr' ? faq.question_fr : (faq.question_en || faq.question_fr)}
+              answer={lang === 'fr' ? faq.answer_fr : (faq.answer_en || faq.answer_fr)}
+              isDark={isDark}
+              index={i}
+              isOpen={openIndex === i}
+              onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
+            />
+          ))}
+        </div>
+
+        {/* Bottom CTA */}
+        <div className={`mt-12 text-center p-8 rounded-2xl border ${
+          isDark 
+            ? 'bg-gradient-to-br from-white/[0.02] to-white/[0.05] border-white/5' 
+            : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'
+        }`}>
+          <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            {lang === 'fr' ? "Vous n'avez pas trouvé la réponse à votre question ?" : "Didn't find the answer you were looking for?"}
+          </p>
+          <Link
+            to="/contact"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-full px-6 py-3 font-semibold text-sm transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105"
+          >
+            {lang === 'fr' ? 'Contactez-nous' : 'Contact us'}
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }
