@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Brain, Zap, TrendingUp } from 'lucide-react';
+import { ArrowRight, Brain, Zap, TrendingUp, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import axios from 'axios';
@@ -48,12 +48,58 @@ function TrustedCompaniesMarquee({ companies, isDark }) {
   );
 }
 
+function FAQItem({ question, answer, isDark, index }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.07, duration: 0.4 }}
+      className={`rounded-xl border overflow-hidden transition-colors duration-200 ${
+        isDark ? 'border-white/5 bg-white/[0.02]' : 'border-gray-200 bg-white'
+      }`}
+    >
+      <button
+        onClick={() => setOpen(!open)}
+        className={`w-full flex items-center justify-between px-6 py-5 text-left transition-colors duration-200 ${
+          isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-gray-50'
+        }`}
+      >
+        <span className={`font-medium text-sm md:text-base pr-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          {question}
+        </span>
+        <ChevronDown className={`w-5 h-5 flex-shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''} ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="answer"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <div className={`px-6 pb-5 text-sm leading-relaxed border-t ${
+              isDark ? 'text-gray-400 border-white/5' : 'text-gray-600 border-gray-100'
+            }`}>
+              <p className="pt-4">{answer}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
 export default function HomePage() {
   const { t, lang } = useLanguage();
   const { isDark } = useTheme();
   const featuresRef = useRef(null);
+  const faqRef = useRef(null);
   const featuresInView = useInView(featuresRef, { once: true, margin: '-100px' });
+  const faqInView = useInView(faqRef, { once: true, margin: '-80px' });
   const [trustedCompanies, setTrustedCompanies] = useState(['GlobalTech', 'BioPharm', 'NeoRetail', 'MedStaff', 'InvestCorp']);
+  const [faqs, setFaqs] = useState([]);
 
   useEffect(() => {
     const fetchTrustedCompanies = async () => {
@@ -66,7 +112,16 @@ export default function HomePage() {
         // Keep default companies on error
       }
     };
+    const fetchFaqs = async () => {
+      try {
+        const res = await axios.get(`${API}/faq`);
+        setFaqs(res.data);
+      } catch (err) {
+        // silently fail
+      }
+    };
     fetchTrustedCompanies();
+    fetchFaqs();
   }, []);
 
   const featureItems = [
@@ -174,8 +229,8 @@ export default function HomePage() {
                 animate={featuresInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ delay: i * 0.15, duration: 0.5 }}
                 className={`group relative overflow-hidden rounded-2xl border p-8 transition-all duration-300 ${
-                  isDark 
-                    ? 'border-white/5 bg-white/[0.02] hover:border-blue-500/20 hover:bg-white/[0.04]' 
+                  isDark
+                    ? 'border-white/5 bg-white/[0.02] hover:border-blue-500/20 hover:bg-white/[0.04]'
                     : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-lg'
                 }`}
                 data-testid={`feature-card-${i}`}
@@ -196,6 +251,41 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* FAQ Section */}
+      {faqs.length > 0 && (
+        <section ref={faqRef} className={`relative py-24 md:py-32 transition-colors duration-300 ${
+          isDark ? 'bg-[#050505]' : 'bg-[#F9FAFB]'
+        }`}>
+          <div className={`absolute inset-x-0 top-0 h-px ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
+          <div className="max-w-3xl mx-auto px-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={faqInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5 }}
+              className="mb-12"
+            >
+              <h2 className={`font-heading text-3xl sm:text-4xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {t.faq.title}
+              </h2>
+              <p className={`mt-4 text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                {t.faq.subtitle}
+              </p>
+            </motion.div>
+            <div className="flex flex-col gap-3">
+              {faqs.map((faq, i) => (
+                <FAQItem
+                  key={faq.id}
+                  question={lang === 'fr' ? faq.question_fr : (faq.question_en || faq.question_fr)}
+                  answer={lang === 'fr' ? faq.answer_fr : (faq.answer_en || faq.answer_fr)}
+                  isDark={isDark}
+                  index={i}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
