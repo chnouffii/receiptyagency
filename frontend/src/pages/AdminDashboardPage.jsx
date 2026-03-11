@@ -97,7 +97,7 @@ export default function AdminDashboardPage() {
             </TabsTrigger>
             <TabsTrigger value="cases" data-testid="tab-case-studies" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 gap-2 text-sm">
               <BookOpen className="w-4 h-4" />
-              {lang === 'fr' ? 'Etudes de Cas' : 'Case Studies'}
+              {lang === 'fr' ? 'Études de Cas' : 'Case Studies'}
             </TabsTrigger>
             <TabsTrigger value="solutions" data-testid="tab-solutions" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 gap-2 text-sm">
               <Layers className="w-4 h-4" />

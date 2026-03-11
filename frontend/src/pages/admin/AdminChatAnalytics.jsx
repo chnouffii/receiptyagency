@@ -57,7 +57,7 @@ export default function AdminChatAnalytics({ token, isDark }) {
       <div className="rounded-xl border border-white/5 bg-[#0F0F10] overflow-hidden">
         <div className="p-4 border-b border-white/5">
           <h2 className="font-heading text-lg font-semibold text-white">
-            {lang === 'fr' ? 'Conversations recentes' : 'Recent conversations'}
+            {lang === 'fr' ? 'Conversations récentes' : 'Recent conversations'}
           </h2>
         </div>
 
@@ -76,7 +76,7 @@ export default function AdminChatAnalytics({ token, isDark }) {
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm text-white truncate max-w-md">
-                        {conv.preview || (lang === 'fr' ? 'Conversation sans apercu' : 'No preview')}
+                        {conv.preview || (lang === 'fr' ? 'Conversation sans aperçu' : 'No preview')}
                       </p>
                       <div className="flex items-center gap-3 mt-1">
                         <span className="text-xs text-gray-600 flex items-center gap-1">
@@ -108,7 +108,7 @@ export default function AdminChatAnalytics({ token, isDark }) {
         <DialogContent className="bg-[#0F0F10] border-white/10 max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="font-heading text-white text-lg">
-              {lang === 'fr' ? 'Detail conversation' : 'Conversation detail'}
+              {lang === 'fr' ? 'Détail conversation' : 'Conversation detail'}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto space-y-3 pr-2 mt-4">

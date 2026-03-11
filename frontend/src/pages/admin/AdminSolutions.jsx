@@ -116,10 +116,10 @@ export default function AdminSolutions({ token, isDark }) {
     try {
       if (editingSolution) {
         await axios.put(`${API}/admin/solutions/${editingSolution.id}`, payload, { headers });
-        toast.success(lang === 'fr' ? 'Solution mise a jour' : 'Solution updated');
+        toast.success(lang === 'fr' ? 'Solution mise à jour' : 'Solution updated');
       } else {
         await axios.post(`${API}/admin/solutions`, payload, { headers });
-        toast.success(lang === 'fr' ? 'Solution creee' : 'Solution created');
+        toast.success(lang === 'fr' ? 'Solution créée' : 'Solution created');
       }
       setDialogOpen(false);
       fetchSolutions();
@@ -130,7 +130,7 @@ export default function AdminSolutions({ token, isDark }) {
     if (!window.confirm(lang === 'fr' ? 'Supprimer cette solution ?' : 'Delete this solution?')) return;
     try {
       await axios.delete(`${API}/admin/solutions/${id}`, { headers });
-      toast.success(lang === 'fr' ? 'Supprimee' : 'Deleted');
+      toast.success(lang === 'fr' ? 'Supprimée' : 'Deleted');
       fetchSolutions();
     } catch { toast.error('Error'); }
   };
@@ -138,7 +138,7 @@ export default function AdminSolutions({ token, isDark }) {
   const togglePublish = async (sol) => {
     try {
       await axios.put(`${API}/admin/solutions/${sol.id}`, { published: !sol.published }, { headers });
-      toast.success(sol.published ? 'Depubliee' : 'Publiee');
+      toast.success(sol.published ? 'Dépubliée' : 'Publiée');
       fetchSolutions();
     } catch { toast.error('Error'); }
   };
@@ -203,7 +203,7 @@ export default function AdminSolutions({ token, isDark }) {
                   </button>
                   <button onClick={() => togglePublish(sol)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-amber-400 transition-colors duration-200">
                     {sol.published ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    {sol.published ? (lang === 'fr' ? 'Depublier' : 'Unpublish') : (lang === 'fr' ? 'Publier' : 'Publish')}
+                    {sol.published ? (lang === 'fr' ? 'Dépublier' : 'Unpublish') : (lang === 'fr' ? 'Publier' : 'Publish')}
                   </button>
                   <button onClick={() => deleteSolution(sol.id)} data-testid={`delete-solution-${sol.id}`} className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-400 transition-colors duration-200 ml-auto">
                     <Trash2 className="w-3 h-3" /> {lang === 'fr' ? 'Supprimer' : 'Delete'}
@@ -246,7 +246,7 @@ export default function AdminSolutions({ token, isDark }) {
             {/* Icon & Chart */}
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="text-xs text-gray-500 mb-1.5 block">Icone</label>
+                <label className="text-xs text-gray-500 mb-1.5 block">Icône</label>
                 <div className="grid grid-cols-4 gap-2">
                   {ICON_OPTIONS.map((opt) => {
                     const OptIcon = opt.icon;
@@ -268,14 +268,14 @@ export default function AdminSolutions({ token, isDark }) {
               <div className="flex items-end">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.published} onChange={(e) => updateField('published', e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-600" />
-                  <span className="text-sm text-gray-400">{lang === 'fr' ? 'Publiee' : 'Published'}</span>
+                  <span className="text-sm text-gray-400">{lang === 'fr' ? 'Publiée' : 'Published'}</span>
                 </label>
               </div>
             </div>
 
             {/* Features */}
             <div className="grid grid-cols-2 gap-4">
-              <ArrayField label="Fonctionnalites (FR)" items={form.features_fr} onChange={(v) => updateField('features_fr', v)} />
+              <ArrayField label="Fonctionnalités (FR)" items={form.features_fr} onChange={(v) => updateField('features_fr', v)} />
               <ArrayField label="Features (EN)" items={form.features_en} onChange={(v) => updateField('features_en', v)} />
             </div>
 
@@ -286,7 +286,7 @@ export default function AdminSolutions({ token, isDark }) {
               </button>
               <button onClick={handleSubmit} disabled={!form.name_fr} data-testid="save-solution-btn"
                 className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white rounded-lg px-6 py-2.5 text-sm font-semibold transition-all duration-200">
-                {editingSolution ? (lang === 'fr' ? 'Mettre a jour' : 'Update') : (lang === 'fr' ? 'Creer' : 'Create')}
+                {editingSolution ? (lang === 'fr' ? 'Mettre à jour' : 'Update') : (lang === 'fr' ? 'Créer' : 'Create')}
               </button>
             </div>
           </div>

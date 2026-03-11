@@ -129,7 +129,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
       document.body.appendChild(link);
       link.click();
       link.remove();
-      toast.success(lang === 'fr' ? 'CSV telecharge' : 'CSV downloaded');
+      toast.success(lang === 'fr' ? 'CSV téléchargé' : 'CSV downloaded');
     } catch { toast.error('Export failed'); }
   };
 

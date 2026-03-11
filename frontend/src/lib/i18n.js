@@ -40,99 +40,99 @@ export const translations = {
       talent: {
         name: 'Receipty Talent',
         tag: 'RH & Recrutement',
-        desc: 'Automatisez votre processus de recrutement, de la selection des CV a l\'onboarding.',
-        features: ['Screening automatise', 'Matching IA candidats', 'Onboarding digital', 'Analytics RH']
+        desc: 'Automatisez votre processus de recrutement, de la sélection des CV à l\'onboarding.',
+        features: ['Screening automatisé', 'Matching IA candidats', 'Onboarding digital', 'Analytics RH']
       },
       spend: {
         name: 'Receipty Spend',
-        tag: 'Finance & Depenses',
-        desc: 'Optimisez vos depenses avec notre plateforme de gestion financiere intelligente.',
-        features: ['Detection anomalies', 'Previsions budgetaires', 'Reporting automatise', 'Conformite']
+        tag: 'Finance & Dépenses',
+        desc: 'Optimisez vos dépenses avec notre plateforme de gestion financière intelligente.',
+        features: ['Détection anomalies', 'Prévisions budgétaires', 'Reporting automatisé', 'Conformité']
       },
       web: {
         name: 'Web-on-Demand',
-        tag: 'Developpement Web',
-        desc: 'Creez des plateformes web performantes avec notre solution modulaire.',
-        features: ['Sites sur mesure', 'E-commerce IA', 'SEO automatise', 'Analytics avances']
+        tag: 'Développement Web',
+        desc: 'Créez des plateformes web performantes avec notre solution modulaire.',
+        features: ['Sites sur mesure', 'E-commerce IA', 'SEO automatisé', 'Analytics avancés']
       }
     },
     quote: {
-      title: 'Devis Instantane',
+      title: 'Devis Instantané',
       subtitle: 'Configurez votre solution en quelques clics.',
-      steps: ['Categorie', 'Echelle', 'Fonctionnalites', 'Votre Devis'],
-      category_label: 'Selectionnez votre besoin',
+      steps: ['Catégorie', 'Échelle', 'Fonctionnalités', 'Votre Devis'],
+      category_label: 'Sélectionnez votre besoin',
       scale_label: 'Taille de votre entreprise',
-      employees: 'employes',
-      features_label: 'Fonctionnalites souhaitees',
-      contact: 'Vos coordonnees',
+      employees: 'employés',
+      features_label: 'Fonctionnalités souhaitées',
+      contact: 'Vos coordonnées',
       name: 'Nom complet',
       email: 'Email professionnel',
       company: 'Entreprise',
-      phone: 'Telephone',
+      phone: 'Téléphone',
       setup_fee: 'Frais de mise en place',
       monthly_fee: 'Abonnement mensuel',
       submit: 'Envoyer ma demande',
       next: 'Suivant',
-      prev: 'Precedent',
-      success: 'Demande envoyee avec succes !',
-      success_desc: 'Notre equipe vous contactera sous 24h.',
+      prev: 'Précédent',
+      success: 'Demande envoyée avec succès !',
+      success_desc: 'Notre équipe vous contactera sous 24h.',
       your_estimate: 'Votre estimation'
     },
     cases: {
-      title: 'Etudes de Cas',
-      subtitle: 'Decouvrez comment nous avons transforme nos clients.',
+      title: 'Études de Cas',
+      subtitle: 'Découvrez comment nous avons transformé nos clients.',
       read_more: 'Voir le cas',
       items: [
         {
           title: 'Automatisation RH chez GlobalTech',
           category: 'Receipty Talent',
-          roi: '+340% efficacite',
-          desc: 'Reduction de 75% du temps de recrutement pour une entreprise de 2000 employes.',
+          roi: '+340% efficacité',
+          desc: 'Réduction de 75% du temps de recrutement pour une entreprise de 2000 employés.',
           tags: ['RH', 'IA', 'Automatisation']
         },
         {
-          title: 'Optimisation financiere BioPharm',
+          title: 'Optimisation financière BioPharm',
           category: 'Receipty Spend',
-          roi: '-45% couts',
-          desc: 'Detection d\'anomalies financieres et optimisation des depenses operationnelles.',
+          roi: '-45% coûts',
+          desc: 'Détection d\'anomalies financières et optimisation des dépenses opérationnelles.',
           tags: ['Finance', 'Analytics', 'Compliance']
         },
         {
           title: 'Plateforme E-commerce NeoRetail',
           category: 'Web-on-Demand',
           roi: '+280% conversion',
-          desc: 'Creation d\'une plateforme e-commerce avec recommandations IA personnalisees.',
+          desc: 'Création d\'une plateforme e-commerce avec recommandations IA personnalisées.',
           tags: ['E-commerce', 'UX', 'IA']
         },
         {
           title: 'Pipeline de recrutement MedStaff',
           category: 'Receipty Talent',
-          roi: '85% automatise',
-          desc: 'Automatisation complete du pipeline de recrutement medical avec matching IA.',
-          tags: ['Sante', 'RH', 'Pipeline']
+          roi: '85% automatisé',
+          desc: 'Automatisation complète du pipeline de recrutement médical avec matching IA.',
+          tags: ['Santé', 'RH', 'Pipeline']
         },
         {
           title: 'Dashboard financier InvestCorp',
           category: 'Receipty Spend',
-          roi: '+200% productivite',
-          desc: 'Dashboard temps reel avec predictions budgetaires et alertes automatisees.',
-          tags: ['Dashboard', 'Prediction', 'Finance']
+          roi: '+200% productivité',
+          desc: 'Dashboard temps réel avec prédictions budgétaires et alertes automatisées.',
+          tags: ['Dashboard', 'Prédiction', 'Finance']
         }
       ]
     },
     admin: {
       login_title: 'Espace Administration',
-      login_subtitle: 'Connectez-vous pour gerer les leads.',
+      login_subtitle: 'Connectez-vous pour gérer les leads.',
       email: 'Email',
       password: 'Mot de passe',
       login: 'Se connecter',
       dashboard: 'Tableau de bord',
       leads: 'Leads',
-      logout: 'Deconnexion',
+      logout: 'Déconnexion',
       total: 'Total Leads',
       new_label: 'Nouveaux',
-      contacted: 'Contactes',
-      qualified: 'Qualifies',
+      contacted: 'Contactés',
+      qualified: 'Qualifiés',
       converted: 'Convertis',
       revenue: 'Revenue Setup',
       monthly_rev: 'Revenue Mensuel',
@@ -168,9 +168,9 @@ export const translations = {
       response_time: 'Temps de réponse moyen : moins de 24h'
     },
     footer: {
-      tagline: "L'agence d'integration IA qui fait la difference.",
-      rights: 'Tous droits reserves.',
-      privacy: 'Politique de confidentialite',
+      tagline: "L'agence d'intégration IA qui fait la différence.",
+      rights: 'Tous droits réservés.',
+      privacy: 'Politique de confidentialité',
       terms: "Conditions d'utilisation"
     }
   },

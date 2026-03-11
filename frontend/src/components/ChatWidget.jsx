@@ -64,7 +64,7 @@ export const ChatWidget = () => {
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: lang === 'fr'
-          ? 'Desole, une erreur est survenue. Reessayez.'
+          ? 'Désolé, une erreur est survenue. Réessayez.'
           : 'Sorry, an error occurred. Please try again.'
       }]);
     } finally {

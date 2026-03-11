@@ -221,7 +221,7 @@ export default function InstantQuotePage() {
                 <div>
                   <h3 className="font-heading text-lg font-semibold text-white mb-6">{t.quote.features_label}</h3>
                   {availableFeatures.length === 0 ? (
-                    <div className="text-center text-gray-500 py-8">{lang === 'fr' ? 'Aucune fonctionnalite configuree pour cette solution.' : 'No features configured for this solution.'}</div>
+                    <div className="text-center text-gray-500 py-8">{lang === 'fr' ? 'Aucune fonctionnalité configurée pour cette solution.' : 'No features configured for this solution.'}</div>
                   ) : (
                     <div className="space-y-3">
                       {availableFeatures.map((feature, i) => (
