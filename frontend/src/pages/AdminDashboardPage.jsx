@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogOut, Users, MessageCircle, BookOpen, Layers, Settings, UserCog, FileText, FileSearch } from 'lucide-react';
+import { LogOut, Users, MessageCircle, BookOpen, Layers, Settings, UserCog, FileText, FileSearch, Briefcase } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
@@ -13,6 +13,7 @@ import AdminSiteContent from './admin/AdminSiteContent';
 import AdminUserManagement from './admin/AdminUserManagement';
 import AdminQuotes from './admin/AdminQuotes';
 import AdminAuditROI from './admin/AdminAuditROI';
+import AdminClosersTab from './admin/AdminClosersTab';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -118,6 +119,10 @@ export default function AdminDashboardPage() {
               <FileSearch className="w-4 h-4" />
               {lang === 'fr' ? 'Audit ROI' : 'Audit ROI'}
             </TabsTrigger>
+            <TabsTrigger value="closers" data-testid="tab-closers" className="data-[state=active]:bg-emerald-600/20 data-[state=active]:text-emerald-400 gap-2 text-sm">
+              <Briefcase className="w-4 h-4" />
+              Closers
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="leads">
@@ -143,6 +148,9 @@ export default function AdminDashboardPage() {
           </TabsContent>
           <TabsContent value="audit">
             <AdminAuditROI token={token} leadData={auditFromLead} onLeadDataUsed={clearAuditFromLead} onCreateQuote={handleCreateQuoteFromLead} isDark={isDark} />
+          </TabsContent>
+          <TabsContent value="closers">
+            <AdminClosersTab token={token} isDark={isDark} />
           </TabsContent>
         </Tabs>
       </div>

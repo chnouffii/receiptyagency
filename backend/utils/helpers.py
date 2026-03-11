@@ -36,18 +36,22 @@ def verify_token(authorization: str = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-async def log_audit(db, admin_email: str, action: str, target_type: str, target_id: str = None, details: str = None, ip: str = None):
-    """Log admin actions for audit trail"""
-    admin = await db.admins.find_one({"email": admin_email}, {"_id": 0, "id": 1})
+async def log_audit(db, admin_email: str, action: str, target_type: str, target_id: str = None, details: str = None, ip: str = None, user_agent: str = None, extra_data: dict = None):
+    """Log admin/closer actions for detailed audit trail"""
+    admin = await db.admins.find_one({"email": admin_email}, {"_id": 0, "id": 1, "role": 1, "name": 1})
     log_entry = {
         "id": str(uuid.uuid4()),
-        "admin_id": admin.get("id", "") if admin else "",
-        "admin_email": admin_email,
+        "user_id": admin.get("id", "") if admin else "",
+        "user_email": admin_email,
+        "user_name": admin.get("name", "") if admin else "",
+        "user_role": admin.get("role", "") if admin else "",
         "action": action,
         "target_type": target_type,
         "target_id": target_id,
         "details": details,
         "ip_address": ip,
+        "user_agent": user_agent,
+        "extra_data": extra_data or {},
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.audit_logs.insert_one(log_entry)

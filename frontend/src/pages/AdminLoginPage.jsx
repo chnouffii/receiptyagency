@@ -24,8 +24,15 @@ export default function AdminLoginPage() {
       const res = await axios.post(`${API}/admin/login`, { email, password });
       localStorage.setItem('receipty-admin-token', res.data.token);
       localStorage.setItem('receipty-admin-email', res.data.email);
+      localStorage.setItem('receipty-admin-role', res.data.role);
       toast.success('Connected');
-      navigate('/admin/dashboard');
+      
+      // Redirect based on role
+      if (res.data.role === 'closer') {
+        navigate('/closer');
+      } else {
+        navigate('/admin/dashboard');
+      }
     } catch {
       toast.error('Invalid credentials');
     } finally {

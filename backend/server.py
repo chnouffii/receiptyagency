@@ -60,6 +60,7 @@ from routes.content import router as content_router
 from routes.site_content import router as site_content_router
 from routes.quotes import router as quotes_router
 from routes.audits import router as audits_router
+from routes.closers import router as closers_router
 
 # Include all routers
 api_router.include_router(leads_router, tags=["Leads"])
@@ -69,6 +70,7 @@ api_router.include_router(content_router, tags=["Content"])
 api_router.include_router(site_content_router, tags=["Site Content"])
 api_router.include_router(quotes_router, tags=["Quotes"])
 api_router.include_router(audits_router, tags=["Audits"])
+api_router.include_router(closers_router, tags=["Closers"])
 
 
 # Root endpoint
@@ -157,6 +159,17 @@ async def startup():
             f"Default admin created — email: admin@receipty.ai | "
             f"password: {default_password} | CHANGE THIS IMMEDIATELY"
         )
+
+    # Seed default commission tiers if empty
+    tier_count = await db.commission_tiers.count_documents({})
+    if tier_count == 0:
+        default_tiers = [
+            {"id": str(uuid.uuid4()), "name": "Bronze", "min_deals": 0, "rate": 10, "created_at": datetime.now(timezone.utc).isoformat()},
+            {"id": str(uuid.uuid4()), "name": "Silver", "min_deals": 5, "rate": 12.5, "created_at": datetime.now(timezone.utc).isoformat()},
+            {"id": str(uuid.uuid4()), "name": "Gold", "min_deals": 15, "rate": 15, "created_at": datetime.now(timezone.utc).isoformat()},
+        ]
+        await db.commission_tiers.insert_many(default_tiers)
+        logger.info("Default commission tiers created")
 
     # Seed case studies if empty
     case_count = await db.case_studies.count_documents({})
