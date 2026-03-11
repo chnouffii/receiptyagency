@@ -3,6 +3,7 @@ import os
 import uuid
 import logging
 import asyncio
+import html
 from datetime import datetime, timezone
 from jose import jwt, JWTError
 from fastapi import Header, HTTPException
@@ -58,38 +59,47 @@ async def send_notification_email(contact_data: dict):
         logger.warning("Resend not configured, skipping email notification")
         return False
     
+    # Escape all user-supplied fields to prevent HTML injection
+    _esc = html.escape
+    c_name = _esc(contact_data.get('name', 'N/A'))
+    c_email = _esc(contact_data.get('email', 'N/A'))
+    c_phone = _esc(contact_data.get('phone', 'Non renseigne'))
+    c_subject = _esc(contact_data.get('subject', 'Non renseigne'))
+    c_message = _esc(contact_data.get('message', 'N/A'))
+    c_lang = _esc(contact_data.get('language', 'fr').upper())
+
     html_content = f"""
     <html>
     <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
         <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h2 style="color: #1e40af; margin-bottom: 20px;">Nouvelle demande de contact</h2>
-            
+
             <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Nom</td>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{contact_data.get('name', 'N/A')}</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{c_name}</td>
                 </tr>
                 <tr>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Email</td>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{contact_data.get('email', 'N/A')}</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{c_email}</td>
                 </tr>
                 <tr>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Telephone</td>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{contact_data.get('phone', 'Non renseigne')}</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{c_phone}</td>
                 </tr>
                 <tr>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Sujet</td>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{contact_data.get('subject', 'Non renseigne')}</td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{c_subject}</td>
                 </tr>
             </table>
-            
+
             <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px;">
                 <p style="font-weight: bold; color: #374151; margin-bottom: 10px;">Message :</p>
-                <p style="color: #6b7280; line-height: 1.6;">{contact_data.get('message', 'N/A')}</p>
+                <p style="color: #6b7280; line-height: 1.6;">{c_message}</p>
             </div>
-            
+
             <p style="margin-top: 20px; font-size: 12px; color: #9ca3af;">
-                Recu le {datetime.now().strftime('%d/%m/%Y a %H:%M')} | Langue: {contact_data.get('language', 'fr').upper()}
+                Recu le {datetime.now().strftime('%d/%m/%Y a %H:%M')} | Langue: {c_lang}
             </p>
         </div>
     </body>

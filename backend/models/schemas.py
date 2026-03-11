@@ -1,5 +1,5 @@
 """Pydantic models for API requests and responses"""
-from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
@@ -9,7 +9,7 @@ class Lead(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    email: str
+    email: EmailStr
     company: str = ""
     phone: str = ""
     category: str = ""
@@ -27,7 +27,7 @@ class Lead(BaseModel):
 
 class LeadCreate(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     company: str
     phone: str = ""
     category: str
@@ -44,7 +44,7 @@ class LeadStatusUpdate(BaseModel):
 
 class ContactMessage(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     phone: str = ""
     subject: str = ""
     message: str
@@ -56,11 +56,30 @@ class AdminLogin(BaseModel):
     password: str
 
 
+def _validate_password_strength(v: str) -> str:
+    if len(v) < 12:
+        raise ValueError("Password must be at least 12 characters long")
+    if not any(c.isupper() for c in v):
+        raise ValueError("Password must contain at least one uppercase letter")
+    if not any(c.islower() for c in v):
+        raise ValueError("Password must contain at least one lowercase letter")
+    if not any(c.isdigit() for c in v):
+        raise ValueError("Password must contain at least one digit")
+    if not any(c in "!@#$%^&*()_+-=[]{}|;':\",./<>?" for c in v):
+        raise ValueError("Password must contain at least one special character")
+    return v
+
+
 class AdminCreate(BaseModel):
     email: EmailStr
     password: str
     name: str
     role: str = "admin"
+
+    @field_validator("password")
+    @classmethod
+    def password_strength(cls, v: str) -> str:
+        return _validate_password_strength(v)
 
 
 class AdminUpdate(BaseModel):
@@ -69,6 +88,13 @@ class AdminUpdate(BaseModel):
     role: Optional[str] = None
     password: Optional[str] = None
     is_active: Optional[bool] = None
+
+    @field_validator("password")
+    @classmethod
+    def password_strength(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            return _validate_password_strength(v)
+        return v
 
 
 class AuditLog(BaseModel):

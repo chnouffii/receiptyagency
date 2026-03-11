@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
 import uuid
 import asyncio
+import re
 from datetime import datetime, timezone
 from pydantic import BaseModel
 
@@ -93,12 +94,13 @@ async def get_leads(
     if status_filter:
         query["status"] = status_filter
     if search:
+        safe_search = re.escape(search)
         query["$or"] = [
-            {"name": {"$regex": search, "$options": "i"}},
-            {"email": {"$regex": search, "$options": "i"}},
-            {"company": {"$regex": search, "$options": "i"}},
+            {"name": {"$regex": safe_search, "$options": "i"}},
+            {"email": {"$regex": safe_search, "$options": "i"}},
+            {"company": {"$regex": safe_search, "$options": "i"}},
         ]
-    leads = await db.leads.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    leads = await db.leads.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
     return leads
 
 
