@@ -325,3 +325,22 @@ class CloserStats(BaseModel):
     conversion_rate: float = 0  # deals_signes / total_deals * 100
     current_tier_name: str = ""
     current_tier_rate: float = 0
+
+
+# ============== FAQ ==============
+class FAQCreate(BaseModel):
+    question_fr: str
+    question_en: str
+    answer_fr: str
+    answer_en: str
+    order: int = 0
+    published: bool = True
+
+
+class FAQUpdate(BaseModel):
+    question_fr: Optional[str] = None
+    question_en: Optional[str] = None
+    answer_fr: Optional[str] = None
+    answer_en: Optional[str] = None
+    order: Optional[int] = None
+    published: Optional[bool] = None

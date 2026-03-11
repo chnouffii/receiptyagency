@@ -167,6 +167,11 @@ export const translations = {
       urgent_email: 'Email urgent',
       response_time: 'Temps de réponse moyen : moins de 24h'
     },
+    faq: {
+      title: 'Questions Fréquentes',
+      subtitle: 'Tout ce que vous devez savoir sur nos services.',
+      no_questions: 'Aucune question pour le moment.',
+    },
     footer: {
       tagline: "L'agence d'intégration IA qui fait la différence.",
       rights: 'Tous droits réservés.',
@@ -341,6 +346,11 @@ export const translations = {
       call_now: 'Call now',
       urgent_email: 'Urgent email',
       response_time: 'Average response time: less than 24h'
+    },
+    faq: {
+      title: 'Frequently Asked Questions',
+      subtitle: 'Everything you need to know about our services.',
+      no_questions: 'No questions yet.',
     },
     footer: {
       tagline: 'The AI integration agency that makes the difference.',

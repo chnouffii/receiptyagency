@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const express = require("express");
-const { execSync } = require("child_process");
+const { spawnSync } = require("child_process");
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Variable Edit Handler - For editing dynamic content from traceable sources
@@ -459,11 +459,11 @@ function setupDevServer(config) {
               newData: result.newValue,
             });
 
-            // Commit the change to git
+            // Commit the change to git (using spawnSync with array args to prevent command injection)
             const timestamp = Date.now();
             try {
-              execSync(`git -c user.name="visual-edit" -c user.email="support@emergent.sh" add "${result.file}"`);
-              execSync(`git -c user.name="visual-edit" -c user.email="support@emergent.sh" commit -m "visual_edit_variable_${timestamp}"`);
+              spawnSync("git", ["-c", "user.name=visual-edit", "-c", "user.email=support@emergent.sh", "add", result.file], { stdio: "pipe" });
+              spawnSync("git", ["-c", "user.name=visual-edit", "-c", "user.email=support@emergent.sh", "commit", "-m", `visual_edit_variable_${timestamp}`], { stdio: "pipe" });
             } catch (gitError) {
               console.error(`Git commit failed for variableEdit: ${gitError.message}`);
             }
@@ -846,12 +846,11 @@ function setupDevServer(config) {
           // Write the updated content
           fs.writeFileSync(targetFile, code, "utf8");
 
-          // Commit changes to git with timestamp
+          // Commit changes to git with timestamp (using spawnSync with array args to prevent command injection)
           const timestamp = Date.now();
           try {
-            // Use -c flag for per-invocation git config to avoid modifying any config
-            execSync(`git -c user.name="visual-edit" -c user.email="support@emergent.sh" add "${targetFile}"`);
-            execSync(`git -c user.name="visual-edit" -c user.email="support@emergent.sh" commit -m "visual_edit_${timestamp}"`);
+            spawnSync("git", ["-c", "user.name=visual-edit", "-c", "user.email=support@emergent.sh", "add", targetFile], { stdio: "pipe" });
+            spawnSync("git", ["-c", "user.name=visual-edit", "-c", "user.email=support@emergent.sh", "commit", "-m", `visual_edit_${timestamp}`], { stdio: "pipe" });
           } catch (gitError) {
             console.error(`Git commit failed: ${gitError.message}`);
             // Continue even if git fails - file write succeeded

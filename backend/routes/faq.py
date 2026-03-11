@@ -1,0 +1,66 @@
+"""FAQ routes — public GET + admin CRUD"""
+from fastapi import APIRouter, Depends, HTTPException
+import uuid
+from datetime import datetime, timezone
+
+from models.schemas import FAQCreate, FAQUpdate
+from utils.helpers import verify_token
+
+router = APIRouter()
+
+
+def get_db():
+    from server import db
+    return db
+
+
+@router.get("/faq")
+async def get_faq_public():
+    db = get_db()
+    faqs = await db.faqs.find({"published": True}, {"_id": 0}).sort("order", 1).to_list(100)
+    return faqs
+
+
+@router.get("/admin/faq")
+async def get_faq_admin(admin=Depends(verify_token)):
+    db = get_db()
+    faqs = await db.faqs.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    return faqs
+
+
+@router.post("/admin/faq")
+async def create_faq(data: FAQCreate, admin=Depends(verify_token)):
+    db = get_db()
+    existing_count = await db.faqs.count_documents({})
+    faq = {
+        "id": str(uuid.uuid4()),
+        **data.model_dump(),
+        "order": data.order if data.order != 0 else existing_count,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.faqs.insert_one(faq)
+    faq.pop("_id", None)
+    return faq
+
+
+@router.put("/admin/faq/{faq_id}")
+async def update_faq(faq_id: str, data: FAQUpdate, admin=Depends(verify_token)):
+    db = get_db()
+    existing = await db.faqs.find_one({"id": faq_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="FAQ not found")
+    updates = {k: v for k, v in data.model_dump().items() if v is not None}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    await db.faqs.update_one({"id": faq_id}, {"$set": updates})
+    updated = await db.faqs.find_one({"id": faq_id}, {"_id": 0})
+    return updated
+
+
+@router.delete("/admin/faq/{faq_id}")
+async def delete_faq(faq_id: str, admin=Depends(verify_token)):
+    db = get_db()
+    result = await db.faqs.delete_one({"id": faq_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="FAQ not found")
+    return {"success": True}
