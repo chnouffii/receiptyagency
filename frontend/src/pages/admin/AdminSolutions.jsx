@@ -34,7 +34,7 @@ const EMPTY_SOLUTION = {
 };
 
 function FormField({ label, value, onChange, multiline, placeholder }) {
-  const cls = "w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-lg text-white text-sm px-3 placeholder:text-gray-600 outline-none transition-all duration-200";
+  const cls = "w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] focus:border-blue-500/50 rounded-lg text-[var(--text-primary)] text-sm px-3 placeholder:text-gray-600 outline-none transition-all duration-200";
   return (
     <div>
       <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
@@ -57,7 +57,7 @@ function ArrayField({ label, items, onChange }) {
       <div className="space-y-2">
         {items.map((item, i) => (
           <div key={i} className="flex gap-2">
-            <input type="text" value={item} onChange={(e) => updateItem(i, e.target.value)} className="flex-1 bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-lg text-white text-sm h-9 px-3 placeholder:text-gray-600 outline-none transition-all duration-200" />
+            <input type="text" value={item} onChange={(e) => updateItem(i, e.target.value)} className="flex-1 bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] focus:border-blue-500/50 rounded-lg text-[var(--text-primary)] text-sm h-9 px-3 placeholder:text-gray-600 outline-none transition-all duration-200" />
             <button onClick={() => removeItem(i)} className="text-gray-600 hover:text-red-400 px-1"><X className="w-3.5 h-3.5" /></button>
           </div>
         ))}
@@ -148,7 +148,7 @@ export default function AdminSolutions({ token, isDark }) {
   return (
     <div data-testid="solutions-admin-tab">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="font-heading text-lg font-semibold text-white">
+        <h2 className="font-heading text-lg font-semibold text-[var(--text-primary)]">
           {lang === 'fr' ? 'Gestion des solutions' : 'Solutions management'}
           <span className="text-sm font-normal text-gray-500 ml-2">({solutions.length})</span>
         </h2>
@@ -162,7 +162,7 @@ export default function AdminSolutions({ token, isDark }) {
           const Icon = getIconComponent(sol.icon);
           return (
             <motion.div key={sol.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-              className={`rounded-xl border bg-[#0F0F10] overflow-hidden transition-all duration-200 ${sol.published ? 'border-white/5' : 'border-amber-500/20 opacity-60'}`}
+              className={`rounded-xl border bg-[var(--bg-secondary)] overflow-hidden transition-all duration-200 ${sol.published ? 'border-[var(--border-primary)]' : 'border-amber-500/20 opacity-60'}`}
               data-testid={`admin-solution-card-${i}`}>
               <div className="p-5">
                 <div className="flex items-start justify-between gap-3">
@@ -171,7 +171,7 @@ export default function AdminSolutions({ token, isDark }) {
                       <Icon className="w-5 h-5 text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="font-heading text-base font-semibold text-white">
+                      <h3 className="font-heading text-base font-semibold text-[var(--text-primary)]">
                         {lang === 'fr' ? sol.name_fr : (sol.name_en || sol.name_fr)}
                       </h3>
                       <Badge variant="outline" className="text-[10px] text-blue-400 border-blue-500/30 mt-1">
@@ -189,7 +189,7 @@ export default function AdminSolutions({ token, isDark }) {
                 {sol.features_fr?.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-3">
                     {(lang === 'fr' ? sol.features_fr : (sol.features_en || sol.features_fr)).slice(0, 3).map((f, fi) => (
-                      <span key={fi} className="text-[10px] text-gray-600 bg-white/5 rounded-full px-2 py-0.5">{f}</span>
+                      <span key={fi} className="text-[10px] text-gray-600 bg-[var(--bg-tertiary)] rounded-full px-2 py-0.5">{f}</span>
                     ))}
                     {(sol.features_fr?.length || 0) > 3 && (
                       <span className="text-[10px] text-gray-600">+{sol.features_fr.length - 3}</span>
@@ -197,7 +197,7 @@ export default function AdminSolutions({ token, isDark }) {
                   </div>
                 )}
 
-                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/5">
+                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-[var(--border-primary)]">
                   <button onClick={() => openEdit(sol)} data-testid={`edit-solution-${sol.id}`} className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-400 transition-colors duration-200">
                     <Pencil className="w-3 h-3" /> {lang === 'fr' ? 'Modifier' : 'Edit'}
                   </button>
@@ -217,9 +217,9 @@ export default function AdminSolutions({ token, isDark }) {
 
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-[#0A0A0B] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-secondary)] max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-heading text-white text-lg">
+            <DialogTitle className="font-heading text-[var(--text-primary)] text-lg">
               {editingSolution ? (lang === 'fr' ? 'Modifier la solution' : 'Edit solution') : (lang === 'fr' ? 'Nouvelle solution' : 'New solution')}
             </DialogTitle>
           </DialogHeader>
@@ -252,7 +252,7 @@ export default function AdminSolutions({ token, isDark }) {
                     const OptIcon = opt.icon;
                     return (
                       <button key={opt.value} onClick={() => updateField('icon', opt.value)}
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 ${form.icon === opt.value ? 'bg-blue-600/20 border border-blue-500/50' : 'bg-white/5 border border-white/10 hover:border-white/20'}`}>
+                        className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 ${form.icon === opt.value ? 'bg-blue-600/20 border border-blue-500/50' : 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] hover:border-[var(--border-hover)]'}`}>
                         <OptIcon className={`w-4 h-4 ${form.icon === opt.value ? 'text-blue-400' : 'text-gray-500'}`} />
                       </button>
                     );
@@ -261,13 +261,13 @@ export default function AdminSolutions({ token, isDark }) {
               </div>
               <div>
                 <label className="text-xs text-gray-500 mb-1.5 block">Type de graphique</label>
-                <select value={form.chart_type} onChange={(e) => updateField('chart_type', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg text-white text-sm h-10 px-3 outline-none">
-                  {CHART_TYPES.map(ct => <option key={ct.value} value={ct.value} className="bg-[#0F0F10]">{ct.label}</option>)}
+                <select value={form.chart_type} onChange={(e) => updateField('chart_type', e.target.value)} className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg text-[var(--text-primary)] text-sm h-10 px-3 outline-none">
+                  {CHART_TYPES.map(ct => <option key={ct.value} value={ct.value} className="bg-[var(--bg-secondary)]">{ct.label}</option>)}
                 </select>
               </div>
               <div className="flex items-end">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={form.published} onChange={(e) => updateField('published', e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-600" />
+                  <input type="checkbox" checked={form.published} onChange={(e) => updateField('published', e.target.checked)} className="w-4 h-4 rounded border-[var(--border-hover)] bg-[var(--bg-tertiary)] text-blue-600" />
                   <span className="text-sm text-gray-400">{lang === 'fr' ? 'Publiée' : 'Published'}</span>
                 </label>
               </div>
@@ -280,8 +280,8 @@ export default function AdminSolutions({ token, isDark }) {
             </div>
 
             {/* Submit */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
-              <button onClick={() => setDialogOpen(false)} className="px-4 py-2.5 text-sm text-gray-400 hover:text-white transition-colors duration-200">
+            <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-primary)]">
+              <button onClick={() => setDialogOpen(false)} className="px-4 py-2.5 text-sm text-gray-400 hover:text-[var(--text-primary)] transition-colors duration-200">
                 {lang === 'fr' ? 'Annuler' : 'Cancel'}
               </button>
               <button onClick={handleSubmit} disabled={!form.name_fr} data-testid="save-solution-btn"

@@ -109,7 +109,7 @@ export default function AdminFAQ({ token, isDark }) {
 
   const inputCls = `w-full px-3 py-2 rounded-lg border text-sm outline-none transition-colors duration-200 ${
     isDark
-      ? 'bg-black/40 border-white/10 text-white placeholder-gray-600 focus:border-blue-500/50'
+      ? 'bg-black/40 border-[var(--border-secondary)] text-[var(--text-primary)] placeholder-gray-600 focus:border-blue-500/50'
       : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-blue-400'
   }`;
 
@@ -122,7 +122,7 @@ export default function AdminFAQ({ token, isDark }) {
         <div className="flex items-center gap-3">
           <HelpCircle className={`w-5 h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
           <div>
-            <h2 className={`font-heading text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <h2 className={`font-heading text-lg font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
               Questions Fréquentes
             </h2>
             <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
@@ -150,13 +150,13 @@ export default function AdminFAQ({ token, isDark }) {
           >
             <form
               onSubmit={handleSubmit}
-              className={`rounded-xl border p-6 ${isDark ? 'border-white/10 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}
+              className={`rounded-xl border p-6 ${isDark ? 'border-[var(--border-secondary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}
             >
               <div className="flex items-center justify-between mb-5">
-                <h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <h3 className={`font-semibold text-sm ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                   {editingId ? 'Modifier la question' : 'Nouvelle question'}
                 </h3>
-                <button type="button" onClick={closeForm} className={`${isDark ? 'text-gray-500 hover:text-white' : 'text-gray-400 hover:text-gray-700'}`}>
+                <button type="button" onClick={closeForm} className={`${isDark ? 'text-gray-500 hover:text-[var(--text-primary)]' : 'text-gray-400 hover:text-gray-700'}`}>
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -228,7 +228,7 @@ export default function AdminFAQ({ token, isDark }) {
               </div>
 
               <div className="flex justify-end gap-3">
-                <button type="button" onClick={closeForm} className={`px-4 py-2 text-sm rounded-lg transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
+                <button type="button" onClick={closeForm} className={`px-4 py-2 text-sm rounded-lg transition-colors ${isDark ? 'text-gray-400 hover:text-[var(--text-primary)]' : 'text-gray-500 hover:text-gray-900'}`}>
                   Annuler
                 </button>
                 <button
@@ -249,7 +249,7 @@ export default function AdminFAQ({ token, isDark }) {
       {loading ? (
         <div className={`text-center py-12 text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Chargement...</div>
       ) : faqs.length === 0 ? (
-        <div className={`text-center py-16 rounded-xl border ${isDark ? 'border-white/5 text-gray-600' : 'border-gray-200 text-gray-400'}`}>
+        <div className={`text-center py-16 rounded-xl border ${isDark ? 'border-[var(--border-primary)] text-gray-600' : 'border-gray-200 text-gray-400'}`}>
           <HelpCircle className="w-8 h-8 mx-auto mb-3 opacity-30" />
           <p className="text-sm">Aucune question pour le moment.</p>
           <p className="text-xs mt-1">Cliquez sur "Nouvelle question" pour commencer.</p>
@@ -262,17 +262,17 @@ export default function AdminFAQ({ token, isDark }) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className={`rounded-xl border p-5 ${isDark ? 'border-white/5 bg-white/[0.02]' : 'border-gray-200 bg-white'}`}
+              className={`rounded-xl border p-5 ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-hover)]' : 'border-gray-200 bg-white'}`}
             >
               <div className="flex items-start gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${isDark ? 'bg-white/5 text-gray-500' : 'bg-gray-100 text-gray-400'}`}>#{faq.order}</span>
+                    <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${isDark ? 'bg-[var(--bg-tertiary)] text-gray-500' : 'bg-gray-100 text-gray-400'}`}>#{faq.order}</span>
                     {!faq.published && (
                       <span className="text-xs px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400">Brouillon</span>
                     )}
                   </div>
-                  <p className={`font-medium text-sm mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{faq.question_fr}</p>
+                  <p className={`font-medium text-sm mb-1 ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{faq.question_fr}</p>
                   {faq.question_en && (
                     <p className={`text-xs mb-2 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>{faq.question_en}</p>
                   )}
@@ -282,19 +282,19 @@ export default function AdminFAQ({ token, isDark }) {
                   <button
                     onClick={() => togglePublished(faq)}
                     title={faq.published ? 'Dépublier' : 'Publier'}
-                    className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 text-gray-500 hover:text-gray-300' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
+                    className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-[var(--bg-tertiary)] text-gray-500 hover:text-gray-300' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
                   >
                     {faq.published ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                   </button>
                   <button
                     onClick={() => openEdit(faq)}
-                    className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 text-gray-500 hover:text-blue-400' : 'hover:bg-gray-100 text-gray-400 hover:text-blue-600'}`}
+                    className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-[var(--bg-tertiary)] text-gray-500 hover:text-blue-400' : 'hover:bg-gray-100 text-gray-400 hover:text-blue-600'}`}
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(faq.id)}
-                    className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 text-gray-500 hover:text-red-400' : 'hover:bg-gray-100 text-gray-400 hover:text-red-500'}`}
+                    className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-[var(--bg-tertiary)] text-gray-500 hover:text-red-400' : 'hover:bg-gray-100 text-gray-400 hover:text-red-500'}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

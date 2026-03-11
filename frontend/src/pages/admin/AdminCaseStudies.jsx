@@ -19,7 +19,7 @@ const EMPTY_CASE = {
 };
 
 function FormField({ label, value, onChange, multiline, placeholder }) {
-  const cls = "w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-lg text-white text-sm px-3 placeholder:text-gray-600 outline-none transition-all duration-200";
+  const cls = "w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] focus:border-blue-500/50 rounded-lg text-[var(--text-primary)] text-sm px-3 placeholder:text-gray-600 outline-none transition-all duration-200";
   return (
     <div>
       <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
@@ -42,7 +42,7 @@ function ArrayField({ label, items, onChange }) {
       <div className="space-y-2">
         {items.map((item, i) => (
           <div key={i} className="flex gap-2">
-            <input type="text" value={item} onChange={(e) => updateItem(i, e.target.value)} className="flex-1 bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-lg text-white text-sm h-9 px-3 placeholder:text-gray-600 outline-none transition-all duration-200" />
+            <input type="text" value={item} onChange={(e) => updateItem(i, e.target.value)} className="flex-1 bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] focus:border-blue-500/50 rounded-lg text-[var(--text-primary)] text-sm h-9 px-3 placeholder:text-gray-600 outline-none transition-all duration-200" />
             <button onClick={() => removeItem(i)} className="text-gray-600 hover:text-red-400 px-1"><X className="w-3.5 h-3.5" /></button>
           </div>
         ))}
@@ -149,7 +149,7 @@ export default function AdminCaseStudies({ token, isDark }) {
     <div data-testid="case-studies-admin-tab">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="font-heading text-lg font-semibold text-white">
+        <h2 className="font-heading text-lg font-semibold text-[var(--text-primary)]">
           {lang === 'fr' ? 'Gestion des études de cas' : 'Case studies management'}
           <span className="text-sm font-normal text-gray-500 ml-2">({cases.length})</span>
         </h2>
@@ -170,7 +170,7 @@ export default function AdminCaseStudies({ token, isDark }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className={`rounded-xl border bg-[#0F0F10] overflow-hidden transition-all duration-200 ${cs.published ? 'border-white/5' : 'border-amber-500/20 opacity-60'}`}
+            className={`rounded-xl border bg-[var(--bg-secondary)] overflow-hidden transition-all duration-200 ${cs.published ? 'border-[var(--border-primary)]' : 'border-amber-500/20 opacity-60'}`}
             data-testid={`admin-case-card-${i}`}
           >
             {cs.image_url && (
@@ -181,12 +181,12 @@ export default function AdminCaseStudies({ token, isDark }) {
             <div className="p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h3 className="font-heading text-sm font-semibold text-white truncate">
+                  <h3 className="font-heading text-sm font-semibold text-[var(--text-primary)] truncate">
                     {lang === 'fr' ? cs.title_fr : (cs.title_en || cs.title_fr)}
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge variant="outline" className="text-[10px] text-blue-400 border-blue-500/30">{cs.category}</Badge>
-                    <Badge className="bg-blue-600/80 text-white border-0 text-[10px] px-1.5">{cs.roi}</Badge>
+                    <Badge className="bg-blue-600/80 text-[var(--text-primary)] border-0 text-[10px] px-1.5">{cs.roi}</Badge>
                   </div>
                 </div>
                 {!cs.published && (
@@ -198,7 +198,7 @@ export default function AdminCaseStudies({ token, isDark }) {
                 {lang === 'fr' ? cs.desc_fr : (cs.desc_en || cs.desc_fr)}
               </p>
 
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/5">
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[var(--border-primary)]">
                 <button onClick={() => openEdit(cs)} data-testid={`edit-case-${cs.id}`} className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-400 transition-colors duration-200">
                   <Pencil className="w-3 h-3" /> {lang === 'fr' ? 'Modifier' : 'Edit'}
                 </button>
@@ -217,9 +217,9 @@ export default function AdminCaseStudies({ token, isDark }) {
 
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-[#0A0A0B] border-white/10 max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-secondary)] max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-heading text-white text-lg">
+            <DialogTitle className="font-heading text-[var(--text-primary)] text-lg">
               {editingCase ? (lang === 'fr' ? 'Modifier l\'étude de cas' : 'Edit case study') : (lang === 'fr' ? 'Nouvelle étude de cas' : 'New case study')}
             </DialogTitle>
           </DialogHeader>
@@ -227,7 +227,7 @@ export default function AdminCaseStudies({ token, isDark }) {
           <div className="space-y-6 mt-4">
             {/* Image Preview */}
             {form.image_url && (
-              <div className="rounded-xl overflow-hidden border border-white/5 h-40">
+              <div className="rounded-xl overflow-hidden border border-[var(--border-primary)] h-40">
                 <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
               </div>
             )}
@@ -249,19 +249,19 @@ export default function AdminCaseStudies({ token, isDark }) {
                 <select 
                   value={form.category} 
                   onChange={(e) => updateField('category', e.target.value)} 
-                  className="w-full bg-white/5 border border-white/10 rounded-lg text-white text-sm h-10 px-3 outline-none focus:border-blue-500/50 transition-all"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg text-[var(--text-primary)] text-sm h-10 px-3 outline-none focus:border-blue-500/50 transition-all"
                 >
                   {solutions.length > 0 ? (
                     solutions.map((sol) => (
-                      <option key={sol.id} value={lang === 'fr' ? sol.name_fr : (sol.name_en || sol.name_fr)} className="bg-[#0F0F10]">
+                      <option key={sol.id} value={lang === 'fr' ? sol.name_fr : (sol.name_en || sol.name_fr)} className="bg-[var(--bg-secondary)]">
                         {lang === 'fr' ? sol.name_fr : (sol.name_en || sol.name_fr)}
                       </option>
                     ))
                   ) : (
                     <>
-                      <option value="Receipty Talent" className="bg-[#0F0F10]">Receipty Talent</option>
-                      <option value="Receipty Spend" className="bg-[#0F0F10]">Receipty Spend</option>
-                      <option value="Web-on-Demand" className="bg-[#0F0F10]">Web-on-Demand</option>
+                      <option value="Receipty Talent" className="bg-[var(--bg-secondary)]">Receipty Talent</option>
+                      <option value="Receipty Spend" className="bg-[var(--bg-secondary)]">Receipty Spend</option>
+                      <option value="Web-on-Demand" className="bg-[var(--bg-secondary)]">Web-on-Demand</option>
                     </>
                   )}
                 </select>
@@ -269,7 +269,7 @@ export default function AdminCaseStudies({ token, isDark }) {
               <FormField label="ROI" value={form.roi} onChange={(e) => updateField('roi', e.target.value)} placeholder="+340% efficacité" />
               <div className="flex items-end">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={form.published} onChange={(e) => updateField('published', e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-600" />
+                  <input type="checkbox" checked={form.published} onChange={(e) => updateField('published', e.target.checked)} className="w-4 h-4 rounded border-[var(--border-hover)] bg-[var(--bg-tertiary)] text-blue-600" />
                   <span className="text-sm text-gray-400">{lang === 'fr' ? 'Publiée' : 'Published'}</span>
                 </label>
               </div>
@@ -315,8 +315,8 @@ export default function AdminCaseStudies({ token, isDark }) {
             </div>
 
             {/* Submit */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
-              <button onClick={() => setDialogOpen(false)} className="px-4 py-2.5 text-sm text-gray-400 hover:text-white transition-colors duration-200">
+            <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-primary)]">
+              <button onClick={() => setDialogOpen(false)} className="px-4 py-2.5 text-sm text-gray-400 hover:text-[var(--text-primary)] transition-colors duration-200">
                 {lang === 'fr' ? 'Annuler' : 'Cancel'}
               </button>
               <button

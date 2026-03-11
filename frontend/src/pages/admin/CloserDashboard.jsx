@@ -273,7 +273,7 @@ export default function CloserDashboard() {
 
   if (loading) {
     return (
-      <div className={`pt-24 min-h-screen flex items-center justify-center ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+      <div className={`pt-24 min-h-screen flex items-center justify-center ${isDark ? 'bg-[var(--bg-primary)]' : 'bg-gray-50'}`}>
         <div className="text-gray-500">{lang === 'fr' ? 'Chargement...' : 'Loading...'}</div>
       </div>
     );
@@ -283,12 +283,12 @@ export default function CloserDashboard() {
   const progressToNextTier = next_tier ? ((stats?.deals_signes || 0) / next_tier.min_deals) * 100 : 100;
 
   return (
-    <div data-testid="closer-dashboard" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+    <div data-testid="closer-dashboard" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[var(--bg-primary)]' : 'bg-gray-50'}`}>
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className={`font-heading text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <h1 className={`font-heading text-2xl font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
               {lang === 'fr' ? 'Mon Dashboard' : 'My Dashboard'}
             </h1>
             <p className="text-gray-500 text-sm mt-1">
@@ -297,7 +297,7 @@ export default function CloserDashboard() {
           </div>
           <button
             onClick={logout}
-            className={`flex items-center gap-2 text-sm transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+            className={`flex items-center gap-2 text-sm transition-colors ${isDark ? 'text-gray-400 hover:text-[var(--text-primary)]' : 'text-gray-500 hover:text-gray-900'}`}
           >
             <LogOut className="w-4 h-4" />
             {lang === 'fr' ? 'Déconnexion' : 'Logout'}
@@ -311,7 +311,7 @@ export default function CloserDashboard() {
           className={`rounded-2xl border p-6 mb-6 ${
             stats?.current_tier_name === 'Gold' ? 'border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent' :
             stats?.current_tier_name === 'Silver' ? 'border-gray-500/30 bg-gradient-to-br from-gray-500/10 to-transparent' :
-            isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'
+            isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'
           }`}
         >
           <div className="flex items-center justify-between mb-4">
@@ -326,7 +326,7 @@ export default function CloserDashboard() {
                 }`} />
               </div>
               <div>
-                <h2 className={`font-heading text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <h2 className={`font-heading text-xl font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                   {lang === 'fr' ? 'Palier' : 'Tier'}: {stats?.current_tier_name}
                 </h2>
                 <p className="text-gray-500 text-sm">
@@ -358,12 +358,12 @@ export default function CloserDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={`rounded-xl border p-4 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={`rounded-xl border p-4 ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
             <div className="flex items-center gap-2 mb-2">
               <Target className="w-4 h-4 text-blue-400" />
               <span className="text-xs text-gray-500">{lang === 'fr' ? 'Total Deals' : 'Total Deals'}</span>
             </div>
-            <p className={`font-mono text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{stats?.total_deals || 0}</p>
+            <p className={`font-mono text-2xl font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{stats?.total_deals || 0}</p>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className={`rounded-xl border p-4 ${isDark ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-emerald-200 bg-emerald-50'}`}>
@@ -374,12 +374,12 @@ export default function CloserDashboard() {
             <p className="font-mono text-2xl font-bold text-emerald-400">{stats?.deals_signes || 0}</p>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className={`rounded-xl border p-4 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className={`rounded-xl border p-4 ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="w-4 h-4 text-amber-400" />
               <span className="text-xs text-gray-500">{lang === 'fr' ? 'CA Généré' : 'Revenue Generated'}</span>
             </div>
-            <p className={`font-mono text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{(stats?.total_ca || 0).toLocaleString()}€</p>
+            <p className={`font-mono text-2xl font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{(stats?.total_ca || 0).toLocaleString()}€</p>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className={`rounded-xl border p-4 ${isDark ? 'border-purple-500/20 bg-purple-500/5' : 'border-purple-200 bg-purple-50'}`}>
@@ -392,13 +392,13 @@ export default function CloserDashboard() {
         </div>
 
         {/* Navigation Tabs - Dynamic based on permissions */}
-        <div className={`flex gap-2 p-1 rounded-lg mb-6 ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
+        <div className={`flex gap-2 p-1 rounded-lg mb-6 ${isDark ? 'bg-[var(--bg-tertiary)]' : 'bg-gray-100'}`}>
           <button
             onClick={() => setActiveTab('deals')}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === 'deals'
                 ? 'bg-blue-600 text-white'
-                : isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                : isDark ? 'text-gray-400 hover:text-[var(--text-primary)]' : 'text-gray-600 hover:text-gray-900'
             }`}
             data-testid="tab-deals"
           >
@@ -412,7 +412,7 @@ export default function CloserDashboard() {
               className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'quotes'
                   ? 'bg-blue-600 text-white'
-                  : isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                  : isDark ? 'text-gray-400 hover:text-[var(--text-primary)]' : 'text-gray-600 hover:text-gray-900'
               }`}
               data-testid="tab-quotes"
             >
@@ -427,7 +427,7 @@ export default function CloserDashboard() {
               className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'audits'
                   ? 'bg-blue-600 text-white'
-                  : isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                  : isDark ? 'text-gray-400 hover:text-[var(--text-primary)]' : 'text-gray-600 hover:text-gray-900'
               }`}
               data-testid="tab-audits"
             >
@@ -445,7 +445,7 @@ export default function CloserDashboard() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={() => setShowDealForm(true)}
-              className="w-full mb-6 flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-600/20"
+              className="w-full mb-6 flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-[var(--text-primary)] font-semibold rounded-xl transition-all shadow-lg shadow-blue-600/20"
               data-testid="add-deal-btn"
             >
               <Plus className="w-5 h-5" />
@@ -453,9 +453,9 @@ export default function CloserDashboard() {
             </motion.button>
 
             {/* Deals List */}
-        <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
-          <div className={`p-4 border-b ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
-            <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
+          <div className={`p-4 border-b ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-200'}`}>
+            <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
               {lang === 'fr' ? 'Mes Deals' : 'My Deals'}
             </h2>
           </div>
@@ -468,7 +468,7 @@ export default function CloserDashboard() {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-[var(--border-primary)]">
               {deals.map((deal, index) => {
                 const StatusIcon = statusConfig[deal.status]?.icon || Clock;
                 return (
@@ -477,7 +477,7 @@ export default function CloserDashboard() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`p-4 ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-gray-50'}`}
+                    className={`p-4 ${isDark ? 'hover:bg-[var(--bg-hover)]' : 'hover:bg-gray-50'}`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -491,14 +491,14 @@ export default function CloserDashboard() {
                           }`} />
                         </div>
                         <div>
-                          <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{deal.client_name}</h3>
+                          <h3 className={`font-medium ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{deal.client_name}</h3>
                           <p className="text-xs text-gray-500">{deal.client_email || 'No email'}</p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-6">
                         <div className="text-right">
-                          <p className={`font-mono font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{deal.amount_ht.toLocaleString()}€</p>
+                          <p className={`font-mono font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{deal.amount_ht.toLocaleString()}€</p>
                           {deal.status === 'signe' && (
                             <p className="text-xs text-emerald-400">
                               +{deal.commission_amount.toLocaleString()}€ ({deal.commission_rate}%)
@@ -514,7 +514,7 @@ export default function CloserDashboard() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => { setEditingDeal(deal); setDealForm({ client_name: deal.client_name, client_email: deal.client_email, amount_ht: deal.amount_ht.toString(), notes: deal.notes }); }}
-                              className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                              className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-[var(--bg-tertiary)]' : 'hover:bg-gray-100'}`}
                             >
                               <Edit2 className="w-4 h-4 text-gray-500" />
                             </button>
@@ -549,7 +549,7 @@ export default function CloserDashboard() {
         </div>
 
         {/* All Tiers Display */}
-        <div className={`mt-6 rounded-xl border p-4 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
+        <div className={`mt-6 rounded-xl border p-4 ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
           <h3 className={`text-sm font-medium mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             {lang === 'fr' ? 'Paliers de commission' : 'Commission Tiers'}
           </h3>
@@ -562,10 +562,10 @@ export default function CloserDashboard() {
                     ? tier.name === 'Gold' ? 'bg-amber-500/20 border border-amber-500/30' :
                       tier.name === 'Silver' ? 'bg-gray-500/20 border border-gray-500/30' :
                       'bg-orange-500/20 border border-orange-500/30'
-                    : isDark ? 'bg-white/5' : 'bg-gray-50'
+                    : isDark ? 'bg-[var(--bg-tertiary)]' : 'bg-gray-50'
                 }`}
               >
-                <p className={`text-xs ${tier.name === stats?.current_tier_name ? 'text-white' : 'text-gray-500'}`}>
+                <p className={`text-xs ${tier.name === stats?.current_tier_name ? 'text-[var(--text-primary)]' : 'text-gray-500'}`}>
                   {tier.name}
                 </p>
                 <p className={`font-mono font-bold text-lg ${
@@ -591,7 +591,7 @@ export default function CloserDashboard() {
           <div className="space-y-6">
             {/* Header with Create button */}
             <div className="flex justify-between items-center">
-              <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                 {lang === 'fr' ? 'Génération de Devis PDF' : 'PDF Quote Generation'}
               </h2>
               <button
@@ -611,7 +611,7 @@ export default function CloserDashboard() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className={`rounded-xl border p-6 ${isDark ? 'border-white/10 bg-[#0F0F10]' : 'border-gray-200 bg-white'}`}
+                  className={`rounded-xl border p-6 ${isDark ? 'border-[var(--border-secondary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white'}`}
                 >
                   <form onSubmit={handleCreateQuote} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -625,7 +625,7 @@ export default function CloserDashboard() {
                           onChange={(e) => setQuoteForm({ ...quoteForm, client_name: e.target.value })}
                           placeholder="Jean Dupont"
                           className={`w-full rounded-lg px-4 py-2.5 text-sm outline-none ${
-                            isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                           }`}
                           required
                         />
@@ -640,7 +640,7 @@ export default function CloserDashboard() {
                           onChange={(e) => setQuoteForm({ ...quoteForm, client_company: e.target.value })}
                           placeholder="Entreprise SAS"
                           className={`w-full rounded-lg px-4 py-2.5 text-sm outline-none ${
-                            isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                           }`}
                         />
                       </div>
@@ -652,7 +652,7 @@ export default function CloserDashboard() {
                           onChange={(e) => setQuoteForm({ ...quoteForm, client_email: e.target.value })}
                           placeholder="client@email.com"
                           className={`w-full rounded-lg px-4 py-2.5 text-sm outline-none ${
-                            isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                           }`}
                         />
                       </div>
@@ -668,7 +668,7 @@ export default function CloserDashboard() {
                         placeholder={lang === 'fr' ? 'Décrivez les services proposés...' : 'Describe the services...'}
                         rows={4}
                         className={`w-full rounded-lg px-4 py-3 text-sm outline-none resize-y ${
-                          isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                          isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                         }`}
                         required
                       />
@@ -687,7 +687,7 @@ export default function CloserDashboard() {
                           onChange={(e) => setQuoteForm({ ...quoteForm, price_ht: e.target.value })}
                           placeholder="1000.00"
                           className={`w-full rounded-lg px-4 py-2.5 text-sm outline-none ${
-                            isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                            isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                           }`}
                           required
                         />
@@ -697,21 +697,21 @@ export default function CloserDashboard() {
                       <div className={`rounded-xl p-4 ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
                         <div className="flex items-center gap-2 mb-3">
                           <Calculator className="w-4 h-4 text-blue-400" />
-                          <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          <span className={`text-sm font-medium ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                             {lang === 'fr' ? 'Calcul automatique' : 'Automatic calculation'}
                           </span>
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="text-gray-500">{lang === 'fr' ? 'Prix HT' : 'Price excl. VAT'}</span>
-                            <span className={`font-mono ${isDark ? 'text-white' : 'text-gray-900'}`}>{quoteHT.toLocaleString()}€</span>
+                            <span className={`font-mono ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{quoteHT.toLocaleString()}€</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">TVA (20%)</span>
-                            <span className={`font-mono ${isDark ? 'text-white' : 'text-gray-900'}`}>{quoteTVA.toLocaleString()}€</span>
+                            <span className={`font-mono ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{quoteTVA.toLocaleString()}€</span>
                           </div>
-                          <div className={`border-t pt-2 flex justify-between ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-                            <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Total TTC</span>
+                          <div className={`border-t pt-2 flex justify-between ${isDark ? 'border-[var(--border-secondary)]' : 'border-gray-200'}`}>
+                            <span className={`font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>Total TTC</span>
                             <span className="font-bold font-mono text-blue-400">{quoteTTC.toLocaleString()}€</span>
                           </div>
                         </div>
@@ -722,7 +722,7 @@ export default function CloserDashboard() {
                       <button
                         type="button"
                         onClick={() => setShowQuoteForm(false)}
-                        className={`px-4 py-2.5 text-sm transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                        className={`px-4 py-2.5 text-sm transition-colors ${isDark ? 'text-gray-400 hover:text-[var(--text-primary)]' : 'text-gray-600 hover:text-gray-900'}`}
                       >
                         {lang === 'fr' ? 'Annuler' : 'Cancel'}
                       </button>
@@ -744,8 +744,8 @@ export default function CloserDashboard() {
             </AnimatePresence>
 
             {/* Quotes List */}
-            <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
-              <div className={`p-4 border-b ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
+            <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
+              <div className={`p-4 border-b ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-200'}`}>
                 <h4 className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   {lang === 'fr' ? `Historique des devis (${quotes.length})` : `Quote history (${quotes.length})`}
                 </h4>
@@ -759,14 +759,14 @@ export default function CloserDashboard() {
                   <p className="text-gray-500">{lang === 'fr' ? 'Aucun devis' : 'No quotes'}</p>
                 </div>
               ) : (
-                <div className="divide-y divide-white/5">
+                <div className="divide-y divide-[var(--border-primary)]">
                   {quotes.map((quote, index) => (
                     <motion.div
                       key={quote.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className={`p-4 ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-gray-50'}`}
+                      className={`p-4 ${isDark ? 'hover:bg-[var(--bg-hover)]' : 'hover:bg-gray-50'}`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -774,7 +774,7 @@ export default function CloserDashboard() {
                             <FileText className="w-5 h-5 text-blue-400" />
                           </div>
                           <div>
-                            <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            <h3 className={`font-medium ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                               {quote.company_name || quote.contact_name || quote.client_name || 'Sans nom'}
                             </h3>
                             <p className="text-xs text-gray-500">{quote.contact_email || quote.client_email}</p>
@@ -782,7 +782,7 @@ export default function CloserDashboard() {
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="text-right">
-                            <p className={`font-mono font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            <p className={`font-mono font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                               {(quote.total_setup || quote.price_ttc || 0).toLocaleString()}€
                             </p>
                             {quote.total_monthly > 0 && (
@@ -807,7 +807,7 @@ export default function CloserDashboard() {
           <div className="space-y-6">
             {/* Header with Create button */}
             <div className="flex justify-between items-center">
-              <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                 {lang === 'fr' ? 'Audit & ROI Optimizer' : 'Audit & ROI Optimizer'}
               </h2>
               <button
@@ -827,11 +827,11 @@ export default function CloserDashboard() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className={`rounded-xl border p-6 ${isDark ? 'border-white/10 bg-[#0F0F10]' : 'border-gray-200 bg-white'}`}
+                  className={`rounded-xl border p-6 ${isDark ? 'border-[var(--border-secondary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white'}`}
                 >
                   <div className="flex items-center gap-2 mb-6">
                     <Sparkles className="w-5 h-5 text-purple-400" />
-                    <h4 className={`font-heading text-md font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    <h4 className={`font-heading text-md font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                       {lang === 'fr' ? 'Créer un nouvel audit' : 'Create a new audit'}
                     </h4>
                   </div>
@@ -854,7 +854,7 @@ export default function CloserDashboard() {
                             onChange={(e) => setAuditForm({ ...auditForm, client_name: e.target.value })}
                             placeholder="Entreprise SAS"
                             className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
-                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                              isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                             }`}
                             required
                           />
@@ -869,7 +869,7 @@ export default function CloserDashboard() {
                             onChange={(e) => setAuditForm({ ...auditForm, client_city: e.target.value })}
                             placeholder="Strasbourg"
                             className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
-                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                              isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                             }`}
                           />
                         </div>
@@ -883,7 +883,7 @@ export default function CloserDashboard() {
                             onChange={(e) => setAuditForm({ ...auditForm, client_sector: e.target.value })}
                             placeholder="RH, Finance, Logistique..."
                             className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
-                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                              isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                             }`}
                           />
                         </div>
@@ -895,7 +895,7 @@ export default function CloserDashboard() {
                             onChange={(e) => setAuditForm({ ...auditForm, client_email: e.target.value })}
                             placeholder="contact@client.com"
                             className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
-                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                              isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                             }`}
                           />
                         </div>
@@ -917,7 +917,7 @@ export default function CloserDashboard() {
                         }
                         rows={4}
                         className={`w-full rounded-lg px-4 py-3 text-sm outline-none resize-y ${
-                          isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                          isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                         }`}
                         required
                       />
@@ -942,7 +942,7 @@ export default function CloserDashboard() {
                             onChange={(e) => setAuditForm({ ...auditForm, hours_lost_per_week: e.target.value })}
                             placeholder="10"
                             className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
-                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                              isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                             }`}
                             required
                           />
@@ -959,7 +959,7 @@ export default function CloserDashboard() {
                             onChange={(e) => setAuditForm({ ...auditForm, hourly_cost: e.target.value })}
                             placeholder="35"
                             className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
-                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                              isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                             }`}
                             required
                           />
@@ -972,7 +972,7 @@ export default function CloserDashboard() {
                             value={auditForm.complexity}
                             onChange={(e) => setAuditForm({ ...auditForm, complexity: e.target.value })}
                             className={`w-full rounded-lg px-3 py-2 text-sm outline-none ${
-                              isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                              isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                             }`}
                           >
                             <option value="low">{lang === 'fr' ? 'Basse (85% réduction)' : 'Low (85% reduction)'}</option>
@@ -1009,7 +1009,7 @@ export default function CloserDashboard() {
                       <button
                         type="button"
                         onClick={() => setShowAuditForm(false)}
-                        className={`px-4 py-2.5 text-sm transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                        className={`px-4 py-2.5 text-sm transition-colors ${isDark ? 'text-gray-400 hover:text-[var(--text-primary)]' : 'text-gray-600 hover:text-gray-900'}`}
                       >
                         {lang === 'fr' ? 'Annuler' : 'Cancel'}
                       </button>
@@ -1031,8 +1031,8 @@ export default function CloserDashboard() {
             </AnimatePresence>
 
             {/* Audits List */}
-            <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
-              <div className={`p-4 border-b ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
+            <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
+              <div className={`p-4 border-b ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-200'}`}>
                 <h4 className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   {lang === 'fr' ? `Historique des audits (${audits.length})` : `Audit history (${audits.length})`}
                 </h4>
@@ -1046,14 +1046,14 @@ export default function CloserDashboard() {
                   <p className="text-gray-500">{lang === 'fr' ? 'Aucun audit' : 'No audits'}</p>
                 </div>
               ) : (
-                <div className="divide-y divide-white/5">
+                <div className="divide-y divide-[var(--border-primary)]">
                   {audits.map((audit, index) => (
                     <motion.div
                       key={audit.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className={`p-4 ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-gray-50'}`}
+                      className={`p-4 ${isDark ? 'hover:bg-[var(--bg-hover)]' : 'hover:bg-gray-50'}`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -1061,7 +1061,7 @@ export default function CloserDashboard() {
                             <FileSearch className="w-5 h-5 text-purple-400" />
                           </div>
                           <div>
-                            <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            <h3 className={`font-medium ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                               {audit.client_name || audit.company_name || 'Audit'}
                             </h3>
                             <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -1093,9 +1093,9 @@ export default function CloserDashboard() {
 
       {/* Deal Form Dialog */}
       <Dialog open={showDealForm || editingDeal !== null} onOpenChange={(open) => { if (!open) { setShowDealForm(false); setEditingDeal(null); resetForm(); }}}>
-        <DialogContent className={isDark ? 'bg-[#0F0F10] border-white/10' : 'bg-white'}>
+        <DialogContent className={isDark ? 'bg-[var(--bg-secondary)] border-[var(--border-secondary)]' : 'bg-white'}>
           <DialogHeader>
-            <DialogTitle className={isDark ? 'text-white' : 'text-gray-900'}>
+            <DialogTitle className={isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}>
               {editingDeal ? (lang === 'fr' ? 'Modifier le deal' : 'Edit Deal') : (lang === 'fr' ? 'Nouveau Prospect' : 'New Prospect')}
             </DialogTitle>
           </DialogHeader>
@@ -1107,7 +1107,7 @@ export default function CloserDashboard() {
                 value={dealForm.client_name}
                 onChange={(e) => setDealForm({ ...dealForm, client_name: e.target.value })}
                 placeholder="ex: Entreprise ABC"
-                className={`w-full rounded-lg h-11 px-4 text-sm ${isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
+                className={`w-full rounded-lg h-11 px-4 text-sm ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)] placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
                 required
               />
             </div>
@@ -1118,7 +1118,7 @@ export default function CloserDashboard() {
                 value={dealForm.client_email}
                 onChange={(e) => setDealForm({ ...dealForm, client_email: e.target.value })}
                 placeholder="contact@entreprise.fr"
-                className={`w-full rounded-lg h-11 px-4 text-sm ${isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
+                className={`w-full rounded-lg h-11 px-4 text-sm ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)] placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
               />
             </div>
             <div>
@@ -1130,7 +1130,7 @@ export default function CloserDashboard() {
                 value={dealForm.amount_ht}
                 onChange={(e) => setDealForm({ ...dealForm, amount_ht: e.target.value })}
                 placeholder="15000"
-                className={`w-full rounded-lg h-11 px-4 text-sm ${isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
+                className={`w-full rounded-lg h-11 px-4 text-sm ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)] placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
                 required
               />
             </div>
@@ -1141,7 +1141,7 @@ export default function CloserDashboard() {
                 onChange={(e) => setDealForm({ ...dealForm, notes: e.target.value })}
                 placeholder={lang === 'fr' ? 'Contexte, source du lead...' : 'Context, lead source...'}
                 rows={3}
-                className={`w-full rounded-lg px-4 py-3 text-sm resize-none ${isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
+                className={`w-full rounded-lg px-4 py-3 text-sm resize-none ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)] placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
               />
             </div>
             <button

@@ -146,12 +146,12 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
     <>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         {statCards.map((stat, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className={`rounded-xl border p-4 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`} data-testid={`admin-stat-${i}`}>
+          <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className={`rounded-xl border p-4 ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`} data-testid={`admin-stat-${i}`}>
             <div className="flex items-center gap-2 mb-2">
               <stat.icon className={`w-4 h-4 ${stat.color}`} />
               <span className="text-xs text-gray-500">{stat.label}</span>
             </div>
-            <p className={`font-mono text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{stat.value}</p>
+            <p className={`font-mono text-xl font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{stat.value}</p>
           </motion.div>
         ))}
       </div>
@@ -165,15 +165,15 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
             exit={{ opacity: 0, height: 0 }}
             className="mb-6 overflow-hidden"
           >
-            <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0F0F10] border border-white/10' : 'bg-white border border-gray-200 shadow-sm'}`}>
+            <div className={`rounded-xl p-6 ${isDark ? 'bg-[var(--bg-secondary)] border border-[var(--border-secondary)]' : 'bg-white border border-gray-200 shadow-sm'}`}>
               <div className="flex items-center justify-between mb-6">
-                <h3 className={`font-heading text-md font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <h3 className={`font-heading text-md font-semibold flex items-center gap-2 ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                   <UserPlus className="w-5 h-5 text-blue-400" />
                   {lang === 'fr' ? 'Nouveau Lead' : 'New Lead'}
                 </h3>
                 <button 
                   onClick={() => { setShowForm(false); resetForm(); }}
-                  className="p-2 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                  className="p-2 text-gray-500 hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-all"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -196,7 +196,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                         value={form.name}
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
                         placeholder="Jean Dupont"
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                        className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                         required
                       />
                     </div>
@@ -209,7 +209,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                           value={form.email}
                           onChange={(e) => setForm({ ...form, email: e.target.value })}
                           placeholder="jean@entreprise.fr"
-                          className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg pl-10 pr-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                           required
                         />
                       </div>
@@ -225,7 +225,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                           value={form.company}
                           onChange={(e) => setForm({ ...form, company: e.target.value })}
                           placeholder="Entreprise SAS"
-                          className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg pl-10 pr-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                         />
                       </div>
                     </div>
@@ -240,7 +240,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                           value={form.phone}
                           onChange={(e) => setForm({ ...form, phone: e.target.value })}
                           placeholder="+33 6 12 34 56 78"
-                          className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg pl-10 pr-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                         />
                       </div>
                     </div>
@@ -261,7 +261,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                       <select
                         value={form.category}
                         onChange={(e) => setForm({ ...form, category: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                        className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                       >
                         <option value="">{lang === 'fr' ? 'Sélectionner...' : 'Select...'}</option>
                         {CATEGORIES.map((cat) => (
@@ -282,7 +282,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                           value={form.estimated_setup}
                           onChange={(e) => setForm({ ...form, estimated_setup: e.target.value })}
                           placeholder="5000"
-                          className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg pl-10 pr-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                         />
                       </div>
                     </div>
@@ -299,7 +299,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                           value={form.estimated_monthly}
                           onChange={(e) => setForm({ ...form, estimated_monthly: e.target.value })}
                           placeholder="500"
-                          className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg pl-10 pr-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                         />
                       </div>
                     </div>
@@ -316,7 +316,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
                     placeholder={lang === 'fr' ? 'Informations additionnelles sur le prospect...' : 'Additional information about the prospect...'}
                     rows={2}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-3 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none resize-y"
                   />
                 </div>
 
@@ -325,7 +325,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                   <button
                     type="button"
                     onClick={() => { setShowForm(false); resetForm(); }}
-                    className="px-4 py-2.5 text-sm text-gray-400 hover:text-white transition-colors"
+                    className="px-4 py-2.5 text-sm text-gray-400 hover:text-[var(--text-primary)] transition-colors"
                   >
                     {lang === 'fr' ? 'Annuler' : 'Cancel'}
                   </button>
@@ -350,19 +350,19 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
         )}
       </AnimatePresence>
 
-      <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
-        <div className={`p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
-          <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.admin.leads}</h2>
+      <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
+        <div className={`p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-200'}`}>
+          <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{t.admin.leads}</h2>
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="relative flex-1 sm:flex-initial">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
-              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={lang === 'fr' ? 'Rechercher...' : 'Search...'} data-testid="admin-search-input" className={`w-full sm:w-48 rounded-lg text-sm h-9 pl-9 pr-3 outline-none transition-all duration-200 ${isDark ? 'bg-white/5 border border-white/10 focus:border-blue-500/50 text-white placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 focus:border-blue-500 text-gray-900 placeholder:text-gray-400'}`} />
+              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={lang === 'fr' ? 'Rechercher...' : 'Search...'} data-testid="admin-search-input" className={`w-full sm:w-48 rounded-lg text-sm h-9 pl-9 pr-3 outline-none transition-all duration-200 ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] focus:border-blue-500/50 text-[var(--text-primary)] placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 focus:border-blue-500 text-gray-900 placeholder:text-gray-400'}`} />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className={`w-[130px] h-9 text-xs ${isDark ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-gray-50'}`} data-testid="admin-status-filter">
+              <SelectTrigger className={`w-[130px] h-9 text-xs ${isDark ? 'border-[var(--border-secondary)] bg-[var(--bg-tertiary)]' : 'border-gray-200 bg-gray-50'}`} data-testid="admin-status-filter">
                 <Filter className="w-3 h-3 mr-1.5 text-gray-500" /><SelectValue />
               </SelectTrigger>
-              <SelectContent className={isDark ? 'bg-[#0F0F10] border-white/10' : 'bg-white border-gray-200'}>
+              <SelectContent className={isDark ? 'bg-[var(--bg-secondary)] border-[var(--border-secondary)]' : 'bg-white border-gray-200'}>
                 <SelectItem value="all">{lang === 'fr' ? 'Tous' : 'All'}</SelectItem>
                 <SelectItem value="new">New</SelectItem>
                 <SelectItem value="contacted">Contacted</SelectItem>
@@ -370,7 +370,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                 <SelectItem value="converted">Converted</SelectItem>
               </SelectContent>
             </Select>
-            <button onClick={exportCSV} data-testid="admin-export-csv-btn" className={`flex items-center gap-1.5 h-9 px-3 text-xs border rounded-lg transition-all duration-200 ${isDark ? 'text-gray-400 hover:text-white border-white/10 hover:border-white/20' : 'text-gray-500 hover:text-gray-900 border-gray-200 hover:border-gray-300'}`}>
+            <button onClick={exportCSV} data-testid="admin-export-csv-btn" className={`flex items-center gap-1.5 h-9 px-3 text-xs border rounded-lg transition-all duration-200 ${isDark ? 'text-gray-400 hover:text-[var(--text-primary)] border-[var(--border-secondary)] hover:border-[var(--border-hover)]' : 'text-gray-500 hover:text-gray-900 border-gray-200 hover:border-gray-300'}`}>
               <Download className="w-3.5 h-3.5" /> CSV
             </button>
             <button 
@@ -389,7 +389,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
         ) : (
           <Table>
             <TableHeader>
-              <TableRow className="border-white/5 hover:bg-transparent">
+              <TableRow className="border-[var(--border-primary)] hover:bg-transparent">
                 <TableHead className="text-gray-500">Name</TableHead>
                 <TableHead className="text-gray-500">Email</TableHead>
                 <TableHead className="text-gray-500">Company</TableHead>
@@ -402,8 +402,8 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
             </TableHeader>
             <TableBody>
               {leads.map((lead) => (
-                <TableRow key={lead.id} className="border-white/5 hover:bg-white/[0.02]">
-                  <TableCell className="text-white font-medium text-sm">
+                <TableRow key={lead.id} className="border-[var(--border-primary)] hover:bg-[var(--bg-hover)]">
+                  <TableCell className="text-[var(--text-primary)] font-medium text-sm">
                     <div className="flex items-center gap-2">
                       {lead.name}
                       {lead.has_quote && (
@@ -432,7 +432,7 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
                   <TableCell>
                     <Select value={lead.status} onValueChange={(val) => updateStatus(lead.id, val)}>
                       <SelectTrigger className={`w-[130px] h-8 text-xs border ${STATUS_COLORS[lead.status] || ''} bg-transparent`} data-testid={`status-select-${lead.id}`}><SelectValue /></SelectTrigger>
-                      <SelectContent className="bg-[#0F0F10] border-white/10">
+                      <SelectContent className="bg-[var(--bg-secondary)] border-[var(--border-secondary)]">
                         <SelectItem value="new">New</SelectItem>
                         <SelectItem value="contacted">Contacted</SelectItem>
                         <SelectItem value="qualified">Qualified</SelectItem>

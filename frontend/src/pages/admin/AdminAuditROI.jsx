@@ -211,7 +211,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="font-heading text-lg font-semibold text-white flex items-center gap-2">
+          <h3 className="font-heading text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
             <FileSearch className="w-5 h-5 text-blue-400" />
             Audit & ROI Optimizer
           </h3>
@@ -234,10 +234,10 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-[#0F0F10] border border-white/10 rounded-xl p-6 overflow-hidden"
+            className="bg-[var(--bg-secondary)] border border-[var(--border-secondary)] rounded-xl p-6 overflow-hidden"
           >
             <div className="flex items-center justify-between mb-6">
-              <h4 className="font-heading text-md font-semibold text-white flex items-center gap-2">
+              <h4 className="font-heading text-md font-semibold text-[var(--text-primary)] flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-purple-400" />
                 Créer un nouvel audit
               </h4>
@@ -264,7 +264,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                       value={form.client_name}
                       onChange={(e) => setForm({ ...form, client_name: e.target.value })}
                       placeholder="Entreprise SAS"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                      className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                       required
                     />
                   </div>
@@ -275,7 +275,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                       value={form.client_city}
                       onChange={(e) => setForm({ ...form, client_city: e.target.value })}
                       placeholder="Strasbourg"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                      className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                     />
                   </div>
                   <div>
@@ -285,7 +285,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                       value={form.client_sector}
                       onChange={(e) => setForm({ ...form, client_sector: e.target.value })}
                       placeholder="RH, Finance, Logistique..."
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                      className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                     />
                   </div>
                   <div>
@@ -295,7 +295,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                       value={form.client_email}
                       onChange={(e) => setForm({ ...form, client_email: e.target.value })}
                       placeholder="contact@client.com"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                      className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                     />
                   </div>
                 </div>
@@ -312,7 +312,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                   onChange={(e) => setForm({ ...form, problem_description: e.target.value })}
                   placeholder="Décrivez le problème manuel identifié chez le client...&#10;Ex: Saisie manuelle des factures, tri des CV, gestion des emails..."
                   rows={4}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-3 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none resize-y"
                   required
                 />
               </div>
@@ -333,7 +333,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                       value={form.hours_lost_per_week}
                       onChange={(e) => setForm({ ...form, hours_lost_per_week: e.target.value })}
                       placeholder="10"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                      className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                       required
                     />
                   </div>
@@ -346,7 +346,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                       value={form.hourly_cost}
                       onChange={(e) => setForm({ ...form, hourly_cost: e.target.value })}
                       placeholder="35"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                      className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                       required
                     />
                   </div>
@@ -355,7 +355,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                     <select
                       value={form.complexity}
                       onChange={(e) => setForm({ ...form, complexity: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                      className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-3 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                     >
                       <option value="low">Basse (85% réduction)</option>
                       <option value="medium">Moyenne (75% réduction)</option>
@@ -392,7 +392,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   placeholder="Notes internes..."
                   rows={2}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-3 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none resize-y"
                 />
               </div>
 
@@ -401,7 +401,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2.5 text-sm text-gray-400 hover:text-white transition-colors"
+                  className="px-4 py-2.5 text-sm text-gray-400 hover:text-[var(--text-primary)] transition-colors"
                 >
                   Annuler
                 </button>
@@ -438,10 +438,10 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
             className="space-y-4"
           >
             {/* Public Audit Summary */}
-            <div className="bg-[#0F0F10] border border-white/10 rounded-xl p-6">
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border-secondary)] rounded-xl p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h4 className="font-heading text-md font-semibold text-white flex items-center gap-2">
+                  <h4 className="font-heading text-md font-semibold text-[var(--text-primary)] flex items-center gap-2">
                     <FileSearch className="w-5 h-5 text-blue-400" />
                     {selectedAudit.audit_number} - {selectedAudit.client_name}
                   </h4>
@@ -477,7 +477,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
 
               {/* AI Report Preview */}
               {selectedAudit.ai_report && (
-                <div className="mt-4 p-4 bg-white/5 rounded-lg">
+                <div className="mt-4 p-4 bg-[var(--bg-tertiary)] rounded-lg">
                   <p className="text-xs text-gray-500 mb-2">Analyse IA</p>
                   <p className="text-sm text-gray-300 whitespace-pre-line">{selectedAudit.ai_report.substring(0, 500)}...</p>
                 </div>
@@ -488,7 +488,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
             <div className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-xl p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Lock className="w-5 h-5 text-purple-400" />
-                <h4 className="font-heading text-md font-semibold text-white">Stratégie Commerciale</h4>
+                <h4 className="font-heading text-md font-semibold text-[var(--text-primary)]">Stratégie Commerciale</h4>
                 <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">Admin uniquement</span>
               </div>
               
@@ -506,10 +506,10 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                   }).map(([key, config]) => (
                     <div key={key} className={`bg-${config.color}-500/10 border border-${config.color}-500/30 rounded-xl p-4`}>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-white">{config.label}</span>
+                        <span className="text-sm font-medium text-[var(--text-primary)]">{config.label}</span>
                         <span className="text-xs text-gray-400">{config.pct} économie</span>
                       </div>
-                      <p className="text-2xl font-bold text-white">{formatPrice(selectedAudit.strategy.suggested_prices[key])}</p>
+                      <p className="text-2xl font-bold text-[var(--text-primary)]">{formatPrice(selectedAudit.strategy.suggested_prices[key])}</p>
                       <p className="text-xs text-gray-400 mt-1">
                         Couvre {selectedAudit.strategy.profitability[`${key}_months`]} mois de frais fixes
                       </p>
@@ -525,17 +525,17 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                     <Target className="w-4 h-4" />
                     Argumentaire de Closing (IA)
                   </h5>
-                  <div className="bg-white/5 rounded-lg p-4">
+                  <div className="bg-[var(--bg-tertiary)] rounded-lg p-4">
                     <p className="text-sm text-gray-300 whitespace-pre-line">{selectedAudit.strategy.closing_arguments}</p>
                   </div>
                 </div>
               )}
 
               {/* Convert to Quote */}
-              <div className="mt-6 pt-4 border-t border-white/10 flex justify-end gap-3">
+              <div className="mt-6 pt-4 border-t border-[var(--border-secondary)] flex justify-end gap-3">
                 <button
                   onClick={() => { setSelectedAudit(null); setShowStrategy(false); }}
-                  className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                  className="px-4 py-2 text-sm text-gray-400 hover:text-[var(--text-primary)] transition-colors"
                 >
                   Fermer
                 </button>
@@ -570,8 +570,8 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
       </AnimatePresence>
 
       {/* Audits List */}
-      <div className="bg-[#0F0F10] border border-white/5 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-white/5">
+      <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-[var(--border-primary)]">
           <h4 className="text-sm font-medium text-gray-400">Historique des audits ({audits.length})</h4>
         </div>
         
@@ -585,7 +585,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/5">
+                <tr className="border-b border-[var(--border-primary)]">
                   <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">N° Audit</th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Client</th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Perte/an</th>
@@ -599,7 +599,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                 {audits.map((audit) => (
                   <tr 
                     key={audit.id} 
-                    className={`border-b border-white/5 hover:bg-white/[0.02] cursor-pointer ${selectedAudit?.id === audit.id ? 'bg-blue-500/10' : ''}`}
+                    className={`border-b border-[var(--border-primary)] hover:bg-[var(--bg-hover)] cursor-pointer ${selectedAudit?.id === audit.id ? 'bg-blue-500/10' : ''}`}
                     onClick={() => { setSelectedAudit(audit); setShowStrategy(true); setShowForm(false); }}
                   >
                     <td className="px-4 py-3">
@@ -607,7 +607,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
                     </td>
                     <td className="px-4 py-3">
                       <div>
-                        <p className="text-sm text-white flex items-center gap-2">
+                        <p className="text-sm text-[var(--text-primary)] flex items-center gap-2">
                           {audit.client_name}
                           {audit.lead_id && (
                             <span title="Lié à un lead" className="text-purple-400">

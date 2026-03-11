@@ -110,10 +110,10 @@ function ActivityLogSection({ isDark, lang, headers, closers, selectedCloserActi
   };
 
   return (
-    <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`} data-testid="activity-log-section">
-      <div className={`p-4 border-b ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
+    <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`} data-testid="activity-log-section">
+      <div className={`p-4 border-b ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-200'}`}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
             {selectedCloserActivity 
               ? `${lang === 'fr' ? 'Activité de' : 'Activity of'} ${selectedCloserActivity.closer?.name || selectedCloserActivity.closer?.email}`
               : (lang === 'fr' ? 'Journal d\'Activité' : 'Activity Log')
@@ -122,7 +122,7 @@ function ActivityLogSection({ isDark, lang, headers, closers, selectedCloserActi
           <button
             onClick={handleRefresh}
             className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all ${
-              isDark ? 'bg-white/5 hover:bg-white/10 text-gray-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+              isDark ? 'bg-[var(--bg-tertiary)] hover:bg-[var(--bg-tertiary)] text-gray-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
             }`}
           >
             <RefreshCw className="w-4 h-4" />
@@ -139,7 +139,7 @@ function ActivityLogSection({ isDark, lang, headers, closers, selectedCloserActi
               value={filter.timeRange}
               onChange={(e) => { setFilter({ ...filter, timeRange: e.target.value }); }}
               className={`text-sm rounded-lg px-3 py-1.5 ${
-                isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
               }`}
             >
               <option value="all">{lang === 'fr' ? 'Tout l\'historique' : 'All history'}</option>
@@ -156,7 +156,7 @@ function ActivityLogSection({ isDark, lang, headers, closers, selectedCloserActi
                 value={filter.closerId}
                 onChange={(e) => setFilter({ ...filter, closerId: e.target.value })}
                 className={`text-sm rounded-lg px-3 py-1.5 ${
-                  isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                  isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
                 }`}
               >
                 <option value="all">{lang === 'fr' ? 'Tous les closers' : 'All closers'}</option>
@@ -174,7 +174,7 @@ function ActivityLogSection({ isDark, lang, headers, closers, selectedCloserActi
               value={filter.action}
               onChange={(e) => setFilter({ ...filter, action: e.target.value })}
               className={`text-sm rounded-lg px-3 py-1.5 ${
-                isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
               }`}
             >
               <option value="all">{lang === 'fr' ? 'Toutes les actions' : 'All actions'}</option>
@@ -192,7 +192,7 @@ function ActivityLogSection({ isDark, lang, headers, closers, selectedCloserActi
               value={limit}
               onChange={(e) => setLimit(parseInt(e.target.value))}
               className={`text-sm rounded-lg px-3 py-1.5 ${
-                isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'
               }`}
             >
               <option value={25}>25</option>
@@ -221,7 +221,7 @@ function ActivityLogSection({ isDark, lang, headers, closers, selectedCloserActi
           <p className="text-gray-500">{lang === 'fr' ? 'Aucune activité enregistrée' : 'No activity recorded'}</p>
         </div>
       ) : (
-        <div className="divide-y divide-white/5 max-h-[600px] overflow-y-auto">
+        <div className="divide-y divide-[var(--border-primary)] max-h-[600px] overflow-y-auto">
           {logs.map((log, index) => {
             const actionStyle = actionLabels[log.action] || { fr: log.action, en: log.action, color: 'bg-gray-500/20 text-gray-400' };
             return (
@@ -230,7 +230,7 @@ function ActivityLogSection({ isDark, lang, headers, closers, selectedCloserActi
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.02 }}
-                className={`p-4 ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-gray-50'}`}
+                className={`p-4 ${isDark ? 'hover:bg-[var(--bg-hover)]' : 'hover:bg-gray-50'}`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3">
@@ -239,7 +239,7 @@ function ActivityLogSection({ isDark, lang, headers, closers, selectedCloserActi
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        <span className={`font-medium text-sm ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                           {log.user_name || log.user_email}
                         </span>
                         <Badge className={actionStyle.color}>
@@ -280,7 +280,7 @@ function ActivityLogSection({ isDark, lang, headers, closers, selectedCloserActi
       )}
 
       {/* Footer with count */}
-      <div className={`p-3 border-t text-xs text-gray-500 ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
+      <div className={`p-3 border-t text-xs text-gray-500 ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-200'}`}>
         {logs.length} {lang === 'fr' ? 'entrées affichées' : 'entries displayed'}
       </div>
     </div>
@@ -499,41 +499,41 @@ export default function AdminClosersTab({ token, isDark }) {
     <div className="space-y-6" data-testid="admin-closers-tab">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`rounded-xl border p-4 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`rounded-xl border p-4 ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
           <div className="flex items-center gap-2 mb-2">
             <Users className="w-4 h-4 text-blue-400" />
             <span className="text-xs text-gray-500">{lang === 'fr' ? 'Closers Actifs' : 'Active Closers'}</span>
           </div>
-          <p className={`font-mono text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{closers.length}</p>
+          <p className={`font-mono text-2xl font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{closers.length}</p>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className={`rounded-xl border p-4 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className={`rounded-xl border p-4 ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
           <div className="flex items-center gap-2 mb-2">
             <Target className="w-4 h-4 text-emerald-400" />
             <span className="text-xs text-gray-500">{lang === 'fr' ? 'Deals Signés' : 'Signed Deals'}</span>
           </div>
-          <p className={`font-mono text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{totalSignedDeals}</p>
+          <p className={`font-mono text-2xl font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{totalSignedDeals}</p>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={`rounded-xl border p-4 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={`rounded-xl border p-4 ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-4 h-4 text-amber-400" />
             <span className="text-xs text-gray-500">{lang === 'fr' ? 'CA Total' : 'Total Revenue'}</span>
           </div>
-          <p className={`font-mono text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{totalCA.toLocaleString()}€</p>
+          <p className={`font-mono text-2xl font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{totalCA.toLocaleString()}€</p>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className={`rounded-xl border p-4 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className={`rounded-xl border p-4 ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
           <div className="flex items-center gap-2 mb-2">
             <Award className="w-4 h-4 text-purple-400" />
             <span className="text-xs text-gray-500">{lang === 'fr' ? 'Commissions' : 'Commissions'}</span>
           </div>
-          <p className={`font-mono text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{totalCommissions.toLocaleString()}€</p>
+          <p className={`font-mono text-2xl font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{totalCommissions.toLocaleString()}€</p>
         </motion.div>
       </div>
 
       {/* Section Tabs */}
-      <div className={`flex gap-2 p-1 rounded-lg ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
+      <div className={`flex gap-2 p-1 rounded-lg ${isDark ? 'bg-[var(--bg-tertiary)]' : 'bg-gray-100'}`}>
         {[
           { id: 'closers', label: 'Closers', icon: Users },
           { id: 'deals', label: 'Deals', icon: Target, badge: pendingDeals.length },
@@ -546,7 +546,7 @@ export default function AdminClosersTab({ token, isDark }) {
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeSection === tab.id
                 ? 'bg-blue-600 text-white'
-                : isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                : isDark ? 'text-gray-400 hover:text-[var(--text-primary)]' : 'text-gray-600 hover:text-gray-900'
             }`}
             data-testid={`tab-${tab.id}`}
           >
@@ -561,9 +561,9 @@ export default function AdminClosersTab({ token, isDark }) {
 
       {/* === CLOSERS SECTION === */}
       {activeSection === 'closers' && (
-        <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
-          <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
-            <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
+          <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-200'}`}>
+            <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
               {lang === 'fr' ? 'Gestion des Closers' : 'Closer Management'}
             </h2>
             <button
@@ -581,19 +581,19 @@ export default function AdminClosersTab({ token, isDark }) {
               {lang === 'fr' ? 'Aucun closer. Créez-en un pour commencer.' : 'No closers. Create one to start.'}
             </div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-[var(--border-primary)]">
               {closers.map((closer) => (
-                <div key={closer.id} className={`p-4 ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-gray-50'}`}>
+                <div key={closer.id} className={`p-4 ${isDark ? 'hover:bg-[var(--bg-hover)]' : 'hover:bg-gray-50'}`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-primary)] font-bold ${
                         closer.stats.current_tier_name === 'Gold' ? 'bg-amber-500' :
                         closer.stats.current_tier_name === 'Silver' ? 'bg-gray-400' : 'bg-orange-600'
                       }`}>
                         {closer.name?.charAt(0) || 'C'}
                       </div>
                       <div>
-                        <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{closer.name || closer.email}</h3>
+                        <h3 className={`font-medium ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{closer.name || closer.email}</h3>
                         <p className="text-sm text-gray-500">{closer.email}</p>
                       </div>
                       <Badge className={`ml-4 ${
@@ -613,7 +613,7 @@ export default function AdminClosersTab({ token, isDark }) {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right mr-4">
-                        <p className={`font-mono text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        <p className={`font-mono text-lg font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                           {closer.stats.total_ca.toLocaleString()}€
                         </p>
                         <p className="text-xs text-gray-500">
@@ -629,7 +629,7 @@ export default function AdminClosersTab({ token, isDark }) {
                       </button>
                       <button
                         onClick={() => setExpandedCloser(expandedCloser === closer.id ? null : closer.id)}
-                        className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                        className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-[var(--bg-tertiary)]' : 'hover:bg-gray-100'}`}
                       >
                         {expandedCloser === closer.id ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
                       </button>
@@ -643,7 +643,7 @@ export default function AdminClosersTab({ token, isDark }) {
                             permissions: closer.permissions || { modules: [], can_view_all_data: false }
                           }); 
                         }}
-                        className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                        className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-[var(--bg-tertiary)]' : 'hover:bg-gray-100'}`}
                       >
                         <Edit2 className="w-4 h-4 text-gray-500" />
                       </button>
@@ -663,12 +663,12 @@ export default function AdminClosersTab({ token, isDark }) {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="mt-4 pt-4 border-t border-white/5"
+                        className="mt-4 pt-4 border-t border-[var(--border-primary)]"
                       >
                         <div className="grid grid-cols-4 gap-4">
-                          <div className={`p-3 rounded-lg ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
+                          <div className={`p-3 rounded-lg ${isDark ? 'bg-[var(--bg-tertiary)]' : 'bg-gray-50'}`}>
                             <p className="text-xs text-gray-500">{lang === 'fr' ? 'Total Deals' : 'Total Deals'}</p>
-                            <p className={`font-mono text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{closer.stats.total_deals}</p>
+                            <p className={`font-mono text-lg font-bold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{closer.stats.total_deals}</p>
                           </div>
                           <div className={`p-3 rounded-lg ${isDark ? 'bg-emerald-500/10' : 'bg-emerald-50'}`}>
                             <p className="text-xs text-emerald-500">{lang === 'fr' ? 'Signés' : 'Signed'}</p>
@@ -695,9 +695,9 @@ export default function AdminClosersTab({ token, isDark }) {
 
       {/* === DEALS SECTION === */}
       {activeSection === 'deals' && (
-        <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
-          <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
-            <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
+          <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-200'}`}>
+            <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
               {lang === 'fr' ? 'Tous les Deals' : 'All Deals'}
             </h2>
             <div className="relative">
@@ -708,7 +708,7 @@ export default function AdminClosersTab({ token, isDark }) {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={lang === 'fr' ? 'Rechercher...' : 'Search...'}
                 className={`w-64 pl-9 pr-4 py-2 rounded-lg text-sm ${
-                  isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 text-gray-900'
+                  isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)] placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 text-gray-900'
                 }`}
               />
             </div>
@@ -722,7 +722,7 @@ export default function AdminClosersTab({ token, isDark }) {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className={isDark ? 'bg-white/[0.02]' : 'bg-gray-50'}>
+                  <tr className={isDark ? 'bg-[var(--bg-hover)]' : 'bg-gray-50'}>
                     <th className={`text-left text-xs font-medium uppercase tracking-wider px-4 py-3 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Client</th>
                     <th className={`text-left text-xs font-medium uppercase tracking-wider px-4 py-3 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Closer</th>
                     <th className={`text-left text-xs font-medium uppercase tracking-wider px-4 py-3 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Montant HT</th>
@@ -731,18 +731,18 @@ export default function AdminClosersTab({ token, isDark }) {
                     <th className={`text-right text-xs font-medium uppercase tracking-wider px-4 py-3 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Actions</th>
                   </tr>
                 </thead>
-                <tbody className={isDark ? 'divide-y divide-white/5' : 'divide-y divide-gray-100'}>
+                <tbody className={isDark ? 'divide-y divide-[var(--border-primary)]' : 'divide-y divide-gray-100'}>
                   {filteredDeals.map((deal) => (
-                    <tr key={deal.id} className={isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-gray-50'}>
+                    <tr key={deal.id} className={isDark ? 'hover:bg-[var(--bg-hover)]' : 'hover:bg-gray-50'}>
                       <td className="px-4 py-3">
-                        <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{deal.client_name}</p>
+                        <p className={`font-medium ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{deal.client_name}</p>
                         <p className="text-xs text-gray-500">{deal.client_email}</p>
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-sm text-gray-500">{deal.closer_email}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className={`font-mono font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{deal.amount_ht.toLocaleString()}€</p>
+                        <p className={`font-mono font-medium ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{deal.amount_ht.toLocaleString()}€</p>
                       </td>
                       <td className="px-4 py-3">
                         <Badge className={statusConfig[deal.status]?.color}>
@@ -801,9 +801,9 @@ export default function AdminClosersTab({ token, isDark }) {
 
       {/* === TIERS SECTION === */}
       {activeSection === 'tiers' && (
-        <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'}`}>
-          <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
-            <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
+          <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-200'}`}>
+            <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
               {lang === 'fr' ? 'Paliers de Commission' : 'Commission Tiers'}
             </h2>
             <button
@@ -826,7 +826,7 @@ export default function AdminClosersTab({ token, isDark }) {
                 className={`relative overflow-hidden rounded-xl border p-6 ${
                   tier.name === 'Gold' ? 'border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent' :
                   tier.name === 'Silver' ? 'border-gray-500/30 bg-gradient-to-br from-gray-500/10 to-transparent' :
-                  isDark ? 'border-white/5 bg-white/[0.02]' : 'border-gray-200 bg-gray-50'
+                  isDark ? 'border-[var(--border-primary)] bg-[var(--bg-hover)]' : 'border-gray-200 bg-gray-50'
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
@@ -834,7 +834,7 @@ export default function AdminClosersTab({ token, isDark }) {
                     <h3 className={`font-heading text-xl font-bold ${
                       tier.name === 'Gold' ? 'text-amber-400' :
                       tier.name === 'Silver' ? 'text-gray-300' :
-                      isDark ? 'text-white' : 'text-gray-900'
+                      isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'
                     }`}>{tier.name}</h3>
                     <p className="text-sm text-gray-500">
                       {lang === 'fr' ? 'À partir de' : 'From'} {tier.min_deals} {lang === 'fr' ? 'deals' : 'deals'}
@@ -845,14 +845,14 @@ export default function AdminClosersTab({ token, isDark }) {
                     tier.name === 'Silver' ? 'text-gray-400' : 'text-orange-400'
                   }`} />
                 </div>
-                <p className={`font-mono text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <p className={`font-mono text-4xl font-bold mb-4 ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                   {tier.rate}%
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => { setEditingTier(tier); setTierForm({ name: tier.name, min_deals: tier.min_deals, rate: tier.rate }); }}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-lg transition-all ${
-                      isDark ? 'bg-white/5 hover:bg-white/10 text-gray-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                      isDark ? 'bg-[var(--bg-tertiary)] hover:bg-[var(--bg-tertiary)] text-gray-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
                     }`}
                   >
                     <Edit2 className="w-3.5 h-3.5" />
@@ -885,9 +885,9 @@ export default function AdminClosersTab({ token, isDark }) {
 
       {/* === CLOSER FORM DIALOG === */}
       <Dialog open={showCloserForm || editingCloser !== null} onOpenChange={(open) => { if (!open) { setShowCloserForm(false); setEditingCloser(null); resetCloserForm(); }}}>
-        <DialogContent className={`max-w-lg ${isDark ? 'bg-[#0F0F10] border-white/10' : 'bg-white'}`}>
+        <DialogContent className={`max-w-lg ${isDark ? 'bg-[var(--bg-secondary)] border-[var(--border-secondary)]' : 'bg-white'}`}>
           <DialogHeader>
-            <DialogTitle className={isDark ? 'text-white' : 'text-gray-900'}>
+            <DialogTitle className={isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}>
               {editingCloser ? (lang === 'fr' ? 'Modifier Closer' : 'Edit Closer') : (lang === 'fr' ? 'Nouveau Closer' : 'New Closer')}
             </DialogTitle>
           </DialogHeader>
@@ -898,7 +898,7 @@ export default function AdminClosersTab({ token, isDark }) {
                 type="text"
                 value={closerForm.name}
                 onChange={(e) => setCloserForm({ ...closerForm, name: e.target.value })}
-                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
+                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
                 required={!editingCloser}
               />
             </div>
@@ -908,7 +908,7 @@ export default function AdminClosersTab({ token, isDark }) {
                 type="email"
                 value={closerForm.email}
                 onChange={(e) => setCloserForm({ ...closerForm, email: e.target.value })}
-                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
+                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
                 required={!editingCloser}
               />
             </div>
@@ -920,16 +920,16 @@ export default function AdminClosersTab({ token, isDark }) {
                 type="password"
                 value={closerForm.password}
                 onChange={(e) => setCloserForm({ ...closerForm, password: e.target.value })}
-                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
+                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
                 required={!editingCloser}
               />
             </div>
 
             {/* Permissions Section */}
-            <div className={`rounded-lg border p-4 ${isDark ? 'border-white/10 bg-white/[0.02]' : 'border-gray-200 bg-gray-50'}`}>
+            <div className={`rounded-lg border p-4 ${isDark ? 'border-[var(--border-secondary)] bg-[var(--bg-hover)]' : 'border-gray-200 bg-gray-50'}`}>
               <div className="flex items-center gap-2 mb-3">
                 <Shield className="w-4 h-4 text-blue-400" />
-                <label className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <label className={`text-sm font-medium ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                   {lang === 'fr' ? 'Permissions' : 'Permissions'}
                 </label>
               </div>
@@ -947,7 +947,7 @@ export default function AdminClosersTab({ token, isDark }) {
                       className={`flex items-center gap-2 p-2 rounded-lg text-xs transition-all ${
                         isSelected
                           ? 'bg-blue-600/20 border border-blue-500/30 text-blue-400'
-                          : isDark ? 'bg-white/5 border border-white/10 text-gray-400 hover:border-white/20' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
+                          : isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-gray-400 hover:border-[var(--border-hover)]' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
                       }`}
                     >
                       <ModuleIcon className="w-3.5 h-3.5" />
@@ -959,9 +959,9 @@ export default function AdminClosersTab({ token, isDark }) {
               </div>
 
               {/* Can view all data toggle */}
-              <div className={`flex items-center justify-between p-3 rounded-lg ${isDark ? 'bg-white/5' : 'bg-white'}`}>
+              <div className={`flex items-center justify-between p-3 rounded-lg ${isDark ? 'bg-[var(--bg-tertiary)]' : 'bg-white'}`}>
                 <div>
-                  <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <p className={`text-sm font-medium ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
                     {lang === 'fr' ? 'Accès à toutes les données' : 'Access all data'}
                   </p>
                   <p className="text-xs text-gray-500">
@@ -993,9 +993,9 @@ export default function AdminClosersTab({ token, isDark }) {
 
       {/* === TIER FORM DIALOG === */}
       <Dialog open={showTierForm || editingTier !== null} onOpenChange={(open) => { if (!open) { setShowTierForm(false); setEditingTier(null); setTierForm({ name: '', min_deals: 0, rate: 10 }); }}}>
-        <DialogContent className={isDark ? 'bg-[#0F0F10] border-white/10' : 'bg-white'}>
+        <DialogContent className={isDark ? 'bg-[var(--bg-secondary)] border-[var(--border-secondary)]' : 'bg-white'}>
           <DialogHeader>
-            <DialogTitle className={isDark ? 'text-white' : 'text-gray-900'}>
+            <DialogTitle className={isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}>
               {editingTier ? (lang === 'fr' ? 'Modifier Palier' : 'Edit Tier') : (lang === 'fr' ? 'Nouveau Palier' : 'New Tier')}
             </DialogTitle>
           </DialogHeader>
@@ -1007,7 +1007,7 @@ export default function AdminClosersTab({ token, isDark }) {
                 value={tierForm.name}
                 onChange={(e) => setTierForm({ ...tierForm, name: e.target.value })}
                 placeholder="ex: Bronze, Silver, Gold..."
-                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
+                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
                 required
               />
             </div>
@@ -1018,7 +1018,7 @@ export default function AdminClosersTab({ token, isDark }) {
                 min="0"
                 value={tierForm.min_deals}
                 onChange={(e) => setTierForm({ ...tierForm, min_deals: parseInt(e.target.value) })}
-                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
+                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
                 required
               />
             </div>
@@ -1031,7 +1031,7 @@ export default function AdminClosersTab({ token, isDark }) {
                 step="0.1"
                 value={tierForm.rate}
                 onChange={(e) => setTierForm({ ...tierForm, rate: parseFloat(e.target.value) })}
-                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
+                className={`w-full rounded-lg h-10 px-3 text-sm ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)]' : 'bg-gray-50 border border-gray-200 text-gray-900'}`}
                 required
               />
             </div>

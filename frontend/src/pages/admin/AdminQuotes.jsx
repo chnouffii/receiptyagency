@@ -12,7 +12,7 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
   const [quotes, setQuotes] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [linkedLead, setLinkedLead] = useState(null);
-  
+
   const [form, setForm] = useState({
     client_name: '',
     client_email: '',
@@ -68,7 +68,7 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!form.client_name || !form.service_description || !form.price_ht) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
@@ -90,7 +90,7 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
         notes: form.notes,
         lead_id: form.lead_id
       }, {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
@@ -105,12 +105,12 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
       // Create download link
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
-      
+
       // Create and trigger download
       const link = document.createElement('a');
       link.href = url;
       link.style.display = 'none';
-      
+
       // Extract filename from Content-Disposition header or use default with timestamp
       const contentDisposition = response.headers['content-disposition'];
       let filename = `Devis_${new Date().toISOString().split('T')[0]}.pdf`;
@@ -120,11 +120,11 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
           filename = matches[1].replace(/['"]/g, '');
         }
       }
-      
+
       link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
-      
+
       // Cleanup
       setTimeout(() => {
         document.body.removeChild(link);
@@ -132,7 +132,7 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
       }, 100);
 
       toast.success('Devis généré et téléchargé avec succès !');
-      
+
       // Reset form and refresh list
       setForm({
         client_name: '',
@@ -189,7 +189,7 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h3 className="font-heading text-lg font-semibold text-white">Génération de Devis PDF</h3>
+        <h3 className="font-heading text-lg font-semibold text-[var(--text-primary)]">Génération de Devis PDF</h3>
         <button
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg px-4 py-2 text-sm font-medium transition-all"
@@ -205,10 +205,10 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0F0F10] border border-white/10 rounded-xl p-6"
+          className="bg-[var(--bg-secondary)] border border-[var(--border-secondary)] rounded-xl p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h4 className="font-heading text-md font-semibold text-white flex items-center gap-2">
+            <h4 className="font-heading text-md font-semibold text-[var(--text-primary)] flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-400" />
               Créer un nouveau devis
             </h4>
@@ -219,12 +219,12 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
               </div>
             )}
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Client Information */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2 flex items-center gap-1">
+                <label className="block text-sm text-[var(--text-secondary)] mb-2 flex items-center gap-1">
                   <User className="w-3 h-3" />
                   Nom du client <span className="text-red-400">*</span>
                 </label>
@@ -234,12 +234,12 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
                   onChange={(e) => setForm({ ...form, client_name: e.target.value })}
                   placeholder="Jean Dupont"
                   data-testid="quote-client-name"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2 flex items-center gap-1">
+                <label className="block text-sm text-[var(--text-secondary)] mb-2 flex items-center gap-1">
                   <Building2 className="w-3 h-3" />
                   Société
                 </label>
@@ -248,11 +248,11 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
                   value={form.client_company}
                   onChange={(e) => setForm({ ...form, client_company: e.target.value })}
                   placeholder="Entreprise SAS"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2 flex items-center gap-1">
+                <label className="block text-sm text-[var(--text-secondary)] mb-2 flex items-center gap-1">
                   <Mail className="w-3 h-3" />
                   Email
                 </label>
@@ -261,14 +261,14 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
                   value={form.client_email}
                   onChange={(e) => setForm({ ...form, client_email: e.target.value })}
                   placeholder="client@email.com"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                 />
               </div>
             </div>
 
             {/* Service Description */}
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-sm text-[var(--text-secondary)] mb-2">
                 Description des services <span className="text-red-400">*</span>
               </label>
               <textarea
@@ -277,7 +277,7 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
                 placeholder="Décrivez en détail les services proposés..."
                 rows={4}
                 data-testid="quote-service-desc"
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-3 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none resize-y"
                 required
               />
             </div>
@@ -285,7 +285,7 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
             {/* Price and Calculation */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm text-gray-400 mb-2 flex items-center gap-1">
+                <label className="block text-sm text-[var(--text-secondary)] mb-2 flex items-center gap-1">
                   <Euro className="w-3 h-3" />
                   Prix HT (€) <span className="text-red-400">*</span>
                 </label>
@@ -297,28 +297,28 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
                   onChange={(e) => setForm({ ...form, price_ht: e.target.value })}
                   placeholder="1000.00"
                   data-testid="quote-price-ht"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                   required
                 />
               </div>
-              
+
               {/* Real-time Price Calculation */}
               <div className="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-blue-500/20 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Calculator className="w-4 h-4 text-blue-400" />
-                  <span className="text-sm font-medium text-white">Calcul automatique</span>
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Calcul automatique</span>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Prix HT</span>
-                    <span className="text-white font-mono">{formatPrice(priceHT)}</span>
+                    <span className="text-[var(--text-secondary)]">Prix HT</span>
+                    <span className="text-[var(--text-primary)] font-mono">{formatPrice(priceHT)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">TVA (20%)</span>
-                    <span className="text-white font-mono">{formatPrice(tvaAmount)}</span>
+                    <span className="text-[var(--text-secondary)]">TVA (20%)</span>
+                    <span className="text-[var(--text-primary)] font-mono">{formatPrice(tvaAmount)}</span>
                   </div>
-                  <div className="border-t border-white/10 pt-2 flex justify-between">
-                    <span className="text-white font-semibold">Total TTC</span>
+                  <div className="border-t border-[var(--border-secondary)] pt-2 flex justify-between">
+                    <span className="text-[var(--text-primary)] font-semibold">Total TTC</span>
                     <span className="text-blue-400 font-bold font-mono">{formatPrice(priceTTC)}</span>
                   </div>
                 </div>
@@ -327,13 +327,13 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
 
             {/* Notes */}
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Notes additionnelles</label>
+              <label className="block text-sm text-[var(--text-secondary)] mb-2">Notes additionnelles</label>
               <textarea
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
                 placeholder="Conditions particulières, remarques..."
                 rows={2}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-3 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none resize-y"
               />
             </div>
 
@@ -342,7 +342,7 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2.5 text-sm text-gray-400 hover:text-white transition-colors"
+                className="px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
                 Annuler
               </button>
@@ -370,38 +370,38 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
       )}
 
       {/* Quotes List */}
-      <div className="bg-[#0F0F10] border border-white/5 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-white/5">
-          <h4 className="text-sm font-medium text-gray-400">Historique des devis ({quotes.length})</h4>
+      <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-[var(--border-primary)]">
+          <h4 className="text-sm font-medium text-[var(--text-secondary)]">Historique des devis ({quotes.length})</h4>
         </div>
-        
+
         {quotes.length === 0 ? (
           <div className="px-4 py-12 text-center">
-            <FileText className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-500">Aucun devis généré</p>
-            <p className="text-gray-600 text-sm mt-1">Créez votre premier devis en cliquant sur "Nouveau devis"</p>
+            <FileText className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
+            <p className="text-[var(--text-muted)]">Aucun devis généré</p>
+            <p className="text-[var(--text-muted)] text-sm mt-1">Créez votre premier devis en cliquant sur "Nouveau devis"</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/5">
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">N° Devis</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Client</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Montant TTC</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Date</th>
-                  <th className="text-right text-xs font-medium text-gray-500 uppercase px-4 py-3">Actions</th>
+                <tr className="border-b border-[var(--border-primary)]">
+                  <th className="text-left text-xs font-medium text-[var(--text-muted)] uppercase px-4 py-3">N° Devis</th>
+                  <th className="text-left text-xs font-medium text-[var(--text-muted)] uppercase px-4 py-3">Client</th>
+                  <th className="text-left text-xs font-medium text-[var(--text-muted)] uppercase px-4 py-3">Montant TTC</th>
+                  <th className="text-left text-xs font-medium text-[var(--text-muted)] uppercase px-4 py-3">Date</th>
+                  <th className="text-right text-xs font-medium text-[var(--text-muted)] uppercase px-4 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {quotes.map((quote) => (
-                  <tr key={quote.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                  <tr key={quote.id} className="border-b border-[var(--border-primary)] hover:bg-[var(--bg-hover)]">
                     <td className="px-4 py-3">
                       <span className="text-sm font-mono text-blue-400">{quote.quote_number}</span>
                     </td>
                     <td className="px-4 py-3">
                       <div>
-                        <p className="text-sm text-white flex items-center gap-2">
+                        <p className="text-sm text-[var(--text-primary)] flex items-center gap-2">
                           {quote.client_name}
                           {quote.lead_id && (
                             <span title="Lié à un lead" className="text-blue-400">
@@ -410,20 +410,20 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
                           )}
                         </p>
                         {quote.client_company && (
-                          <p className="text-xs text-gray-500">{quote.client_company}</p>
+                          <p className="text-xs text-[var(--text-muted)]">{quote.client_company}</p>
                         )}
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-sm font-semibold text-emerald-400">{formatPrice(quote.price_ttc)}</span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-400">
+                    <td className="px-4 py-3 text-sm text-[var(--text-secondary)]">
                       {formatDate(quote.created_at)}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => handleDelete(quote)}
-                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                        className="p-2 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                         title="Supprimer"
                       >
                         <Trash2 className="w-4 h-4" />

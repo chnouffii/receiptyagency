@@ -142,7 +142,7 @@ export default function AdminUserManagement({ token, isDark }) {
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeTab === 'admins'
               ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-              : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10'
+              : 'bg-[var(--bg-tertiary)] text-gray-400 border border-[var(--border-primary)] hover:bg-[var(--bg-tertiary)]'
           }`}
         >
           <User className="w-4 h-4" />
@@ -153,7 +153,7 @@ export default function AdminUserManagement({ token, isDark }) {
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeTab === 'logs'
               ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-              : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10'
+              : 'bg-[var(--bg-tertiary)] text-gray-400 border border-[var(--border-primary)] hover:bg-[var(--bg-tertiary)]'
           }`}
         >
           <Activity className="w-4 h-4" />
@@ -166,7 +166,7 @@ export default function AdminUserManagement({ token, isDark }) {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           {/* Header */}
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-heading text-lg font-semibold text-white">Gestion des comptes</h3>
+            <h3 className="font-heading text-lg font-semibold text-[var(--text-primary)]">Gestion des comptes</h3>
             <button
               onClick={() => { setShowForm(true); setEditingAdmin(null); setForm({ email: '', name: '', password: '', role: 'admin', is_active: true }); }}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg px-4 py-2 text-sm font-medium transition-all"
@@ -182,9 +182,9 @@ export default function AdminUserManagement({ token, isDark }) {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-[#0F0F10] border border-white/10 rounded-xl p-6 mb-6"
+              className="bg-[var(--bg-secondary)] border border-[var(--border-secondary)] rounded-xl p-6 mb-6"
             >
-              <h4 className="font-heading text-md font-semibold text-white mb-4">
+              <h4 className="font-heading text-md font-semibold text-[var(--text-primary)] mb-4">
                 {editingAdmin ? 'Modifier l\'admin' : 'Créer un admin'}
               </h4>
               <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -194,7 +194,7 @@ export default function AdminUserManagement({ token, isDark }) {
                     type="text"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                     required
                   />
                 </div>
@@ -204,7 +204,7 @@ export default function AdminUserManagement({ token, isDark }) {
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                     required
                   />
                 </div>
@@ -217,13 +217,13 @@ export default function AdminUserManagement({ token, isDark }) {
                       type={showPassword ? 'text' : 'password'}
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none pr-10"
+                      className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none pr-10"
                       required={!editingAdmin}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[var(--text-primary)]"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -234,7 +234,7 @@ export default function AdminUserManagement({ token, isDark }) {
                   <select
                     value={form.role}
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                   >
                     <option value="admin">Admin</option>
                     <option value="super_admin">Super Admin</option>
@@ -247,7 +247,7 @@ export default function AdminUserManagement({ token, isDark }) {
                       id="is_active"
                       checked={form.is_active}
                       onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                      className="w-4 h-4 rounded border-white/10 bg-white/5"
+                      className="w-4 h-4 rounded border-[var(--border-secondary)] bg-[var(--bg-tertiary)]"
                     />
                     <label htmlFor="is_active" className="text-sm text-gray-400">Compte actif</label>
                   </div>
@@ -256,7 +256,7 @@ export default function AdminUserManagement({ token, isDark }) {
                   <button
                     type="button"
                     onClick={() => { setShowForm(false); setEditingAdmin(null); }}
-                    className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                    className="px-4 py-2 text-sm text-gray-400 hover:text-[var(--text-primary)] transition-colors"
                   >
                     Annuler
                   </button>
@@ -272,10 +272,10 @@ export default function AdminUserManagement({ token, isDark }) {
           )}
 
           {/* Admins List */}
-          <div className="bg-[#0F0F10] border border-white/5 rounded-xl overflow-hidden">
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/5">
+                <tr className="border-b border-[var(--border-primary)]">
                   <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Admin</th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Rôle</th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Statut</th>
@@ -285,14 +285,14 @@ export default function AdminUserManagement({ token, isDark }) {
               </thead>
               <tbody>
                 {admins.map((admin) => (
-                  <tr key={admin.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                  <tr key={admin.id} className="border-b border-[var(--border-primary)] hover:bg-[var(--bg-hover)]">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center">
                           <User className="w-4 h-4 text-blue-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-white">{admin.name || 'Sans nom'}</p>
+                          <p className="text-sm font-medium text-[var(--text-primary)]">{admin.name || 'Sans nom'}</p>
                           <p className="text-xs text-gray-500">{admin.email}</p>
                         </div>
                       </div>
@@ -355,13 +355,13 @@ export default function AdminUserManagement({ token, isDark }) {
                 placeholder="Filtrer par email..."
                 value={logFilter.email}
                 onChange={(e) => setLogFilter({ ...logFilter, email: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg pl-10 pr-4 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
               />
             </div>
             <select
               value={logFilter.action}
               onChange={(e) => setLogFilter({ ...logFilter, action: e.target.value })}
-              className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:border-blue-500/50 outline-none"
+              className="bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
             >
               <option value="">Toutes les actions</option>
               <option value="login">Connexion</option>
@@ -371,7 +371,7 @@ export default function AdminUserManagement({ token, isDark }) {
             </select>
             <button
               onClick={fetchLogs}
-              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg px-4 py-2 text-sm transition-all"
+              className="flex items-center gap-2 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-[var(--text-primary)] rounded-lg px-4 py-2 text-sm transition-all"
             >
               <RefreshCw className="w-4 h-4" />
               Actualiser
@@ -379,11 +379,11 @@ export default function AdminUserManagement({ token, isDark }) {
           </div>
 
           {/* Logs List */}
-          <div className="bg-[#0F0F10] border border-white/5 rounded-xl overflow-hidden">
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl overflow-hidden">
             <div className="max-h-[500px] overflow-y-auto">
               <table className="w-full">
-                <thead className="sticky top-0 bg-[#0F0F10]">
-                  <tr className="border-b border-white/5">
+                <thead className="sticky top-0 bg-[var(--bg-secondary)]">
+                  <tr className="border-b border-[var(--border-primary)]">
                     <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Date</th>
                     <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Admin</th>
                     <th className="text-left text-xs font-medium text-gray-500 uppercase px-4 py-3">Action</th>
@@ -393,14 +393,14 @@ export default function AdminUserManagement({ token, isDark }) {
                 </thead>
                 <tbody>
                   {logs.map((log) => (
-                    <tr key={log.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                    <tr key={log.id} className="border-b border-[var(--border-primary)] hover:bg-[var(--bg-hover)]">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2 text-sm text-gray-400">
                           <Clock className="w-3 h-3" />
                           {formatDate(log.created_at)}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-white">
+                      <td className="px-4 py-3 text-sm text-[var(--text-primary)]">
                         {log.admin_email}
                       </td>
                       <td className="px-4 py-3">
