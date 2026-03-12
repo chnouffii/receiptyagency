@@ -95,8 +95,17 @@ function formatDate(dateStr, lang) {
   });
 }
 
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function renderMessageContent(content) {
-  return content.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  return escapeHtml(content).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 }
 
 // ─── Confetti component ───────────────────────────────────────────────────────

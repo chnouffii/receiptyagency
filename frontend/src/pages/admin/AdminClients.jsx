@@ -169,6 +169,14 @@ export default function AdminClients({ token, isDark }) {
     setSelectedClient(client);
     setActivePanel('messages');
     setEditingEvo(null);
+    // Reset stale data from previous client
+    setMessages([]);
+    setDocuments([]);
+    setUpdates([]);
+    setEvolutions([]);
+    setSatisfaction(null);
+    setProjectData(null);
+    setMsgInput('');
     fetchMessages(client.id);
     fetchDocuments(client.id);
     fetchProject(client.id);
@@ -229,7 +237,7 @@ export default function AdminClients({ token, isDark }) {
     setAddingDoc(true);
     try {
       await axios.post(`${API}/admin/clients/${selectedClient.id}/documents`, {
-        name: docName.trim(), url: docUrl.trim(), type: docType
+        name: docName.trim(), url: docUrl.trim(), doc_type: docType
       }, { headers });
       setDocName(''); setDocUrl(''); setDocType('document');
       await fetchDocuments(selectedClient.id);
@@ -781,13 +789,13 @@ export default function AdminClients({ token, isDark }) {
                           } transition-all`}
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            <span className="text-lg flex-shrink-0">{DOC_EMOJIS[doc.type] || '📄'}</span>
+                            <span className="text-lg flex-shrink-0">{DOC_EMOJIS[doc.doc_type] || '📄'}</span>
                             <div className="min-w-0">
                               <p className={`text-sm font-medium truncate ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-800'}`}>
                                 {doc.name}
                               </p>
                               <p className={`text-xs truncate ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-                                {doc.type} · {doc.created_at ? new Date(doc.created_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US') : ''}
+                                {doc.doc_type} · {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US') : ''}
                               </p>
                             </div>
                           </div>
