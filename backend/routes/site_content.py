@@ -1,4 +1,5 @@
 """Site Content Management routes"""
+import re
 from fastapi import APIRouter, Depends
 from datetime import datetime, timezone
 
@@ -32,15 +33,29 @@ async def get_site_content(admin=Depends(verify_token)):
     return content
 
 
+_MONGO_OPERATORS = re.compile(r'^\$')
+
+def _sanitize_content(obj, depth=0):
+    """Recursively strip MongoDB operator keys to prevent NoSQL injection."""
+    if depth > 10:
+        return {}
+    if isinstance(obj, dict):
+        return {k: _sanitize_content(v, depth + 1) for k, v in obj.items() if not _MONGO_OPERATORS.match(str(k))}
+    if isinstance(obj, list):
+        return [_sanitize_content(item, depth + 1) for item in obj]
+    return obj
+
+
 @router.put("/admin/site-content")
 async def update_site_content(content: dict, admin=Depends(verify_token)):
     """Admin endpoint to update site content"""
     db = get_db()
-    content["type"] = "main"
-    content["updated_at"] = datetime.now(timezone.utc).isoformat()
+    safe_content = _sanitize_content(content)
+    safe_content["type"] = "main"
+    safe_content["updated_at"] = datetime.now(timezone.utc).isoformat()
     await db.site_content.update_one(
         {"type": "main"},
-        {"$set": content},
+        {"$set": safe_content},
         upsert=True
     )
     return {"message": "Content updated successfully"}

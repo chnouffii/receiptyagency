@@ -140,10 +140,10 @@ export default function ClientLoginPage() {
                 : 'Your credentials were provided by your Receipty advisor.'}
             </p>
             <a
-              href="mailto:contact@receipty.ai"
+              href="mailto:contact@receipty.fr"
               className="text-xs text-blue-400 hover:text-blue-300 mt-2 inline-block transition-colors"
             >
-              {lang === 'fr' ? 'Besoin d\'aide ? contact@receipty.ai' : 'Need help? contact@receipty.ai'}
+              {lang === 'fr' ? 'Besoin d\'aide ? contact@receipty.fr' : 'Need help? contact@receipty.fr'}
             </a>
           </div>
         </div>
