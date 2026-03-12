@@ -4,7 +4,7 @@ import {
   Users, Plus, Send, FileUp, Trash2, X,
   MessageCircle, FolderOpen, BarChart2, CheckCircle, Clock,
   Eye, ExternalLink, User, Building, Mail, Lock, AlertCircle,
-  BookOpen, Zap, Flag, Rocket, ArrowRight, Pencil
+  BookOpen, Zap, Flag, Rocket, ArrowRight, Pencil, Sparkles, Star
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -31,12 +31,27 @@ const UPDATE_TYPES = [
   { value: 'next',      emoji: '⏭️', labelFr: 'Prochaine étape',    labelEn: 'Next step',          color: 'text-gray-400',   bg: 'bg-gray-500/10',   border: 'border-gray-500/20' },
 ];
 
+const EVOLUTION_TYPES_ADMIN = [
+  { value: 'bug',           emoji: '🐛', labelFr: 'Bug',             labelEn: 'Bug',         color: 'text-red-400',    bg: 'bg-red-500/10',    border: 'border-red-500/20' },
+  { value: 'amelioration',  emoji: '✨', labelFr: 'Amélioration',    labelEn: 'Improvement', color: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'border-blue-500/20' },
+  { value: 'fonctionnalite',emoji: '🚀', labelFr: 'Nouvelle feature','labelEn': 'New feature',color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+];
+
+const EVOLUTION_STATUSES_ADMIN = [
+  { value: 'en_attente', labelFr: 'En attente',    labelEn: 'Pending',      color: 'text-gray-400' },
+  { value: 'en_etude',   labelFr: 'En étude',      labelEn: 'Under review', color: 'text-amber-400' },
+  { value: 'planifie',   labelFr: 'Planifiée',     labelEn: 'Planned',      color: 'text-blue-400' },
+  { value: 'en_cours',   labelFr: 'En cours',      labelEn: 'In progress',  color: 'text-purple-400' },
+  { value: 'livre',      labelFr: 'Livrée',        labelEn: 'Delivered',    color: 'text-emerald-400' },
+  { value: 'refuse',     labelFr: 'Refusée',       labelEn: 'Declined',     color: 'text-red-400' },
+];
+
 export default function AdminClients({ token, isDark }) {
   const { lang } = useLanguage();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState(null);
-  const [activePanel, setActivePanel] = useState('messages'); // messages | project | documents | journal
+  const [activePanel, setActivePanel] = useState('messages'); // messages | project | documents | journal | evolutions
   const [showCreate, setShowCreate] = useState(false);
   const [leads, setLeads] = useState([]);
 
@@ -66,6 +81,14 @@ export default function AdminClients({ token, isDark }) {
   const [updateTitle, setUpdateTitle] = useState('');
   const [updateContent, setUpdateContent] = useState('');
   const [addingUpdate, setAddingUpdate] = useState(false);
+
+  // Evolutions state
+  const [evolutions, setEvolutions] = useState([]);
+  const [editingEvo, setEditingEvo] = useState(null); // {id, status, response}
+  const [savingEvo, setSavingEvo] = useState(false);
+
+  // Satisfaction state
+  const [satisfaction, setSatisfaction] = useState(null);
 
   // Create client form
   const [form, setForm] = useState({ name: '', email: '', password: '', company: '', lead_id: '' });
@@ -124,6 +147,20 @@ export default function AdminClients({ token, isDark }) {
     } catch {}
   }, [token]);
 
+  const fetchEvolutions = useCallback(async (clientId) => {
+    try {
+      const res = await axios.get(`${API}/admin/clients/${clientId}/evolutions`, { headers });
+      setEvolutions(res.data);
+    } catch {}
+  }, [token]);
+
+  const fetchSatisfaction = useCallback(async (clientId) => {
+    try {
+      const res = await axios.get(`${API}/admin/clients/${clientId}/satisfaction`, { headers });
+      setSatisfaction(res.data?.rating ? res.data : null);
+    } catch {}
+  }, [token]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -131,10 +168,13 @@ export default function AdminClients({ token, isDark }) {
   const selectClient = (client) => {
     setSelectedClient(client);
     setActivePanel('messages');
+    setEditingEvo(null);
     fetchMessages(client.id);
     fetchDocuments(client.id);
     fetchProject(client.id);
     fetchUpdates(client.id);
+    fetchEvolutions(client.id);
+    fetchSatisfaction(client.id);
   };
 
   const handleAddUpdate = async () => {
@@ -223,6 +263,24 @@ export default function AdminClients({ token, isDark }) {
       toast.error(lang === 'fr' ? 'Erreur mise à jour projet' : 'Failed to update project');
     } finally {
       setSavingProject(false);
+    }
+  };
+
+  const handleSaveEvolution = async (evoId) => {
+    if (!editingEvo) return;
+    setSavingEvo(true);
+    try {
+      await axios.patch(`${API}/admin/clients/${selectedClient.id}/evolutions/${evoId}`, {
+        status: editingEvo.status,
+        admin_response: editingEvo.response || ''
+      }, { headers });
+      await fetchEvolutions(selectedClient.id);
+      setEditingEvo(null);
+      toast.success(lang === 'fr' ? 'Évolution mise à jour !' : 'Evolution updated!');
+    } catch {
+      toast.error(lang === 'fr' ? 'Erreur mise à jour' : 'Update failed');
+    } finally {
+      setSavingEvo(false);
     }
   };
 
@@ -458,13 +516,26 @@ export default function AdminClients({ token, isDark }) {
                     <X className="w-4 h-4" />
                   </button>
                 </div>
+                {/* Satisfaction stars */}
+                {satisfaction?.rating && (
+                  <div className="flex items-center gap-1 mt-1">
+                    {[1,2,3,4,5].map(s => (
+                      <Star key={s} className={`w-3 h-3 ${s <= satisfaction.rating ? 'text-amber-400 fill-amber-400' : isDark ? 'text-gray-700' : 'text-gray-200'}`} />
+                    ))}
+                    <span className={`text-xs ml-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                      {satisfaction.comment ? `"${satisfaction.comment.slice(0, 40)}${satisfaction.comment.length > 40 ? '…' : ''}"` : ''}
+                    </span>
+                  </div>
+                )}
+
                 {/* Panel tabs */}
-                <div className="flex gap-1 mt-4">
+                <div className="flex flex-wrap gap-1 mt-4">
                   {[
                     { key: 'messages', icon: MessageCircle, label: lang === 'fr' ? 'Messages' : 'Messages' },
                     { key: 'project', icon: BarChart2, label: lang === 'fr' ? 'Projet' : 'Project' },
                     { key: 'documents', icon: FolderOpen, label: lang === 'fr' ? 'Documents' : 'Documents' },
                     { key: 'journal', icon: BookOpen, label: lang === 'fr' ? 'Journal' : 'Journal' },
+                    { key: 'evolutions', icon: Sparkles, label: lang === 'fr' ? `Évolutions${evolutions.length > 0 ? ` (${evolutions.length})` : ''}` : `Evolutions${evolutions.length > 0 ? ` (${evolutions.length})` : ''}` },
                   ].map(({ key, icon: Icon, label }) => (
                     <button
                       key={key}
@@ -740,6 +811,123 @@ export default function AdminClients({ token, isDark }) {
                       ))
                     )}
                   </div>
+                </div>
+              )}
+
+              {/* Evolutions panel */}
+              {activePanel === 'evolutions' && (
+                <div className="px-6 py-5 space-y-4">
+                  {evolutions.length === 0 ? (
+                    <div className="text-center py-10">
+                      <Sparkles className={`w-8 h-8 mx-auto mb-3 ${isDark ? 'text-gray-700' : 'text-gray-300'}`} />
+                      <p className={`text-sm ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                        {lang === 'fr' ? 'Aucune demande d\'évolution pour l\'instant.' : 'No evolution requests yet.'}
+                      </p>
+                    </div>
+                  ) : (
+                    evolutions.map(evo => {
+                      const typeInfo = EVOLUTION_TYPES_ADMIN.find(t => t.value === evo.type) || EVOLUTION_TYPES_ADMIN[1];
+                      const isEditing = editingEvo?.id === evo.id;
+                      return (
+                        <div
+                          key={evo.id}
+                          className={`rounded-xl border p-4 ${typeInfo.bg} ${typeInfo.border}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className="text-lg flex-shrink-0 mt-0.5">{typeInfo.emoji}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2 mb-1">
+                                <p className={`text-sm font-semibold ${typeInfo.color}`}>{evo.title}</p>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                                    evo.priority === 'haute' ? 'text-amber-400 bg-amber-500/10' :
+                                    evo.priority === 'faible' ? 'text-gray-400 bg-gray-500/10' :
+                                    'text-blue-400 bg-blue-500/10'
+                                  }`}>
+                                    {evo.priority === 'haute' ? (lang === 'fr' ? 'Haute' : 'High') :
+                                     evo.priority === 'faible' ? (lang === 'fr' ? 'Faible' : 'Low') :
+                                     (lang === 'fr' ? 'Normale' : 'Normal')}
+                                  </span>
+                                  <button
+                                    onClick={() => setEditingEvo(isEditing ? null : { id: evo.id, status: evo.status, response: evo.admin_response || '' })}
+                                    className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
+                                      isEditing
+                                        ? isDark ? 'border-white/20 text-white bg-white/10' : 'border-gray-300 text-gray-900 bg-gray-100'
+                                        : isDark ? 'border-white/10 text-gray-400 hover:border-white/20' : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                                    }`}
+                                  >
+                                    {isEditing ? (lang === 'fr' ? 'Annuler' : 'Cancel') : (lang === 'fr' ? 'Répondre' : 'Respond')}
+                                  </button>
+                                </div>
+                              </div>
+                              <p className={`text-xs leading-relaxed whitespace-pre-wrap mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {evo.description}
+                              </p>
+                              <p className={`text-[11px] ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                                {evo.created_at ? new Date(evo.created_at).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
+                              </p>
+
+                              {/* Inline edit form */}
+                              {isEditing && (
+                                <div className={`mt-3 p-3 rounded-xl space-y-3 ${isDark ? 'bg-black/20' : 'bg-white/60'}`}>
+                                  <div>
+                                    <label className={`block text-xs font-medium mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                      {lang === 'fr' ? 'Statut' : 'Status'}
+                                    </label>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {EVOLUTION_STATUSES_ADMIN.map(s => (
+                                        <button
+                                          key={s.value}
+                                          onClick={() => setEditingEvo(e => ({ ...e, status: s.value }))}
+                                          className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                                            editingEvo.status === s.value
+                                              ? `${s.color} border-current bg-current/10`
+                                              : isDark ? 'border-white/10 text-gray-500 hover:border-white/20' : 'border-gray-200 text-gray-400 hover:border-gray-300'
+                                          }`}
+                                        >
+                                          {lang === 'fr' ? s.labelFr : s.labelEn}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className={`block text-xs font-medium mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                      {lang === 'fr' ? 'Réponse client' : 'Client response'}
+                                    </label>
+                                    <textarea
+                                      value={editingEvo.response}
+                                      onChange={e => setEditingEvo(ev => ({ ...ev, response: e.target.value }))}
+                                      rows={2}
+                                      placeholder={lang === 'fr' ? 'Expliquez votre décision au client...' : 'Explain your decision to the client...'}
+                                      className={`w-full px-3 py-2 rounded-lg text-xs outline-none resize-none transition-all ${inputClass}`}
+                                    />
+                                  </div>
+                                  <button
+                                    onClick={() => handleSaveEvolution(evo.id)}
+                                    disabled={savingEvo}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition-all"
+                                  >
+                                    {savingEvo ? <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                    {lang === 'fr' ? 'Enregistrer' : 'Save'}
+                                  </button>
+                                </div>
+                              )}
+
+                              {/* Existing response */}
+                              {!isEditing && evo.admin_response && (
+                                <div className={`mt-2 p-2 rounded-lg ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-100'}`}>
+                                  <p className="text-[11px] font-semibold text-blue-400 mb-0.5">
+                                    {lang === 'fr' ? 'Votre réponse' : 'Your response'}
+                                  </p>
+                                  <p className={`text-xs ${isDark ? 'text-blue-200' : 'text-blue-700'}`}>{evo.admin_response}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               )}
 

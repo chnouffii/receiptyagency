@@ -106,6 +106,27 @@ class ClientUpdateCreate(BaseModel):
     content: str
 
 
+class EvolutionCreate(BaseModel):
+    type: str = "amelioration"  # bug, amelioration, fonctionnalite
+    title: str
+    description: str
+    priority: str = "normale"  # faible, normale, haute
+
+
+class EvolutionUpdate(BaseModel):
+    status: str  # en_attente, en_etude, planifie, en_cours, livre, refuse
+    admin_response: str = ""
+
+
+class SatisfactionCreate(BaseModel):
+    rating: int  # 1-5
+    comment: str = ""
+
+
+class ReactionToggle(BaseModel):
+    emoji: str  # 👍, ❤️, 🔥
+
+
 # ==================== CLIENT AUTH ====================
 
 @router.post("/client/login")
@@ -256,6 +277,120 @@ async def get_client_updates(authorization: Optional[str] = Header(None)):
         {"client_id": payload["client_id"]}, {"_id": 0}
     ).sort("created_at", -1).to_list(200)
     return updates
+
+
+@router.post("/client/updates/{update_id}/react")
+async def toggle_reaction(update_id: str, body: ReactionToggle, authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token manquant")
+    payload = await _verify_client(authorization)
+    db = get_db()
+    client_id = payload["client_id"]
+
+    allowed_emojis = ["👍", "❤️", "🔥"]
+    if body.emoji not in allowed_emojis:
+        raise HTTPException(status_code=400, detail="Emoji non autorisé")
+
+    update = await db.client_updates.find_one({"id": update_id, "client_id": client_id}, {"_id": 0})
+    if not update:
+        raise HTTPException(status_code=404, detail="Mise à jour introuvable")
+
+    reactions = update.get("reactions", {})
+    emoji_reactors = reactions.get(body.emoji, [])
+
+    if client_id in emoji_reactors:
+        emoji_reactors.remove(client_id)
+    else:
+        emoji_reactors.append(client_id)
+
+    reactions[body.emoji] = emoji_reactors
+    await db.client_updates.update_one({"id": update_id}, {"$set": {"reactions": reactions}})
+    return {"reactions": reactions}
+
+
+@router.get("/client/evolutions")
+async def get_client_evolutions(authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token manquant")
+    payload = await _verify_client(authorization)
+    db = get_db()
+    evolutions = await db.client_evolutions.find(
+        {"client_id": payload["client_id"]}, {"_id": 0}
+    ).sort("created_at", -1).to_list(200)
+    return evolutions
+
+
+@router.post("/client/evolutions")
+async def create_evolution(body: EvolutionCreate, authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token manquant")
+    payload = await _verify_client(authorization)
+    db = get_db()
+    client_id = payload["client_id"]
+
+    title = body.title.strip()
+    description = body.description.strip()
+    if not title or not description:
+        raise HTTPException(status_code=400, detail="Titre et description requis")
+    if len(title) > 200:
+        raise HTTPException(status_code=400, detail="Titre trop long")
+    if len(description) > 2000:
+        raise HTTPException(status_code=400, detail="Description trop longue")
+
+    evolution = {
+        "id": str(uuid.uuid4()),
+        "client_id": client_id,
+        "type": body.type,
+        "title": title,
+        "description": description,
+        "priority": body.priority,
+        "status": "en_attente",
+        "admin_response": "",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": None
+    }
+    await db.client_evolutions.insert_one(evolution)
+    evolution.pop("_id", None)
+    return evolution
+
+
+@router.get("/client/satisfaction")
+async def get_client_satisfaction(authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token manquant")
+    payload = await _verify_client(authorization)
+    db = get_db()
+    satisfaction = await db.client_satisfaction.find_one(
+        {"client_id": payload["client_id"]}, {"_id": 0}
+    )
+    return satisfaction or {}
+
+
+@router.post("/client/satisfaction")
+async def submit_satisfaction(body: SatisfactionCreate, authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token manquant")
+    payload = await _verify_client(authorization)
+    db = get_db()
+    client_id = payload["client_id"]
+
+    if not (1 <= body.rating <= 5):
+        raise HTTPException(status_code=400, detail="Note invalide (1-5)")
+
+    existing = await db.client_satisfaction.find_one({"client_id": client_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Satisfaction déjà soumise")
+
+    satisfaction = {
+        "id": str(uuid.uuid4()),
+        "client_id": client_id,
+        "rating": body.rating,
+        "comment": body.comment.strip(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.client_satisfaction.insert_one(satisfaction)
+    satisfaction.pop("_id", None)
+    return satisfaction
 
 
 # ==================== ADMIN — CLIENTS MANAGEMENT ====================
@@ -553,3 +688,41 @@ async def delete_client_update(client_id: str, update_id: str, admin=Depends(ver
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Mise à jour introuvable")
     return {"message": "Supprimé"}
+
+
+# ==================== ADMIN — ÉVOLUTIONS ====================
+
+@router.get("/admin/clients/{client_id}/evolutions")
+async def get_client_evolutions_admin(client_id: str, admin=Depends(verify_token)):
+    db = get_db()
+    evolutions = await db.client_evolutions.find(
+        {"client_id": client_id}, {"_id": 0}
+    ).sort("created_at", -1).to_list(200)
+    return evolutions
+
+
+@router.patch("/admin/clients/{client_id}/evolutions/{evo_id}")
+async def update_evolution(client_id: str, evo_id: str, body: EvolutionUpdate, admin=Depends(verify_token)):
+    db = get_db()
+    updates = {
+        "status": body.status,
+        "admin_response": body.admin_response.strip(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    result = await db.client_evolutions.update_one(
+        {"id": evo_id, "client_id": client_id}, {"$set": updates}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Évolution introuvable")
+    return {"message": "Mis à jour"}
+
+
+# ==================== ADMIN — SATISFACTION ====================
+
+@router.get("/admin/clients/{client_id}/satisfaction")
+async def get_client_satisfaction_admin(client_id: str, admin=Depends(verify_token)):
+    db = get_db()
+    satisfaction = await db.client_satisfaction.find_one(
+        {"client_id": client_id}, {"_id": 0}
+    )
+    return satisfaction or {}
