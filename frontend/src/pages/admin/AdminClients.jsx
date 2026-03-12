@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Users, Plus, Send, FileUp, Trash2, X, ChevronDown, ChevronUp,
-  MessageCircle, FolderOpen, BarChart2, CheckCircle, Clock, RefreshCw,
-  Eye, ExternalLink, User, Building, Mail, Lock, AlertCircle
+  Users, Plus, Send, FileUp, Trash2, X,
+  MessageCircle, FolderOpen, BarChart2, CheckCircle, Clock,
+  Eye, ExternalLink, User, Building, Mail, Lock, AlertCircle,
+  BookOpen, Zap, Flag, Rocket, ArrowRight, Pencil
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -22,12 +23,20 @@ const PROJECT_STATUSES = [
 const DOC_TYPES = ['document', 'devis', 'contrat', 'rapport'];
 const DOC_EMOJIS = { document: '📄', devis: '💰', contrat: '📝', rapport: '📊' };
 
+const UPDATE_TYPES = [
+  { value: 'action',    emoji: '🔨', labelFr: 'Ce qu\'on fait',      labelEn: 'What we\'re doing',  color: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'border-blue-500/20' },
+  { value: 'milestone', emoji: '🎯', labelFr: 'Jalon',               labelEn: 'Milestone',          color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+  { value: 'info',      emoji: '💡', labelFr: 'Information',         labelEn: 'Information',        color: 'text-amber-400',  bg: 'bg-amber-500/10',  border: 'border-amber-500/20' },
+  { value: 'delivery',  emoji: '🚀', labelFr: 'Livraison',           labelEn: 'Delivery',           color: 'text-emerald-400',bg: 'bg-emerald-500/10',border: 'border-emerald-500/20' },
+  { value: 'next',      emoji: '⏭️', labelFr: 'Prochaine étape',    labelEn: 'Next step',          color: 'text-gray-400',   bg: 'bg-gray-500/10',   border: 'border-gray-500/20' },
+];
+
 export default function AdminClients({ token, isDark }) {
   const { lang } = useLanguage();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState(null);
-  const [activePanel, setActivePanel] = useState('messages'); // messages | project | documents
+  const [activePanel, setActivePanel] = useState('messages'); // messages | project | documents | journal
   const [showCreate, setShowCreate] = useState(false);
   const [leads, setLeads] = useState([]);
 
@@ -50,6 +59,13 @@ export default function AdminClients({ token, isDark }) {
   const [projectNotes, setProjectNotes] = useState('');
   const [savingProject, setSavingProject] = useState(false);
   const [projectData, setProjectData] = useState(null);
+
+  // Journal / Updates state
+  const [updates, setUpdates] = useState([]);
+  const [updateType, setUpdateType] = useState('action');
+  const [updateTitle, setUpdateTitle] = useState('');
+  const [updateContent, setUpdateContent] = useState('');
+  const [addingUpdate, setAddingUpdate] = useState(false);
 
   // Create client form
   const [form, setForm] = useState({ name: '', email: '', password: '', company: '', lead_id: '' });
@@ -101,6 +117,13 @@ export default function AdminClients({ token, isDark }) {
     } catch {}
   }, [token]);
 
+  const fetchUpdates = useCallback(async (clientId) => {
+    try {
+      const res = await axios.get(`${API}/admin/clients/${clientId}/updates`, { headers });
+      setUpdates(res.data);
+    } catch {}
+  }, [token]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -111,6 +134,36 @@ export default function AdminClients({ token, isDark }) {
     fetchMessages(client.id);
     fetchDocuments(client.id);
     fetchProject(client.id);
+    fetchUpdates(client.id);
+  };
+
+  const handleAddUpdate = async () => {
+    if (!updateTitle.trim() || !updateContent.trim()) {
+      toast.error(lang === 'fr' ? 'Titre et contenu requis' : 'Title and content required');
+      return;
+    }
+    setAddingUpdate(true);
+    try {
+      await axios.post(`${API}/admin/clients/${selectedClient.id}/updates`, {
+        type: updateType, title: updateTitle.trim(), content: updateContent.trim()
+      }, { headers });
+      setUpdateTitle(''); setUpdateContent(''); setUpdateType('action');
+      await fetchUpdates(selectedClient.id);
+      toast.success(lang === 'fr' ? 'Mise à jour publiée !' : 'Update published!');
+    } catch {
+      toast.error(lang === 'fr' ? 'Erreur publication' : 'Failed to publish');
+    } finally {
+      setAddingUpdate(false);
+    }
+  };
+
+  const handleDeleteUpdate = async (updateId) => {
+    try {
+      await axios.delete(`${API}/admin/clients/${selectedClient.id}/updates/${updateId}`, { headers });
+      await fetchUpdates(selectedClient.id);
+    } catch {
+      toast.error(lang === 'fr' ? 'Erreur suppression' : 'Delete failed');
+    }
   };
 
   const sendMessage = async () => {
@@ -411,6 +464,7 @@ export default function AdminClients({ token, isDark }) {
                     { key: 'messages', icon: MessageCircle, label: lang === 'fr' ? 'Messages' : 'Messages' },
                     { key: 'project', icon: BarChart2, label: lang === 'fr' ? 'Projet' : 'Project' },
                     { key: 'documents', icon: FolderOpen, label: lang === 'fr' ? 'Documents' : 'Documents' },
+                    { key: 'journal', icon: BookOpen, label: lang === 'fr' ? 'Journal' : 'Journal' },
                   ].map(({ key, icon: Icon, label }) => (
                     <button
                       key={key}
@@ -686,6 +740,105 @@ export default function AdminClients({ token, isDark }) {
                       ))
                     )}
                   </div>
+                </div>
+              )}
+
+              {/* Journal panel */}
+              {activePanel === 'journal' && (
+                <div className="px-6 py-5 space-y-5">
+                  {/* Add update form */}
+                  <div className={`p-4 rounded-xl space-y-3 ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
+                    <p className={`text-xs font-medium ${labelClass}`}>
+                      {lang === 'fr' ? 'Publier une mise à jour' : 'Publish an update'}
+                    </p>
+                    {/* Type selector */}
+                    <div className="flex flex-wrap gap-2">
+                      {UPDATE_TYPES.map(t => (
+                        <button
+                          key={t.value}
+                          onClick={() => setUpdateType(t.value)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                            updateType === t.value
+                              ? `${t.color} ${t.bg} ${t.border}`
+                              : isDark
+                                ? 'border-white/10 text-gray-500 hover:border-white/20'
+                                : 'border-gray-200 text-gray-400 hover:border-gray-300'
+                          }`}
+                        >
+                          <span>{t.emoji}</span>
+                          {lang === 'fr' ? t.labelFr : t.labelEn}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      type="text"
+                      value={updateTitle}
+                      onChange={e => setUpdateTitle(e.target.value)}
+                      placeholder={lang === 'fr' ? 'Titre de la mise à jour...' : 'Update title...'}
+                      className={`w-full px-3 py-2 rounded-xl text-sm outline-none transition-all ${inputClass}`}
+                    />
+                    <textarea
+                      value={updateContent}
+                      onChange={e => setUpdateContent(e.target.value)}
+                      rows={3}
+                      placeholder={lang === 'fr'
+                        ? 'Expliquez ce que vous faites, ce que vous avez mis en place, ce qui arrive...'
+                        : 'Explain what you\'re doing, what you\'ve set up, what\'s coming...'
+                      }
+                      className={`w-full px-3 py-2 rounded-xl text-sm outline-none transition-all resize-none ${inputClass}`}
+                    />
+                    <button
+                      onClick={handleAddUpdate}
+                      disabled={addingUpdate || !updateTitle.trim() || !updateContent.trim()}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-all"
+                    >
+                      {addingUpdate ? (
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : <Pencil className="w-4 h-4" />}
+                      {lang === 'fr' ? 'Publier' : 'Publish'}
+                    </button>
+                  </div>
+
+                  {/* Updates list */}
+                  {updates.length === 0 ? (
+                    <div className="text-center py-8">
+                      <BookOpen className={`w-8 h-8 mx-auto mb-3 ${isDark ? 'text-gray-700' : 'text-gray-300'}`} />
+                      <p className={`text-sm ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                        {lang === 'fr' ? 'Aucune mise à jour publiée' : 'No updates published yet'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {updates.map(upd => {
+                        const typeInfo = UPDATE_TYPES.find(t => t.value === upd.type) || UPDATE_TYPES[0];
+                        return (
+                          <div
+                            key={upd.id}
+                            className={`flex gap-3 p-4 rounded-xl border ${typeInfo.bg} ${typeInfo.border}`}
+                          >
+                            <span className="text-xl flex-shrink-0 mt-0.5">{typeInfo.emoji}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <p className={`text-sm font-semibold ${typeInfo.color}`}>{upd.title}</p>
+                                <button
+                                  onClick={() => handleDeleteUpdate(upd.id)}
+                                  className={`flex-shrink-0 p-1 rounded transition-colors ${isDark ? 'text-gray-600 hover:text-red-400' : 'text-gray-300 hover:text-red-500'}`}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                              <p className={`text-xs mt-1 leading-relaxed whitespace-pre-wrap ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {upd.content}
+                              </p>
+                              <p className={`text-[11px] mt-2 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                                {lang === 'fr' ? 'Publié par' : 'Published by'} {upd.author_name} · {upd.created_at ? new Date(upd.created_at).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

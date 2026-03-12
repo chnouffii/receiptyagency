@@ -97,7 +97,14 @@ class AdminDocumentCreate(BaseModel):
 class ProjectStatusUpdate(BaseModel):
     status: str  # en_attente, en_cours, revue, livre, termine
     description: str = ""
+    notes: str = ""
     progress: int = 0  # 0-100
+
+
+class ClientUpdateCreate(BaseModel):
+    type: str = "info"  # info, action, milestone, delivery, next
+    title: str
+    content: str
 
 
 # ==================== CLIENT AUTH ====================
@@ -235,9 +242,22 @@ async def get_client_project(authorization: str = None):
     return {
         "status": client.get("project_status", "en_attente"),
         "description": client.get("project_description", ""),
+        "notes": client.get("project_notes", ""),
         "progress": client.get("project_progress", 0),
         "updated_at": client.get("project_updated_at", client.get("created_at", ""))
     }
+
+
+@router.get("/client/updates")
+async def get_client_updates(authorization: str = None):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token manquant")
+    payload = await _verify_client(authorization)
+    db = get_db()
+    updates = await db.client_updates.find(
+        {"client_id": payload["client_id"]}, {"_id": 0}
+    ).sort("created_at", -1).to_list(200)
+    return updates
 
 
 # ==================== ADMIN — CLIENTS MANAGEMENT ====================
@@ -332,6 +352,21 @@ async def update_client(client_id: str, body: dict, admin=Depends(verify_token))
     return {"message": "Mis à jour"}
 
 
+@router.get("/admin/clients/{client_id}/project")
+async def get_client_project_admin(client_id: str, admin=Depends(verify_token)):
+    db = get_db()
+    client = await db.client_accounts.find_one({"id": client_id}, {"_id": 0, "password": 0})
+    if not client:
+        raise HTTPException(status_code=404, detail="Client introuvable")
+    return {
+        "status": client.get("project_status", "en_attente"),
+        "description": client.get("project_description", ""),
+        "notes": client.get("project_notes", ""),
+        "progress": client.get("project_progress", 0),
+        "updated_at": client.get("project_updated_at", client.get("created_at", ""))
+    }
+
+
 @router.patch("/admin/clients/{client_id}/project")
 async def update_project_status(client_id: str, body: ProjectStatusUpdate, admin=Depends(verify_token)):
     db = get_db()
@@ -342,6 +377,8 @@ async def update_project_status(client_id: str, body: ProjectStatusUpdate, admin
     }
     if body.description:
         updates["project_description"] = body.description
+    if body.notes is not None:
+        updates["project_notes"] = body.notes
 
     result = await db.client_accounts.update_one({"id": client_id}, {"$set": updates})
     if result.matched_count == 0:
@@ -469,3 +506,52 @@ async def delete_document(client_id: str, doc_id: str, admin=Depends(verify_toke
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Document introuvable")
     return {"message": "Document supprimé"}
+
+
+# ==================== ADMIN — PROJECT UPDATES (JOURNAL) ====================
+
+@router.get("/admin/clients/{client_id}/updates")
+async def get_client_updates_admin(client_id: str, admin=Depends(verify_token)):
+    db = get_db()
+    updates = await db.client_updates.find(
+        {"client_id": client_id}, {"_id": 0}
+    ).sort("created_at", -1).to_list(200)
+    return updates
+
+
+@router.post("/admin/clients/{client_id}/updates")
+async def create_client_update(client_id: str, body: ClientUpdateCreate, admin=Depends(verify_token)):
+    db = get_db()
+    client = await db.client_accounts.find_one({"id": client_id}, {"_id": 0})
+    if not client:
+        raise HTTPException(status_code=404, detail="Client introuvable")
+
+    title = body.title.strip()
+    content = body.content.strip()
+    if not title or not content:
+        raise HTTPException(status_code=400, detail="Titre et contenu requis")
+
+    admin_info = await db.admins.find_one({"email": admin["sub"]}, {"_id": 0, "name": 1})
+    admin_name = admin_info.get("name", "Équipe Receipty") if admin_info else "Équipe Receipty"
+
+    update = {
+        "id": str(uuid.uuid4()),
+        "client_id": client_id,
+        "type": body.type,
+        "title": title,
+        "content": content,
+        "author_name": admin_name,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.client_updates.insert_one(update)
+    update.pop("_id", None)
+    return update
+
+
+@router.delete("/admin/clients/{client_id}/updates/{update_id}")
+async def delete_client_update(client_id: str, update_id: str, admin=Depends(verify_token)):
+    db = get_db()
+    result = await db.client_updates.delete_one({"id": update_id, "client_id": client_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Mise à jour introuvable")
+    return {"message": "Supprimé"}

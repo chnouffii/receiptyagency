@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageCircle, FileText, FolderOpen, LogOut, Send, Download,
   CheckCircle, Clock, Loader, Package, Star, ChevronRight,
-  User, Building2, RefreshCw, ExternalLink, AlertCircle
+  User, Building2, RefreshCw, ExternalLink, AlertCircle, BookOpen
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -80,11 +80,12 @@ export default function ClientDashboardPage() {
   const { lang } = useLanguage();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('messages');
+  const [activeTab, setActiveTab] = useState('updates');
   const [profile, setProfile] = useState(null);
   const [project, setProject] = useState(null);
   const [messages, setMessages] = useState([]);
   const [documents, setDocuments] = useState([]);
+  const [updates, setUpdates] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -107,16 +108,18 @@ export default function ClientDashboardPage() {
   const fetchAll = useCallback(async () => {
     if (!token) { navigate('/client'); return; }
     try {
-      const [profileRes, projectRes, messagesRes, docsRes] = await Promise.all([
+      const [profileRes, projectRes, messagesRes, docsRes, updatesRes] = await Promise.all([
         axios.get(`${API}/client/profile`, { headers }),
         axios.get(`${API}/client/project`, { headers }),
         axios.get(`${API}/client/messages`, { headers }),
         axios.get(`${API}/client/documents`, { headers }),
+        axios.get(`${API}/client/updates`, { headers }),
       ]);
       setProfile(profileRes.data);
       setProject(projectRes.data);
       setMessages(messagesRes.data);
       setDocuments(docsRes.data);
+      setUpdates(updatesRes.data);
     } catch (err) {
       if (err.response?.status === 401) {
         toast.error(lang === 'fr' ? 'Session expirée. Reconnectez-vous.' : 'Session expired. Please log in again.');
@@ -183,10 +186,19 @@ export default function ClientDashboardPage() {
   const progressPercent = project?.progress || 0;
 
   const tabs = [
+    { id: 'updates', labelFr: 'Journal', labelEn: 'Journal', icon: BookOpen },
     { id: 'messages', labelFr: 'Messages', labelEn: 'Messages', icon: MessageCircle },
     { id: 'project', labelFr: 'Mon Projet', labelEn: 'My Project', icon: CheckCircle },
     { id: 'documents', labelFr: 'Documents', labelEn: 'Documents', icon: FolderOpen },
   ];
+
+  const UPDATE_TYPE_META = {
+    action:    { emoji: '🔨', labelFr: 'En cours',         labelEn: 'In progress',  color: 'text-blue-400',    bg: isDark ? 'bg-blue-500/10'    : 'bg-blue-50',    border: isDark ? 'border-blue-500/20'    : 'border-blue-200' },
+    milestone: { emoji: '🎯', labelFr: 'Jalon',            labelEn: 'Milestone',    color: 'text-purple-400',  bg: isDark ? 'bg-purple-500/10'  : 'bg-purple-50',  border: isDark ? 'border-purple-500/20'  : 'border-purple-200' },
+    info:      { emoji: '💡', labelFr: 'Information',      labelEn: 'Information',  color: 'text-amber-400',   bg: isDark ? 'bg-amber-500/10'   : 'bg-amber-50',   border: isDark ? 'border-amber-500/20'   : 'border-amber-200' },
+    delivery:  { emoji: '🚀', labelFr: 'Livraison',        labelEn: 'Delivery',     color: 'text-emerald-400', bg: isDark ? 'bg-emerald-500/10' : 'bg-emerald-50', border: isDark ? 'border-emerald-500/20' : 'border-emerald-200' },
+    next:      { emoji: '⏭️', labelFr: 'Prochaine étape', labelEn: 'Next step',    color: 'text-gray-400',    bg: isDark ? 'bg-gray-500/10'    : 'bg-gray-50',    border: isDark ? 'border-gray-500/20'    : 'border-gray-200' },
+  };
 
   return (
     <div className={`min-h-screen pt-20 transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
@@ -287,6 +299,81 @@ export default function ClientDashboardPage() {
             );
           })}
         </div>
+
+        {/* === TAB: JOURNAL / UPDATES === */}
+        {activeTab === 'updates' && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-3"
+          >
+            {updates.length === 0 ? (
+              <div className={`rounded-2xl border p-16 text-center ${isDark ? 'bg-[var(--bg-secondary)] border-[var(--border-primary)]' : 'bg-white border-gray-200 shadow-sm'}`}>
+                <BookOpen className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-gray-700' : 'text-gray-300'}`} />
+                <p className={`text-sm font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {lang === 'fr' ? 'Votre journal de projet est vide pour l\'instant.' : 'Your project journal is empty for now.'}
+                </p>
+                <p className={`text-xs ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                  {lang === 'fr' ? 'Votre équipe publiera bientôt des mises à jour ici.' : 'Your team will publish updates here soon.'}
+                </p>
+              </div>
+            ) : (
+              <div className="relative">
+                {/* Timeline line */}
+                <div className={`absolute left-[27px] top-6 bottom-6 w-px ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
+                <div className="space-y-4">
+                  {updates.map((upd, i) => {
+                    const meta = UPDATE_TYPE_META[upd.type] || UPDATE_TYPE_META.info;
+                    return (
+                      <motion.div
+                        key={upd.id || i}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.06 }}
+                        className="relative flex gap-4"
+                      >
+                        {/* Timeline dot */}
+                        <div className={`relative z-10 flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-xl border ${meta.bg} ${meta.border}`}>
+                          {meta.emoji}
+                        </div>
+
+                        {/* Card */}
+                        <div className={`flex-1 rounded-2xl border p-4 ${meta.bg} ${meta.border}`}>
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <div>
+                              <span className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full mb-1 ${meta.color} ${isDark ? 'bg-white/5' : 'bg-white/60'}`}>
+                                {lang === 'fr' ? meta.labelFr : meta.labelEn}
+                              </span>
+                              <h3 className={`text-sm font-semibold leading-snug ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {upd.title}
+                              </h3>
+                            </div>
+                            <p className={`text-[11px] flex-shrink-0 mt-0.5 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                              {upd.created_at ? new Date(upd.created_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {
+                                day: '2-digit', month: 'short', year: 'numeric'
+                              }) : ''}
+                            </p>
+                          </div>
+                          <p className={`text-sm leading-relaxed whitespace-pre-wrap ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                            {upd.content}
+                          </p>
+                          <div className={`flex items-center gap-2 mt-3 pt-3 border-t ${isDark ? 'border-white/5' : 'border-black/5'}`}>
+                            <div className={`w-5 h-5 rounded-full bg-blue-600/20 flex items-center justify-center flex-shrink-0`}>
+                              <User className="w-2.5 h-2.5 text-blue-400" />
+                            </div>
+                            <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                              {upd.author_name} · {upd.created_at ? new Date(upd.created_at).toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' }) : ''}
+                            </span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* === TAB: MESSAGES === */}
         {activeTab === 'messages' && (
