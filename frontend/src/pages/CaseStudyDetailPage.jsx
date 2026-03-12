@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Target, Lightbulb, TrendingUp, CheckCircle2 } fr
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Badge } from '../components/ui/badge';
+import SEOHead, { CaseStudySchema } from '../components/SEOHead';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -48,8 +49,22 @@ export default function CaseStudyDetailPage() {
     cta: lang === 'fr' ? 'Démarrer un projet similaire' : 'Start a similar project',
   };
 
+  const caseTitle = lang === 'fr' ? (cs.title_fr || cs.title) : (cs.title_en || cs.title);
+  const caseDesc = lang === 'fr' ? (cs.summary_fr || cs.summary || '') : (cs.summary_en || cs.summary || '');
+
   return (
     <div data-testid="case-detail-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+      <SEOHead
+        page="cases"
+        customTitle={`${caseTitle} — Étude de Cas | Receipty`}
+        customDescription={caseDesc.slice(0, 160)}
+        canonicalPath={`/cases/${id}`}
+      />
+      <CaseStudySchema
+        title={caseTitle}
+        description={caseDesc}
+        url={`https://receipty.fr/cases/${id}`}
+      />
       <div className="max-w-4xl mx-auto px-6 py-16">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <Link to="/cases" className={`inline-flex items-center gap-2 text-sm transition-colors duration-200 mb-10 ${isDark ? 'text-gray-500 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`} data-testid="back-to-cases">

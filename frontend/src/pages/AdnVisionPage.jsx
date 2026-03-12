@@ -3,6 +3,7 @@ import { motion, useInView } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
+import SEOHead from '../components/SEOHead';
 
 function AnimatedCounter({ target, suffix = '', inView }) {
   const [count, setCount] = useState(0);
@@ -50,6 +51,7 @@ export default function AdnVisionPage() {
 
   return (
     <div data-testid="adn-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+      <SEOHead page="adn" />
       {/* Manifesto */}
       <section className="max-w-5xl mx-auto px-6 py-16 md:py-24">
         <motion.div

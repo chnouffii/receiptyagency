@@ -4,6 +4,7 @@ import { Send, Phone, Mail, MapPin, Clock, Zap, PhoneCall } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+import SEOHead from '../components/SEOHead';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -87,6 +88,7 @@ export default function ContactPage() {
 
   return (
     <div data-testid="contact-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+      <SEOHead page="contact" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-20">
         {/* Header */}
         <motion.div 

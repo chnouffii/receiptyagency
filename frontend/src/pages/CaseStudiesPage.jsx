@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Badge } from '../components/ui/badge';
+import SEOHead from '../components/SEOHead';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -72,6 +73,7 @@ export default function CaseStudiesPage() {
 
   return (
     <div data-testid="cases-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+      <SEOHead page="cases" />
       <section className="max-w-6xl mx-auto px-6 py-16 md:py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

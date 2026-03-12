@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "sonner";
 import { LanguageProvider } from "./context/LanguageContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
@@ -55,17 +56,10 @@ function AppContent() {
   useEffect(() => {
     document.documentElement.classList.add("dark");
 
-    const TITLE = "Receipty | Agence d'IA";
-
-    // Force title immediately and on every change
-    const forceTitle = () => { document.title = TITLE; };
-    forceTitle();
-
     // Masquer le badge Emergent + forcer favicon
     const cleanup = () => {
       const badge = document.getElementById('emergent-badge');
       if (badge) badge.remove();
-      if (document.title !== TITLE) forceTitle();
       // Force favicon
       let link = document.querySelector("link[rel='icon']");
       if (!link || !link.href.includes('favicon.png')) {
@@ -79,12 +73,9 @@ function AppContent() {
     };
     cleanup();
 
-    // MutationObserver pour intercepter les modifications du DOM et du <head>
     const observer = new MutationObserver(cleanup);
     observer.observe(document.body, { childList: true, subtree: true });
-    observer.observe(document.head, { childList: true, subtree: true, characterData: true });
 
-    // Interval de secours — certains scripts externes changent le titre après un délai
     const interval = setInterval(cleanup, 500);
 
     return () => { observer.disconnect(); clearInterval(interval); };
@@ -118,11 +109,13 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AppContent />
-      </LanguageProvider>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AppContent />
+        </LanguageProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 

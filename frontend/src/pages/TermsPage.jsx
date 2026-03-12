@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FileText, Building2, Scale, Shield, AlertTriangle, Gavel } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+import SEOHead from '../components/SEOHead';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -258,6 +259,7 @@ ${company.legal_email}`
 
   return (
     <div data-testid="terms-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+      <SEOHead page="terms" noIndex={true} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20">
         {/* Header */}
         <motion.div
