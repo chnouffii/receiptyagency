@@ -43,46 +43,46 @@ export default function AdminChatAnalytics({ token, isDark }) {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {statItems.map((stat, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="rounded-xl border border-white/5 bg-[#0F0F10] p-6" data-testid={`chat-stat-${i}`}>
+          <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="rounded-xl border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-6" data-testid={`chat-stat-${i}`}>
             <div className="flex items-center gap-2 mb-3">
               <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              <span className="text-sm text-gray-500">{stat.label}</span>
+              <span className="text-sm text-[var(--text-muted)]">{stat.label}</span>
             </div>
-            <p className="font-mono text-3xl font-bold text-white">{stat.value}</p>
+            <p className="font-mono text-3xl font-bold text-[var(--text-primary)]">{stat.value}</p>
           </motion.div>
         ))}
       </div>
 
       {/* Recent Conversations */}
-      <div className="rounded-xl border border-white/5 bg-[#0F0F10] overflow-hidden">
-        <div className="p-4 border-b border-white/5">
-          <h2 className="font-heading text-lg font-semibold text-white">
+      <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--bg-secondary)] overflow-hidden">
+        <div className="p-4 border-b border-[var(--border-primary)]">
+          <h2 className="font-heading text-lg font-semibold text-[var(--text-primary)]">
             {lang === 'fr' ? 'Conversations récentes' : 'Recent conversations'}
           </h2>
         </div>
 
         {!analytics || analytics.conversations.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
+          <div className="p-12 text-center text-[var(--text-muted)]">
             {lang === 'fr' ? 'Aucune conversation pour le moment.' : 'No conversations yet.'}
           </div>
         ) : (
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-[var(--border-primary)]">
             {analytics.conversations.map((conv, i) => (
-              <div key={conv.session_id} className="flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition-colors duration-200" data-testid={`conversation-row-${i}`}>
+              <div key={conv.session_id} className="flex items-center justify-between px-5 py-4 hover:bg-[var(--bg-hover)] transition-colors duration-200" data-testid={`conversation-row-${i}`}>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-blue-600/10 flex items-center justify-center flex-shrink-0">
                       <MessageCircle className="w-4 h-4 text-blue-400" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm text-white truncate max-w-md">
+                      <p className="text-sm text-[var(--text-primary)] truncate max-w-md">
                         {conv.preview || (lang === 'fr' ? 'Conversation sans aperçu' : 'No preview')}
                       </p>
                       <div className="flex items-center gap-3 mt-1">
-                        <span className="text-xs text-gray-600 flex items-center gap-1">
+                        <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
                           <Hash className="w-3 h-3" /> {conv.message_count} msgs
                         </span>
-                        <span className="text-xs text-gray-600 flex items-center gap-1">
+                        <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
                           <Clock className="w-3 h-3" /> {new Date(conv.last_at).toLocaleDateString()}
                         </span>
                       </div>
@@ -92,7 +92,7 @@ export default function AdminChatAnalytics({ token, isDark }) {
                 <button
                   onClick={() => viewConversation(conv.session_id)}
                   data-testid={`view-conversation-${i}`}
-                  className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-400 transition-colors duration-200 ml-4"
+                  className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-blue-400 transition-colors duration-200 ml-4"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   {lang === 'fr' ? 'Voir' : 'View'}
@@ -105,16 +105,16 @@ export default function AdminChatAnalytics({ token, isDark }) {
 
       {/* Conversation Detail Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-[#0F0F10] border-white/10 max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogContent className="bg-[var(--bg-secondary)] border-[var(--border-secondary)] max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle className="font-heading text-white text-lg">
+            <DialogTitle className="font-heading text-[var(--text-primary)] text-lg">
               {lang === 'fr' ? 'Détail conversation' : 'Conversation detail'}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto space-y-3 pr-2 mt-4">
             {sessionMessages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`rounded-2xl px-4 py-3 max-w-[85%] ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-white/5 text-gray-300 rounded-tl-sm'}`}>
+                <div className={`rounded-2xl px-4 py-3 max-w-[85%] ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-[var(--border-primary)] text-[var(--text-secondary)] rounded-tl-sm'}`}>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   <p className="text-[10px] mt-1 opacity-50">{new Date(msg.created_at).toLocaleTimeString()}</p>
                 </div>

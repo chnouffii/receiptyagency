@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Globe, Shield, Sun, Moon } from 'lucide-react';
+import { Menu, X, Globe, Shield, Sun, Moon, Calculator, Building } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -89,6 +89,38 @@ export const Navbar = () => {
             {lang.toUpperCase()}
           </button>
 
+          {/* ROI Calculator */}
+          <Link
+            to="/roi"
+            data-testid="nav-roi-link"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border ${
+              isActive('/roi')
+                ? 'text-blue-500 border-blue-500/30 bg-blue-500/10'
+                : isDark
+                  ? 'text-gray-400 hover:text-white border-white/10 hover:border-white/20'
+                  : 'text-gray-500 hover:text-gray-900 border-gray-200 hover:border-gray-300'
+            }`}
+          >
+            <Calculator className="w-3.5 h-3.5" />
+            ROI
+          </Link>
+
+          {/* Client Portal */}
+          <Link
+            to="/client"
+            data-testid="nav-client-link"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border ${
+              isActive('/client') || isActive('/client/dashboard')
+                ? 'text-blue-500 border-blue-500/30 bg-blue-500/10'
+                : isDark
+                  ? 'text-gray-400 hover:text-white border-white/10 hover:border-white/20'
+                  : 'text-gray-500 hover:text-gray-900 border-gray-200 hover:border-gray-300'
+            }`}
+          >
+            <Building className="w-3.5 h-3.5" />
+            {lang === 'fr' ? 'Espace Client' : 'Client Portal'}
+          </Link>
+
           {/* Admin Link */}
           <Link
             to="/admin"
@@ -135,7 +167,7 @@ export const Navbar = () => {
               ))}
               <div className={`flex items-center gap-4 pt-2 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
                 {/* Mobile Theme Toggle */}
-                <button 
+                <button
                   onClick={toggleTheme}
                   className={`flex items-center gap-1.5 text-sm ${
                     isDark ? 'text-yellow-400' : 'text-blue-600'
@@ -144,15 +176,29 @@ export const Navbar = () => {
                   {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                   {isDark ? 'Clair' : 'Sombre'}
                 </button>
-                <button 
-                  onClick={toggleLang} 
+                <button
+                  onClick={toggleLang}
                   className={`flex items-center gap-1.5 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
                 >
                   <Globe className="w-4 h-4" /> {lang.toUpperCase()}
                 </button>
-                <Link 
-                  to="/admin" 
-                  onClick={() => setIsOpen(false)} 
+                <Link
+                  to="/roi"
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center gap-1.5 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
+                >
+                  <Calculator className="w-4 h-4" /> ROI
+                </Link>
+                <Link
+                  to="/client"
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center gap-1.5 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
+                >
+                  <Building className="w-4 h-4" /> {lang === 'fr' ? 'Client' : 'Client'}
+                </Link>
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
                   className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
                 >
                   <Shield className="w-4 h-4" />

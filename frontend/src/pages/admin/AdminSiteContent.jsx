@@ -294,7 +294,7 @@ export default function AdminSiteContent({ token, isDark }) {
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
               activeSection === section.id
                 ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10'
+                : 'bg-[var(--bg-tertiary)] text-gray-400 border border-[var(--border-primary)] hover:bg-[var(--bg-tertiary)]'
             }`}
           >
             <section.icon className="w-4 h-4" />
@@ -308,9 +308,9 @@ export default function AdminSiteContent({ token, isDark }) {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0F0F10] border border-white/5 rounded-xl p-6"
+          className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl p-6"
         >
-          <h3 className="font-heading text-lg font-semibold text-white mb-6 flex items-center gap-2">
+          <h3 className="font-heading text-lg font-semibold text-[var(--text-primary)] mb-6 flex items-center gap-2">
             <Phone className="w-5 h-5 text-blue-400" />
             Informations de Contact
           </h3>
@@ -321,7 +321,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 type="text"
                 value={contactInfo.phone}
                 onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
               />
             </div>
             <div>
@@ -330,7 +330,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 type="email"
                 value={contactInfo.email}
                 onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
               />
             </div>
             <div>
@@ -339,7 +339,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 type="email"
                 value={contactInfo.urgent_email}
                 onChange={(e) => setContactInfo({ ...contactInfo, urgent_email: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
               />
             </div>
             <div>
@@ -348,7 +348,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 type="text"
                 value={contactInfo.address_line1}
                 onChange={(e) => setContactInfo({ ...contactInfo, address_line1: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
               />
             </div>
             <div>
@@ -357,7 +357,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 type="text"
                 value={contactInfo.address_line2}
                 onChange={(e) => setContactInfo({ ...contactInfo, address_line2: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
               />
             </div>
             <div>
@@ -366,7 +366,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 type="text"
                 value={contactInfo.hours_fr}
                 onChange={(e) => setContactInfo({ ...contactInfo, hours_fr: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
               />
             </div>
             <div>
@@ -375,7 +375,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 type="text"
                 value={contactInfo.hours_en}
                 onChange={(e) => setContactInfo({ ...contactInfo, hours_en: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
               />
             </div>
           </div>
@@ -387,9 +387,9 @@ export default function AdminSiteContent({ token, isDark }) {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0F0F10] border border-white/5 rounded-xl p-6"
+          className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl p-6"
         >
-          <h3 className="font-heading text-lg font-semibold text-white mb-6 flex items-center gap-2">
+          <h3 className="font-heading text-lg font-semibold text-[var(--text-primary)] mb-6 flex items-center gap-2">
             <Building2 className="w-5 h-5 text-blue-400" />
             Informations Société
           </h3>
@@ -400,7 +400,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 type="text"
                 value={companyInfo.name}
                 onChange={(e) => setCompanyInfo({ ...companyInfo, name: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
               />
             </div>
             <div>
@@ -409,7 +409,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 type="text"
                 value={companyInfo.legal_form}
                 onChange={(e) => setCompanyInfo({ ...companyInfo, legal_form: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
               />
             </div>
             <div>
@@ -418,11 +418,11 @@ export default function AdminSiteContent({ token, isDark }) {
                 type="text"
                 value={companyInfo.capital}
                 onChange={(e) => setCompanyInfo({ ...companyInfo, capital: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
               />
             </div>
-            <div className="md:col-span-2 border-t border-white/5 pt-4 mt-2">
-              <h4 className="text-sm font-medium text-white mb-4">Co-CEO 1</h4>
+            <div className="md:col-span-2 border-t border-[var(--border-primary)] pt-4 mt-2">
+              <h4 className="text-sm font-medium text-[var(--text-primary)] mb-4">Co-CEO 1</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">Nom</label>
@@ -430,7 +430,7 @@ export default function AdminSiteContent({ token, isDark }) {
                     type="text"
                     value={companyInfo.ceo1_name}
                     onChange={(e) => setCompanyInfo({ ...companyInfo, ceo1_name: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                   />
                 </div>
                 <div>
@@ -439,7 +439,7 @@ export default function AdminSiteContent({ token, isDark }) {
                     type="text"
                     value={companyInfo.ceo1_role_fr}
                     onChange={(e) => setCompanyInfo({ ...companyInfo, ceo1_role_fr: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                   />
                 </div>
                 <div>
@@ -448,13 +448,13 @@ export default function AdminSiteContent({ token, isDark }) {
                     type="text"
                     value={companyInfo.ceo1_role_en}
                     onChange={(e) => setCompanyInfo({ ...companyInfo, ceo1_role_en: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                   />
                 </div>
               </div>
             </div>
-            <div className="md:col-span-2 border-t border-white/5 pt-4 mt-2">
-              <h4 className="text-sm font-medium text-white mb-4">Co-CEO 2</h4>
+            <div className="md:col-span-2 border-t border-[var(--border-primary)] pt-4 mt-2">
+              <h4 className="text-sm font-medium text-[var(--text-primary)] mb-4">Co-CEO 2</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">Nom</label>
@@ -462,7 +462,7 @@ export default function AdminSiteContent({ token, isDark }) {
                     type="text"
                     value={companyInfo.ceo2_name}
                     onChange={(e) => setCompanyInfo({ ...companyInfo, ceo2_name: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                   />
                 </div>
                 <div>
@@ -471,7 +471,7 @@ export default function AdminSiteContent({ token, isDark }) {
                     type="text"
                     value={companyInfo.ceo2_role_fr}
                     onChange={(e) => setCompanyInfo({ ...companyInfo, ceo2_role_fr: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                   />
                 </div>
                 <div>
@@ -480,13 +480,13 @@ export default function AdminSiteContent({ token, isDark }) {
                     type="text"
                     value={companyInfo.ceo2_role_en}
                     onChange={(e) => setCompanyInfo({ ...companyInfo, ceo2_role_en: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                   />
                 </div>
               </div>
             </div>
-            <div className="md:col-span-2 border-t border-white/5 pt-4 mt-2">
-              <h4 className="text-sm font-medium text-white mb-4">Emails légaux</h4>
+            <div className="md:col-span-2 border-t border-[var(--border-primary)] pt-4 mt-2">
+              <h4 className="text-sm font-medium text-[var(--text-primary)] mb-4">Emails légaux</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">Email DPO (RGPD)</label>
@@ -494,7 +494,7 @@ export default function AdminSiteContent({ token, isDark }) {
                     type="email"
                     value={companyInfo.dpo_email}
                     onChange={(e) => setCompanyInfo({ ...companyInfo, dpo_email: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                   />
                 </div>
                 <div>
@@ -503,7 +503,7 @@ export default function AdminSiteContent({ token, isDark }) {
                     type="email"
                     value={companyInfo.legal_email}
                     onChange={(e) => setCompanyInfo({ ...companyInfo, legal_email: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                   />
                 </div>
               </div>
@@ -517,9 +517,9 @@ export default function AdminSiteContent({ token, isDark }) {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0F0F10] border border-white/5 rounded-xl p-6"
+          className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl p-6"
         >
-          <h3 className="font-heading text-lg font-semibold text-white mb-6 flex items-center gap-2">
+          <h3 className="font-heading text-lg font-semibold text-[var(--text-primary)] mb-6 flex items-center gap-2">
             <Star className="w-5 h-5 text-yellow-400" />
             Entreprises qui nous font confiance
           </h3>
@@ -535,7 +535,7 @@ export default function AdminSiteContent({ token, isDark }) {
               onChange={(e) => setNewCompany(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addCompany()}
               placeholder="Nom de l'entreprise..."
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+              className="flex-1 bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
             />
             <button
               onClick={addCompany}
@@ -555,9 +555,9 @@ export default function AdminSiteContent({ token, isDark }) {
               trustedCompanies.map((company, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-4 py-3"
+                  className="flex items-center justify-between bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-3"
                 >
-                  <span className="text-white text-sm">{company}</span>
+                  <span className="text-[var(--text-primary)] text-sm">{company}</span>
                   <button
                     onClick={() => removeCompany(index)}
                     className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
@@ -584,8 +584,8 @@ export default function AdminSiteContent({ token, isDark }) {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
-          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
-            <h3 className="font-heading text-lg font-semibold text-white mb-6 flex items-center gap-2">
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl p-6">
+            <h3 className="font-heading text-lg font-semibold text-[var(--text-primary)] mb-6 flex items-center gap-2">
               <Shield className="w-5 h-5 text-blue-400" />
               Politique de Confidentialité - Paramètres
             </h3>
@@ -596,7 +596,7 @@ export default function AdminSiteContent({ token, isDark }) {
                   type="number"
                   value={privacyContent.data_retention_years}
                   onChange={(e) => setPrivacyContent({ ...privacyContent, data_retention_years: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                 />
               </div>
               <div>
@@ -605,7 +605,7 @@ export default function AdminSiteContent({ token, isDark }) {
                   type="text"
                   value={privacyContent.last_update_fr}
                   onChange={(e) => setPrivacyContent({ ...privacyContent, last_update_fr: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                 />
               </div>
               <div>
@@ -614,15 +614,15 @@ export default function AdminSiteContent({ token, isDark }) {
                   type="text"
                   value={privacyContent.last_update_en}
                   onChange={(e) => setPrivacyContent({ ...privacyContent, last_update_en: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                 />
               </div>
             </div>
           </div>
 
           {/* Privacy Sections Editor */}
-          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
-            <h4 className="font-heading text-md font-semibold text-white mb-4">Sections détaillées (FR)</h4>
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl p-6">
+            <h4 className="font-heading text-md font-semibold text-[var(--text-primary)] mb-4">Sections détaillées (FR)</h4>
             {[
               { key: 'data_collected', label: '1. Données collectées' },
               { key: 'purpose', label: '2. Finalité du traitement' },
@@ -634,7 +634,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 <button
                   type="button"
                   onClick={() => setExpandedSections({ ...expandedSections, [`privacy_fr_${key}`]: !expandedSections[`privacy_fr_${key}`] })}
-                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-white py-2"
+                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-[var(--text-primary)] py-2"
                 >
                   {label}
                   {expandedSections[`privacy_fr_${key}`] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -647,15 +647,15 @@ export default function AdminSiteContent({ token, isDark }) {
                       sections_fr: { ...privacyContent.sections_fr, [key]: e.target.value }
                     })}
                     rows={8}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-3 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
                   />
                 )}
               </div>
             ))}
           </div>
 
-          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
-            <h4 className="font-heading text-md font-semibold text-white mb-4">Sections détaillées (EN)</h4>
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl p-6">
+            <h4 className="font-heading text-md font-semibold text-[var(--text-primary)] mb-4">Sections détaillées (EN)</h4>
             {[
               { key: 'data_collected', label: '1. Data Collected' },
               { key: 'purpose', label: '2. Purpose of Processing' },
@@ -667,7 +667,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 <button
                   type="button"
                   onClick={() => setExpandedSections({ ...expandedSections, [`privacy_en_${key}`]: !expandedSections[`privacy_en_${key}`] })}
-                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-white py-2"
+                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-[var(--text-primary)] py-2"
                 >
                   {label}
                   {expandedSections[`privacy_en_${key}`] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -680,7 +680,7 @@ export default function AdminSiteContent({ token, isDark }) {
                       sections_en: { ...privacyContent.sections_en, [key]: e.target.value }
                     })}
                     rows={8}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-3 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
                   />
                 )}
               </div>
@@ -696,8 +696,8 @@ export default function AdminSiteContent({ token, isDark }) {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
-          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
-            <h3 className="font-heading text-lg font-semibold text-white mb-6 flex items-center gap-2">
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl p-6">
+            <h3 className="font-heading text-lg font-semibold text-[var(--text-primary)] mb-6 flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-400" />
               CGU - Paramètres
             </h3>
@@ -708,7 +708,7 @@ export default function AdminSiteContent({ token, isDark }) {
                   type="text"
                   value={termsContent.last_update_fr}
                   onChange={(e) => setTermsContent({ ...termsContent, last_update_fr: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                 />
               </div>
               <div>
@@ -717,15 +717,15 @@ export default function AdminSiteContent({ token, isDark }) {
                   type="text"
                   value={termsContent.last_update_en}
                   onChange={(e) => setTermsContent({ ...termsContent, last_update_en: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:border-blue-500/50 outline-none"
+                  className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none"
                 />
               </div>
             </div>
           </div>
 
           {/* Terms Sections Editor */}
-          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
-            <h4 className="font-heading text-md font-semibold text-white mb-4">Sections détaillées (FR)</h4>
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl p-6">
+            <h4 className="font-heading text-md font-semibold text-[var(--text-primary)] mb-4">Sections détaillées (FR)</h4>
             {[
               { key: 'services', label: '3. Services proposés' },
               { key: 'intellectual_property', label: '4. Propriété intellectuelle' },
@@ -736,7 +736,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 <button
                   type="button"
                   onClick={() => setExpandedSections({ ...expandedSections, [`terms_fr_${key}`]: !expandedSections[`terms_fr_${key}`] })}
-                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-white py-2"
+                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-[var(--text-primary)] py-2"
                 >
                   {label}
                   {expandedSections[`terms_fr_${key}`] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -749,15 +749,15 @@ export default function AdminSiteContent({ token, isDark }) {
                       sections_fr: { ...termsContent.sections_fr, [key]: e.target.value }
                     })}
                     rows={8}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-3 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
                   />
                 )}
               </div>
             ))}
           </div>
 
-          <div className="bg-[#0F0F10] border border-white/5 rounded-xl p-6">
-            <h4 className="font-heading text-md font-semibold text-white mb-4">Sections détaillées (EN)</h4>
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl p-6">
+            <h4 className="font-heading text-md font-semibold text-[var(--text-primary)] mb-4">Sections détaillées (EN)</h4>
             {[
               { key: 'services', label: '3. Services Offered' },
               { key: 'intellectual_property', label: '4. Intellectual Property' },
@@ -768,7 +768,7 @@ export default function AdminSiteContent({ token, isDark }) {
                 <button
                   type="button"
                   onClick={() => setExpandedSections({ ...expandedSections, [`terms_en_${key}`]: !expandedSections[`terms_en_${key}`] })}
-                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-white py-2"
+                  className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-300 hover:text-[var(--text-primary)] py-2"
                 >
                   {label}
                   {expandedSections[`terms_en_${key}`] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -781,7 +781,7 @@ export default function AdminSiteContent({ token, isDark }) {
                       sections_en: { ...termsContent.sections_en, [key]: e.target.value }
                     })}
                     rows={8}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] rounded-lg px-4 py-3 text-[var(--text-primary)] text-sm focus:border-blue-500/50 outline-none resize-y mt-2"
                   />
                 )}
               </div>
