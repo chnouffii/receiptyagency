@@ -1,5 +1,5 @@
 """Client Portal routes — authentication, messaging, documents, project tracking"""
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Header
 from datetime import datetime, timezone
 import bcrypt
 from jose import jwt
@@ -43,9 +43,8 @@ def get_db():
     return db
 
 
-def verify_client_token(authorization: str = None):
+def verify_client_token(authorization: Optional[str] = Header(None)):
     """Verify client JWT token"""
-    from fastapi import Header
     return authorization
 
 
@@ -151,9 +150,8 @@ async def client_login(input: ClientLogin, request: Request):
 # ==================== CLIENT PORTAL ====================
 
 @router.get("/client/profile")
-async def get_client_profile(authorization: str = None):
+async def get_client_profile(authorization: Optional[str] = Header(None)):
     if not authorization:
-        from fastapi import Header
         raise HTTPException(status_code=401, detail="Token manquant")
     payload = await _verify_client(authorization)
     db = get_db()
@@ -166,7 +164,7 @@ async def get_client_profile(authorization: str = None):
 
 
 @router.get("/client/messages")
-async def get_client_messages(authorization: str = None):
+async def get_client_messages(authorization: Optional[str] = Header(None)):
     if not authorization:
         raise HTTPException(status_code=401, detail="Token manquant")
     payload = await _verify_client(authorization)
@@ -186,7 +184,7 @@ async def get_client_messages(authorization: str = None):
 
 
 @router.post("/client/messages")
-async def send_client_message(body: ClientMessageCreate, authorization: str = None):
+async def send_client_message(body: ClientMessageCreate, authorization: Optional[str] = Header(None)):
     if not authorization:
         raise HTTPException(status_code=401, detail="Token manquant")
     payload = await _verify_client(authorization)
@@ -216,7 +214,7 @@ async def send_client_message(body: ClientMessageCreate, authorization: str = No
 
 
 @router.get("/client/documents")
-async def get_client_documents(authorization: str = None):
+async def get_client_documents(authorization: Optional[str] = Header(None)):
     if not authorization:
         raise HTTPException(status_code=401, detail="Token manquant")
     payload = await _verify_client(authorization)
@@ -228,7 +226,7 @@ async def get_client_documents(authorization: str = None):
 
 
 @router.get("/client/project")
-async def get_client_project(authorization: str = None):
+async def get_client_project(authorization: Optional[str] = Header(None)):
     if not authorization:
         raise HTTPException(status_code=401, detail="Token manquant")
     payload = await _verify_client(authorization)
@@ -249,7 +247,7 @@ async def get_client_project(authorization: str = None):
 
 
 @router.get("/client/updates")
-async def get_client_updates(authorization: str = None):
+async def get_client_updates(authorization: Optional[str] = Header(None)):
     if not authorization:
         raise HTTPException(status_code=401, detail="Token manquant")
     payload = await _verify_client(authorization)
