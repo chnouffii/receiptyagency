@@ -479,7 +479,7 @@ export default function AdminClients({ token, isDark }) {
                     </p>
                   </div>
                   <div className={`flex-shrink-0 w-2 h-2 rounded-full ml-2 ${
-                    client.unread_count > 0 ? 'bg-blue-400' : 'bg-transparent'
+                    client.unread_messages > 0 ? 'bg-blue-400' : 'bg-transparent'
                   }`} />
                 </div>
               </button>

@@ -367,7 +367,6 @@ export default function ClientDashboardPage() {
   const [submittingEvo, setSubmittingEvo] = useState(false);
 
   const token = localStorage.getItem('receipty-client-token');
-  const clientId = localStorage.getItem('receipty-client-id') || '';
   const clientName = localStorage.getItem('receipty-client-name') || '';
   const clientCompany = localStorage.getItem('receipty-client-company') || '';
 
