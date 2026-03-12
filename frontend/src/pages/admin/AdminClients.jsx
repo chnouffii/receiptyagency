@@ -567,8 +567,8 @@ export default function AdminClients({ token, isDark }) {
                       </div>
                     ) : (
                       messages.map((msg, i) => {
-                        const isAdmin = msg.sender === 'admin';
-                        const isSystem = msg.sender === 'system';
+                        const isAdmin = msg.author_type === 'admin';
+                        const isSystem = msg.author_type === 'system';
                         if (isSystem) {
                           return (
                             <div key={i} className="flex justify-center">
