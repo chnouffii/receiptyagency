@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogOut, Users, MessageCircle, BookOpen, Layers, Settings, UserCog, FileText, FileSearch, Briefcase, HelpCircle } from 'lucide-react';
+import { LogOut, Users, MessageCircle, BookOpen, Layers, Settings, UserCog, FileText, FileSearch, Briefcase, HelpCircle, Building } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
@@ -15,6 +15,7 @@ import AdminQuotes from './admin/AdminQuotes';
 import AdminAuditROI from './admin/AdminAuditROI';
 import AdminClosersTab from './admin/AdminClosersTab';
 import AdminFAQ from './admin/AdminFAQ';
+import AdminClients from './admin/AdminClients';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -128,6 +129,10 @@ export default function AdminDashboardPage() {
               <HelpCircle className="w-4 h-4" />
               FAQ
             </TabsTrigger>
+            <TabsTrigger value="clients" data-testid="tab-clients" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 gap-2 text-sm">
+              <Building className="w-4 h-4" />
+              {lang === 'fr' ? 'Clients' : 'Clients'}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="leads">
@@ -159,6 +164,9 @@ export default function AdminDashboardPage() {
           </TabsContent>
           <TabsContent value="faq">
             <AdminFAQ token={token} isDark={isDark} />
+          </TabsContent>
+          <TabsContent value="clients">
+            <AdminClients token={token} isDark={isDark} />
           </TabsContent>
         </Tabs>
       </div>

@@ -17,6 +17,9 @@ import TermsPage from "./pages/TermsPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import CloserDashboard from "./pages/admin/CloserDashboard";
+import ROICalculatorPage from "./pages/ROICalculatorPage";
+import ClientLoginPage from "./pages/ClientLoginPage";
+import ClientDashboardPage from "./pages/ClientDashboardPage";
 import { ChatWidget } from "./components/ChatWidget";
 
 function AppLayout({ children }) {
@@ -33,6 +36,14 @@ function AdminLayout({ children }) {
   return (
     <>
       <Navbar />
+      <main>{children}</main>
+    </>
+  );
+}
+
+function ClientLayout({ children }) {
+  return (
+    <>
       <main>{children}</main>
     </>
   );
@@ -95,6 +106,9 @@ function AppContent() {
           <Route path="/admin" element={<AdminLayout><AdminLoginPage /></AdminLayout>} />
           <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboardPage /></AdminLayout>} />
           <Route path="/closer" element={<AdminLayout><CloserDashboard /></AdminLayout>} />
+          <Route path="/roi" element={<AppLayout><ROICalculatorPage /></AppLayout>} />
+          <Route path="/client" element={<ClientLayout><ClientLoginPage /></ClientLayout>} />
+          <Route path="/client/dashboard" element={<ClientLayout><ClientDashboardPage /></ClientLayout>} />
         </Routes>
         <ChatWidget />
       </BrowserRouter>
