@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Public pages
+Allow: /adn
+Allow: /solutions
+Allow: /cases
+Allow: /contact
+Allow: /roi
+
+# Block private areas
+Disallow: /admin
+Disallow: /admin/
+Disallow: /closer
+Disallow: /client
+Disallow: /client/
+
+Sitemap: https://receipty.fr/sitemap.xml

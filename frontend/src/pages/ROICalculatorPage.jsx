@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import SEOHead from '../components/SEOHead';
 import {
   Calculator, TrendingUp, Clock, Euro, ArrowRight, CheckCircle,
   Users, CreditCard, Globe, ChevronDown, ChevronUp, Sparkles
@@ -157,6 +158,7 @@ export default function ROICalculatorPage() {
 
   return (
     <div className={`min-h-screen pt-24 pb-20 transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+      <SEOHead page="roi" />
       <div className="max-w-5xl mx-auto px-6">
 
         {/* Header */}

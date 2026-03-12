@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Brain, Zap, TrendingUp, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+import SEOHead, { OrganizationSchema, ServiceSchema } from '../components/SEOHead';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -132,6 +133,9 @@ export default function HomePage() {
 
   return (
     <div data-testid="home-page">
+      <SEOHead page="home" />
+      <OrganizationSchema />
+      <ServiceSchema />
       {/* Hero Section */}
       <section className={`relative min-h-screen flex items-center justify-center overflow-hidden transition-colors duration-300 ${
         isDark ? 'bg-[#050505]' : 'bg-[#F9FAFB]'

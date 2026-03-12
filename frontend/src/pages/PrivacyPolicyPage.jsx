@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Shield, Database, Lock, UserCheck, Mail, FileText } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+import SEOHead from '../components/SEOHead';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -200,6 +201,7 @@ You also have the right to lodge a complaint with the CNIL (Commission Nationale
 
   return (
     <div data-testid="privacy-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+      <SEOHead page="privacy" noIndex={true} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20">
         {/* Header */}
         <motion.div

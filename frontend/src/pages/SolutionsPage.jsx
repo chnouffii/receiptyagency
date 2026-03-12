@@ -4,6 +4,7 @@ import { Users, Wallet, Globe, Cpu, ShoppingCart, Mail, Shield, BarChart3, Check
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Badge } from '../components/ui/badge';
+import SEOHead from '../components/SEOHead';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -70,6 +71,7 @@ export default function SolutionsPage() {
 
   return (
     <div data-testid="solutions-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+      <SEOHead page="solutions" />
       <section className="max-w-6xl mx-auto px-6 py-16 md:py-24">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mb-16">
           <h1 className={`font-heading text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>{t.solutions.title}</h1>
