@@ -351,122 +351,162 @@ export default function AdminLeadsTab({ token, stats, onRefresh, onCreateQuote, 
       </AnimatePresence>
 
       <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-[var(--border-primary)] bg-[var(--bg-secondary)]' : 'border-gray-200 bg-white shadow-sm'}`}>
-        <div className={`p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-200'}`}>
-          <h2 className={`font-heading text-lg font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{t.admin.leads}</h2>
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative flex-1 sm:flex-initial">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
-              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={lang === 'fr' ? 'Rechercher...' : 'Search...'} data-testid="admin-search-input" className={`w-full sm:w-48 rounded-lg text-sm h-9 pl-9 pr-3 outline-none transition-all duration-200 ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] focus:border-blue-500/50 text-[var(--text-primary)] placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 focus:border-blue-500 text-gray-900 placeholder:text-gray-400'}`} />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className={`w-[130px] h-9 text-xs ${isDark ? 'border-[var(--border-secondary)] bg-[var(--bg-tertiary)]' : 'border-gray-200 bg-gray-50'}`} data-testid="admin-status-filter">
-                <Filter className="w-3 h-3 mr-1.5 text-gray-500" /><SelectValue />
-              </SelectTrigger>
-              <SelectContent className={isDark ? 'bg-[var(--bg-secondary)] border-[var(--border-secondary)]' : 'bg-white border-gray-200'}>
-                <SelectItem value="all">{lang === 'fr' ? 'Tous' : 'All'}</SelectItem>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="contacted">Contacted</SelectItem>
-                <SelectItem value="qualified">Qualified</SelectItem>
-                <SelectItem value="converted">Converted</SelectItem>
-              </SelectContent>
-            </Select>
-            <button onClick={exportCSV} data-testid="admin-export-csv-btn" className={`flex items-center gap-1.5 h-9 px-3 text-xs border rounded-lg transition-all duration-200 ${isDark ? 'text-gray-400 hover:text-[var(--text-primary)] border-[var(--border-secondary)] hover:border-[var(--border-hover)]' : 'text-gray-500 hover:text-gray-900 border-gray-200 hover:border-gray-300'}`}>
-              <Download className="w-3.5 h-3.5" /> CSV
-            </button>
-            <button 
-              onClick={() => setShowForm(true)} 
-              data-testid="admin-new-lead-btn" 
-              className="flex items-center gap-1.5 h-9 px-4 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-all duration-200"
-            >
+        <div className={`p-3 sm:p-4 border-b ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-200'}`}>
+          <div className="flex items-center justify-between gap-2 mb-3 sm:mb-0 sm:hidden">
+            <h2 className={`font-heading text-base font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{t.admin.leads}</h2>
+            <button onClick={() => setShowForm(true)} data-testid="admin-new-lead-btn" className="flex items-center gap-1.5 h-9 px-3 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-all duration-200">
               <Plus className="w-4 h-4" />
               {lang === 'fr' ? 'Nouveau' : 'New'}
             </button>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 sm:justify-between">
+            <h2 className={`hidden sm:block font-heading text-lg font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>{t.admin.leads}</h2>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="relative flex-1 sm:flex-initial">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={lang === 'fr' ? 'Rechercher...' : 'Search...'} data-testid="admin-search-input" className={`w-full sm:w-48 rounded-lg text-sm h-10 sm:h-9 pl-9 pr-3 outline-none transition-all duration-200 ${isDark ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] focus:border-blue-500/50 text-[var(--text-primary)] placeholder:text-gray-600' : 'bg-gray-50 border border-gray-200 focus:border-blue-500 text-gray-900 placeholder:text-gray-400'}`} />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className={`w-[110px] sm:w-[130px] h-10 sm:h-9 text-xs ${isDark ? 'border-[var(--border-secondary)] bg-[var(--bg-tertiary)]' : 'border-gray-200 bg-gray-50'}`} data-testid="admin-status-filter">
+                  <Filter className="w-3 h-3 mr-1 text-gray-500 shrink-0" /><SelectValue />
+                </SelectTrigger>
+                <SelectContent className={isDark ? 'bg-[var(--bg-secondary)] border-[var(--border-secondary)]' : 'bg-white border-gray-200'}>
+                  <SelectItem value="all">{lang === 'fr' ? 'Tous' : 'All'}</SelectItem>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="contacted">Contacted</SelectItem>
+                  <SelectItem value="qualified">Qualified</SelectItem>
+                  <SelectItem value="converted">Converted</SelectItem>
+                </SelectContent>
+              </Select>
+              <button onClick={exportCSV} data-testid="admin-export-csv-btn" className={`flex items-center gap-1.5 h-10 sm:h-9 px-3 text-xs border rounded-lg transition-all duration-200 shrink-0 ${isDark ? 'text-gray-400 hover:text-[var(--text-primary)] border-[var(--border-secondary)] hover:border-[var(--border-hover)]' : 'text-gray-500 hover:text-gray-900 border-gray-200 hover:border-gray-300'}`}>
+                <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">CSV</span>
+              </button>
+              <button onClick={() => setShowForm(true)} data-testid="admin-new-lead-btn" className="hidden sm:flex items-center gap-1.5 h-9 px-4 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-all duration-200">
+                <Plus className="w-4 h-4" />
+                {lang === 'fr' ? 'Nouveau' : 'New'}
+              </button>
+            </div>
           </div>
         </div>
 
         {leads.length === 0 ? (
           <div className="p-12 text-center text-gray-500">{t.admin.no_leads}</div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="border-[var(--border-primary)] hover:bg-transparent">
-                <TableHead className="text-gray-500">Name</TableHead>
-                <TableHead className="text-gray-500">Email</TableHead>
-                <TableHead className="text-gray-500">Company</TableHead>
-                <TableHead className="text-gray-500">Category</TableHead>
-                <TableHead className="text-gray-500">Setup</TableHead>
-                <TableHead className="text-gray-500">Monthly</TableHead>
-                <TableHead className="text-gray-500">{t.admin.status}</TableHead>
-                <TableHead className="text-gray-500">{t.admin.actions}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            {/* Mobile card view */}
+            <div className="sm:hidden divide-y divide-[var(--border-primary)]">
               {leads.map((lead) => (
-                <TableRow key={lead.id} className="border-[var(--border-primary)] hover:bg-[var(--bg-hover)]">
-                  <TableCell className="text-[var(--text-primary)] font-medium text-sm">
-                    <div className="flex items-center gap-2">
-                      {lead.name}
-                      {lead.has_quote && (
-                        <span title="Devis créé" className="text-emerald-400">
-                          <CheckCircle className="w-3.5 h-3.5" />
-                        </span>
-                      )}
-                      {lead.has_audit && (
-                        <span title="Audit créé" className="text-purple-400">
-                          <FileSearch className="w-3.5 h-3.5" />
-                        </span>
-                      )}
+                <div key={lead.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5 font-medium text-sm text-[var(--text-primary)]">
+                        {lead.name}
+                        {lead.has_quote && <CheckCircle className="w-3.5 h-3.5 text-emerald-400" title="Devis créé" />}
+                        {lead.has_audit && <FileSearch className="w-3.5 h-3.5 text-purple-400" title="Audit créé" />}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">{lead.email}</div>
+                      {lead.company && <div className="text-xs text-gray-500 mt-0.5">{lead.company}</div>}
                     </div>
-                  </TableCell>
-                  <TableCell className="text-gray-400 text-sm">{lead.email}</TableCell>
-                  <TableCell className="text-gray-400 text-sm">{lead.company || '-'}</TableCell>
-                  <TableCell>
-                    {lead.category ? (
-                      <Badge variant="outline" className="text-xs text-blue-400 border-blue-500/30 capitalize">{lead.category}</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-xs text-gray-500 border-gray-500/30">{lead.type || 'contact'}</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-mono text-sm text-gray-300">{lead.estimated_setup || 0} EUR</TableCell>
-                  <TableCell className="font-mono text-sm text-gray-300">{lead.estimated_monthly || 0} EUR/mo</TableCell>
-                  <TableCell>
-                    <Select value={lead.status} onValueChange={(val) => updateStatus(lead.id, val)}>
-                      <SelectTrigger className={`w-[130px] h-8 text-xs border ${STATUS_COLORS[lead.status] || ''} bg-transparent`} data-testid={`status-select-${lead.id}`}><SelectValue /></SelectTrigger>
-                      <SelectContent className="bg-[var(--bg-secondary)] border-[var(--border-secondary)]">
-                        <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="contacted">Contacted</SelectItem>
-                        <SelectItem value="qualified">Qualified</SelectItem>
-                        <SelectItem value="converted">Converted</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <button 
-                        onClick={() => onCreateAudit && onCreateAudit(lead)} 
-                        data-testid={`create-audit-${lead.id}`} 
-                        className="p-2 text-gray-600 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-all"
-                        title={lang === 'fr' ? 'Créer un audit ROI' : 'Create ROI audit'}
-                      >
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => onCreateAudit && onCreateAudit(lead)} data-testid={`create-audit-${lead.id}`} className="p-2 text-gray-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-all" title="Audit ROI">
                         <FileSearch className="w-4 h-4" />
                       </button>
-                      <button 
-                        onClick={() => onCreateQuote && onCreateQuote(lead)} 
-                        data-testid={`create-quote-${lead.id}`} 
-                        className="p-2 text-gray-600 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all"
-                        title={lang === 'fr' ? 'Créer un devis' : 'Create quote'}
-                      >
+                      <button onClick={() => onCreateQuote && onCreateQuote(lead)} data-testid={`create-quote-${lead.id}`} className="p-2 text-gray-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all" title="Devis">
                         <FileText className="w-4 h-4" />
                       </button>
-                      <button onClick={() => deleteLead(lead.id)} data-testid={`delete-lead-${lead.id}`} className="p-2 text-gray-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all">
+                      <button onClick={() => deleteLead(lead.id)} data-testid={`delete-lead-${lead.id}`} className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {lead.category ? (
+                      <Badge variant="outline" className="text-xs text-blue-400 border-blue-500/30">{lead.category}</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs text-gray-500 border-gray-500/30">{lead.type || 'contact'}</Badge>
+                    )}
+                    <span className="text-xs font-mono text-gray-400">{lead.estimated_setup || 0}€ setup</span>
+                    <span className="text-xs font-mono text-gray-400">{lead.estimated_monthly || 0}€/mo</span>
+                  </div>
+                  <Select value={lead.status} onValueChange={(val) => updateStatus(lead.id, val)}>
+                    <SelectTrigger className={`w-full h-9 text-xs border ${STATUS_COLORS[lead.status] || ''} bg-transparent`} data-testid={`status-select-${lead.id}`}><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-[var(--bg-secondary)] border-[var(--border-secondary)]">
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="contacted">Contacted</SelectItem>
+                      <SelectItem value="qualified">Qualified</SelectItem>
+                      <SelectItem value="converted">Converted</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+
+            {/* Desktop table view */}
+            <div className="hidden sm:block">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-[var(--border-primary)] hover:bg-transparent">
+                    <TableHead className="text-gray-500">Name</TableHead>
+                    <TableHead className="text-gray-500">Email</TableHead>
+                    <TableHead className="text-gray-500">Company</TableHead>
+                    <TableHead className="text-gray-500">Category</TableHead>
+                    <TableHead className="text-gray-500">Setup</TableHead>
+                    <TableHead className="text-gray-500">Monthly</TableHead>
+                    <TableHead className="text-gray-500">{t.admin.status}</TableHead>
+                    <TableHead className="text-gray-500">{t.admin.actions}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {leads.map((lead) => (
+                    <TableRow key={lead.id} className="border-[var(--border-primary)] hover:bg-[var(--bg-hover)]">
+                      <TableCell className="text-[var(--text-primary)] font-medium text-sm">
+                        <div className="flex items-center gap-2">
+                          {lead.name}
+                          {lead.has_quote && <span title="Devis créé" className="text-emerald-400"><CheckCircle className="w-3.5 h-3.5" /></span>}
+                          {lead.has_audit && <span title="Audit créé" className="text-purple-400"><FileSearch className="w-3.5 h-3.5" /></span>}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-gray-400 text-sm">{lead.email}</TableCell>
+                      <TableCell className="text-gray-400 text-sm">{lead.company || '-'}</TableCell>
+                      <TableCell>
+                        {lead.category ? (
+                          <Badge variant="outline" className="text-xs text-blue-400 border-blue-500/30 capitalize">{lead.category}</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs text-gray-500 border-gray-500/30">{lead.type || 'contact'}</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-mono text-sm text-gray-300">{lead.estimated_setup || 0} EUR</TableCell>
+                      <TableCell className="font-mono text-sm text-gray-300">{lead.estimated_monthly || 0} EUR/mo</TableCell>
+                      <TableCell>
+                        <Select value={lead.status} onValueChange={(val) => updateStatus(lead.id, val)}>
+                          <SelectTrigger className={`w-[130px] h-8 text-xs border ${STATUS_COLORS[lead.status] || ''} bg-transparent`} data-testid={`status-select-${lead.id}`}><SelectValue /></SelectTrigger>
+                          <SelectContent className="bg-[var(--bg-secondary)] border-[var(--border-secondary)]">
+                            <SelectItem value="new">New</SelectItem>
+                            <SelectItem value="contacted">Contacted</SelectItem>
+                            <SelectItem value="qualified">Qualified</SelectItem>
+                            <SelectItem value="converted">Converted</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => onCreateAudit && onCreateAudit(lead)} data-testid={`create-audit-${lead.id}`} className="p-2 text-gray-600 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-all" title={lang === 'fr' ? 'Créer un audit ROI' : 'Create ROI audit'}>
+                            <FileSearch className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => onCreateQuote && onCreateQuote(lead)} data-testid={`create-quote-${lead.id}`} className="p-2 text-gray-600 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all" title={lang === 'fr' ? 'Créer un devis' : 'Create quote'}>
+                            <FileText className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => deleteLead(lead.id)} data-testid={`delete-lead-${lead.id}`} className="p-2 text-gray-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </div>
     </>

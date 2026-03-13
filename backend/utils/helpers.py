@@ -4,7 +4,26 @@ import uuid
 import logging
 import asyncio
 import html
+import time as _time
 from datetime import datetime, timezone
+
+# ── Simple in-memory TTL cache ───────────────────────────────────────────────
+_cache: dict = {}
+
+def cache_get(key: str):
+    entry = _cache.get(key)
+    if entry:
+        value, expires_at = entry
+        if _time.time() < expires_at:
+            return value
+        del _cache[key]
+    return None
+
+def cache_set(key: str, value, ttl: int = 300):
+    _cache[key] = (value, _time.time() + ttl)
+
+def cache_invalidate(key: str):
+    _cache.pop(key, None)
 from jose import jwt, JWTError
 from fastapi import Header, HTTPException
 
@@ -151,6 +170,17 @@ def sanitize_text(text):
     # Keep accented characters - fpdf2 Helvetica supports ISO-8859-1 (Latin-1)
     # which includes: àâäéèêëïîôùûüç and their uppercase versions
     return text
+
+
+async def get_next_sequence(db, name: str) -> int:
+    """Atomic counter to avoid race conditions on sequential numbers (AUD-, DEV-, ...)"""
+    result = await db.counters.find_one_and_update(
+        {"_id": name},
+        {"$inc": {"seq": 1}},
+        upsert=True,
+        return_document=True
+    )
+    return result["seq"]
 
 
 def get_default_site_content():

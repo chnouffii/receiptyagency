@@ -5,9 +5,11 @@ import bcrypt
 from jose import jwt
 import uuid
 import os
+import html
+import re
 import time
 from collections import defaultdict
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List
 
 from utils.helpers import verify_token
@@ -91,6 +93,15 @@ class AdminDocumentCreate(BaseModel):
     description: str = ""
     url: str
     doc_type: str = "document"  # document, devis, contrat, rapport
+
+    # #7: reject javascript: and data: URLs to prevent XSS via document links
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
+        stripped = v.strip().lower()
+        if re.match(r'^(javascript|data|vbscript):', stripped):
+            raise ValueError("URL non autorisée")
+        return v.strip()
 
 
 class ProjectStatusUpdate(BaseModel):
@@ -400,14 +411,17 @@ async def list_clients(admin=Depends(verify_token)):
     db = get_db()
     clients = await db.client_accounts.find({}, {"_id": 0, "password": 0}).sort("created_at", -1).to_list(500)
 
-    # Add unread message count for each client
-    for client in clients:
-        unread = await db.client_messages.count_documents({
-            "client_id": client["id"],
-            "author_type": "client",
-            "read_by_admin": False
-        })
-        client["unread_messages"] = unread
+    # Single aggregation instead of one count_documents per client
+    if clients:
+        client_ids = [c["id"] for c in clients]
+        pipeline = [
+            {"$match": {"client_id": {"$in": client_ids}, "author_type": "client", "read_by_admin": False}},
+            {"$group": {"_id": "$client_id", "count": {"$sum": 1}}}
+        ]
+        unread_results = await db.client_messages.aggregate(pipeline).to_list(len(clients))
+        unread_map = {r["_id"]: r["count"] for r in unread_results}
+        for client in clients:
+            client["unread_messages"] = unread_map.get(client["id"], 0)
 
     return clients
 
@@ -447,12 +461,14 @@ async def create_client(body: AdminClientCreate, admin=Depends(verify_token)):
     client.pop("password", None)
 
     # Send welcome message
+    # #6: escape name to prevent XSS/injection in the stored welcome message
+    safe_name = html.escape(body.name)
     welcome_msg = {
         "id": str(uuid.uuid4()),
         "client_id": client["id"],
         "author_type": "admin",
         "author_name": "Équipe Receipty",
-        "content": f"Bonjour {body.name} 👋\n\nBienvenue dans votre espace client Receipty ! C'est ici que vous pourrez suivre l'avancement de votre projet, consulter vos documents et échanger directement avec notre équipe.\n\nN'hésitez pas à nous poser toutes vos questions.",
+        "content": f"Bonjour {safe_name} 👋\n\nBienvenue dans votre espace client Receipty ! C'est ici que vous pourrez suivre l'avancement de votre projet, consulter vos documents et échanger directement avec notre équipe.\n\nN'hésitez pas à nous poser toutes vos questions.",
         "read_by_admin": True,
         "read_by_client": False,
         "created_at": datetime.now(timezone.utc).isoformat()

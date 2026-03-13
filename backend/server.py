@@ -83,6 +83,12 @@ async def root():
     return {"message": "Receipty Agency API", "version": "2.0.0"}
 
 
+# #20: health endpoint for Docker/Kubernetes monitoring
+@api_router.get("/health")
+async def health():
+    return {"status": "ok", "version": "2.0.0"}
+
+
 # CSV Export endpoint — protected, bounded
 @api_router.get("/leads/export")
 async def export_leads_csv(admin=Depends(verify_token)):
@@ -145,6 +151,26 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     """Initialize database with default admin and seed data"""
+    # #11: create indexes for performance on common query fields
+    await db.leads.create_index("created_at")
+    await db.leads.create_index("status")
+    await db.leads.create_index("email")
+    await db.leads.create_index([("name", 1), ("email", 1), ("company", 1)])
+    await db.deals.create_index("closer_id")
+    await db.deals.create_index("created_at")
+    await db.deals.create_index("status")
+    await db.audits.create_index("created_at")
+    await db.audits.create_index("created_by")
+    await db.quotes.create_index("created_at")
+    await db.quotes.create_index("created_by")
+    await db.client_accounts.create_index("email", unique=True, sparse=True)
+    await db.client_messages.create_index([("client_id", 1), ("created_at", 1)])
+    await db.client_messages.create_index([("client_id", 1), ("author_type", 1), ("read_by_admin", 1)])
+    await db.audit_logs.create_index("created_at")
+    await db.audit_logs.create_index("user_id")
+    await db.chat_messages.create_index("session_id")
+    logger.info("MongoDB indexes ensured")
+
     # Create default admin if none exists — password is auto-generated and logged ONCE
     existing = await db.admins.find_one({}, {"_id": 0})
     if not existing:

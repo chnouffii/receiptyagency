@@ -1,5 +1,5 @@
 """Pydantic models for API requests and responses"""
-from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator, model_validator
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
@@ -235,6 +235,14 @@ class DealCreate(BaseModel):
     amount_ht: float  # Montant du devis HT
     notes: str = ""
 
+    # #15: prevent negative or zero amounts
+    @field_validator("amount_ht")
+    @classmethod
+    def amount_must_be_positive(cls, v: float) -> float:
+        if v <= 0:
+            raise ValueError("Le montant HT doit être supérieur à 0")
+        return v
+
 
 class DealUpdate(BaseModel):
     """Schema for updating a deal"""
@@ -243,6 +251,13 @@ class DealUpdate(BaseModel):
     amount_ht: Optional[float] = None
     notes: Optional[str] = None
     status: Optional[str] = None  # Only admin can change to 'signe'
+
+    @field_validator("amount_ht")
+    @classmethod
+    def amount_must_be_positive(cls, v: Optional[float]) -> Optional[float]:
+        if v is not None and v <= 0:
+            raise ValueError("Le montant HT doit être supérieur à 0")
+        return v
 
 
 class Deal(BaseModel):

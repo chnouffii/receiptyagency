@@ -1,6 +1,7 @@
 """Closer Management and Deals routes"""
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from datetime import datetime, timezone
+import asyncio
 import bcrypt
 import uuid
 import os
@@ -11,7 +12,7 @@ from models.schemas import (
     CloserCreate, CloserUpdate, CloserStats, CloserPermissions,
     AuditCreate, QuoteCreate
 )
-from utils.helpers import verify_token, log_audit
+from utils.helpers import verify_token, log_audit, cache_get, cache_set, cache_invalidate
 
 router = APIRouter()
 
@@ -44,40 +45,50 @@ def is_closer_role(role: str) -> bool:
 
 
 async def get_current_tier(db, signed_deals_count: int) -> dict:
-    """Get the commission tier based on number of signed deals"""
-    tiers = await db.commission_tiers.find({}, {"_id": 0}).sort("min_deals", -1).to_list(100)
+    """Get the commission tier based on number of signed deals (cached 5 min)"""
+    tiers = cache_get("commission_tiers")
+    if tiers is None:
+        tiers = await db.commission_tiers.find({}, {"_id": 0}).sort("min_deals", -1).to_list(100)
+        cache_set("commission_tiers", tiers, ttl=300)
     for tier in tiers:
         if signed_deals_count >= tier["min_deals"]:
             return tier
-    # Default tier if none configured
     return {"name": "Débutant", "rate": 10, "min_deals": 0}
 
 
 async def calculate_closer_stats(db, closer: dict) -> dict:
-    """Calculate statistics for a closer"""
+    """Calculate statistics for a closer — single aggregation instead of 4+ queries"""
     closer_id = closer["id"]
-    
-    # Count deals by status
-    total = await db.deals.count_documents({"closer_id": closer_id})
-    en_cours = await db.deals.count_documents({"closer_id": closer_id, "status": DealStatus.EN_COURS})
-    signes = await db.deals.count_documents({"closer_id": closer_id, "status": DealStatus.SIGNE})
-    perdus = await db.deals.count_documents({"closer_id": closer_id, "status": DealStatus.PERDU})
-    
-    # Calculate total CA and commissions
+
+    # One aggregation replaces 4 count_documents + 1 aggregate
     pipeline = [
-        {"$match": {"closer_id": closer_id, "status": DealStatus.SIGNE}},
-        {"$group": {"_id": None, "total_ca": {"$sum": "$amount_ht"}, "total_commission": {"$sum": "$commission_amount"}}}
+        {"$match": {"closer_id": closer_id}},
+        {"$group": {
+            "_id": "$status",
+            "count": {"$sum": 1},
+            "total_ca": {"$sum": {"$cond": [{"$eq": ["$status", DealStatus.SIGNE]}, "$amount_ht", 0]}},
+            "total_commission": {"$sum": {"$cond": [{"$eq": ["$status", DealStatus.SIGNE]}, "$commission_amount", 0]}}
+        }}
     ]
-    result = await db.deals.aggregate(pipeline).to_list(1)
-    total_ca = result[0]["total_ca"] if result else 0
-    total_commission = result[0]["total_commission"] if result else 0
-    
-    # Get current tier
+    rows = await db.deals.aggregate(pipeline).to_list(10)
+
+    total = en_cours = signes = perdus = 0
+    total_ca = total_commission = 0.0
+    for row in rows:
+        count = row["count"]
+        total += count
+        if row["_id"] == DealStatus.EN_COURS:
+            en_cours = count
+        elif row["_id"] == DealStatus.SIGNE:
+            signes = count
+            total_ca = row["total_ca"]
+            total_commission = row["total_commission"]
+        elif row["_id"] == DealStatus.PERDU:
+            perdus = count
+
     current_tier = await get_current_tier(db, signes)
-    
-    # Conversion rate
     conversion_rate = (signes / total * 100) if total > 0 else 0
-    
+
     return {
         "closer_id": closer_id,
         "closer_email": closer["email"],
@@ -129,10 +140,11 @@ async def create_commission_tier(input: CommissionTierCreate, request: Request, 
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.commission_tiers.insert_one(tier)
-    
+    cache_invalidate("commission_tiers")
+
     client_ip = request.client.host if request.client else None
     await log_audit(db, token_data["sub"], "create", "commission_tier", tier["id"], f"Created tier: {input.name}", client_ip)
-    
+
     tier.pop("_id", None)
     return tier
 
@@ -162,10 +174,11 @@ async def update_commission_tier(tier_id: str, input: CommissionTierUpdate, requ
     result = await db.commission_tiers.update_one({"id": tier_id}, {"$set": updates})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Tier not found")
-    
+    cache_invalidate("commission_tiers")
+
     client_ip = request.client.host if request.client else None
     await log_audit(db, token_data["sub"], "update", "commission_tier", tier_id, f"Updated fields: {list(updates.keys())}", client_ip)
-    
+
     updated = await db.commission_tiers.find_one({"id": tier_id}, {"_id": 0})
     return updated
 
@@ -183,6 +196,7 @@ async def delete_commission_tier(tier_id: str, request: Request, token_data=Depe
         raise HTTPException(status_code=404, detail="Tier not found")
     
     await db.commission_tiers.delete_one({"id": tier_id})
+    cache_invalidate("commission_tiers")
     
     client_ip = request.client.host if request.client else None
     await log_audit(db, token_data["sub"], "delete", "commission_tier", tier_id, f"Deleted tier: {tier['name']}", client_ip)
@@ -201,17 +215,10 @@ async def list_closers(token_data=Depends(verify_token)):
         raise HTTPException(status_code=403, detail="Admin access required")
     
     closers = await db.admins.find({"role": UserRole.CLOSER}, {"_id": 0, "password": 0}).sort("created_at", -1).to_list(100)
-    
-    # Calculate stats for each closer
-    result = []
-    for closer in closers:
-        stats = await calculate_closer_stats(db, closer)
-        result.append({
-            **closer,
-            "stats": stats
-        })
-    
-    return result
+
+    # Compute all stats in parallel
+    stats_list = await asyncio.gather(*[calculate_closer_stats(db, c) for c in closers])
+    return [{**closer, "stats": stats} for closer, stats in zip(closers, stats_list)]
 
 
 @router.post("/admin/closers")
@@ -332,18 +339,23 @@ async def delete_closer(closer_id: str, request: Request, token_data=Depends(ver
 # ============== DEALS ==============
 
 @router.get("/deals")
-async def list_deals(token_data=Depends(verify_token)):
+async def list_deals(
+    token_data=Depends(verify_token),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500)
+):
     """List deals - Closers see only their own, Admins see all"""
     db = get_db()
     user = await db.admins.find_one({"email": token_data["sub"]}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
+    # #16: pagination with skip/limit
     if is_closer_role(user.get("role", "")):
-        deals = await db.deals.find({"closer_id": user["id"]}, {"_id": 0}).sort("created_at", -1).to_list(500)
+        deals = await db.deals.find({"closer_id": user["id"]}, {"_id": 0}).sort("created_at", -1).skip(skip).to_list(limit)
     else:
-        deals = await db.deals.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
-    
+        deals = await db.deals.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).to_list(limit)
+
     return deals
 
 
@@ -589,10 +601,11 @@ async def get_closer_monthly_stats(token_data=Depends(verify_token)):
         raise HTTPException(status_code=404, detail="User not found")
     
     # Aggregate deals by month
+    # #10: use $dateToString instead of $substr on ISO string (more robust)
     pipeline = [
         {"$match": {"closer_id": user["id"]}},
         {"$addFields": {
-            "month": {"$substr": ["$created_at", 0, 7]}
+            "month": {"$dateToString": {"format": "%Y-%m", "date": {"$toDate": "$created_at"}}}
         }},
         {"$group": {
             "_id": "$month",
@@ -632,13 +645,7 @@ async def get_all_closers_stats(token_data=Depends(verify_token)):
         raise HTTPException(status_code=403, detail="Admin access required")
     
     closers = await db.admins.find({"role": UserRole.CLOSER}, {"_id": 0, "password": 0}).to_list(100)
-    
-    result = []
-    for closer in closers:
-        stats = await calculate_closer_stats(db, closer)
-        result.append(stats)
-    
-    return result
+    return list(await asyncio.gather(*[calculate_closer_stats(db, c) for c in closers]))
 
 
 
@@ -820,7 +827,7 @@ async def closer_create_audit(request: Request, token_data=Depends(verify_token)
     # Generate AI report
     ai_report = None
     closing_args = "- Le projet s'autofinance rapidement\n- ROI garanti des la premiere annee\n- Solution sur-mesure adaptee a votre secteur"
-    
+
     try:
         EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
         if EMERGENT_LLM_KEY:
@@ -829,7 +836,7 @@ async def closer_create_audit(request: Request, token_data=Depends(verify_token)
                 session_id=f"audit-{uuid.uuid4()}",
                 system_message="Tu es un consultant expert en automatisation et IA pour les entreprises. Tu fournis des analyses strategiques et des recommandations professionnelles."
             ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-            
+
             prompt = f"""Contexte de l'audit:
 - Secteur: {input_data.client_sector}
 - Probleme identifie: {input_data.problem_description}
@@ -844,10 +851,20 @@ Genere un rapport d'audit structure avec:
 Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS de prix ou de tarifs."""
 
             from emergentintegrations.llm.chat import UserMessage
-            ai_report = await chat.send_message(UserMessage(text=prompt))
+            # #13: timeout 30s to avoid indefinite hang
+            ai_report = await asyncio.wait_for(
+                chat.send_message(UserMessage(text=prompt)),
+                timeout=30.0
+            )
+    except asyncio.TimeoutError:
+        import logging
+        logging.error("AI generation timed out for closer audit after 30s")
     except Exception as e:
         import logging
         logging.error(f"AI generation error for closer audit: {e}")
+
+    # #9: flag when LLM failed so the user can see the report is incomplete
+    ai_report_failed = ai_report is None
     
     audit_doc = {
         "id": str(uuid.uuid4()),
@@ -867,6 +884,7 @@ Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS 
         "roi_year1": roi_year1,
         "roi_year2": roi_year2,
         "ai_report": ai_report,
+        "ai_report_failed": ai_report_failed,
         "strategy": {
             "suggested_prices": suggested_prices,
             "profitability": profitability,
@@ -878,7 +896,7 @@ Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS 
         "created_at": datetime.now(timezone.utc).isoformat(),
         "created_by": token_data["sub"]
     }
-    
+
     await db.audits.insert_one(audit_doc)
     
     # Log activity

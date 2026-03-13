@@ -379,13 +379,14 @@ export default function ClientDashboardPage() {
   const clientName = localStorage.getItem('receipty-client-name') || '';
   const clientCompany = localStorage.getItem('receipty-client-company') || '';
 
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const headers = useMemo(() => token ? { Authorization: `Bearer ${token}` } : {}, [token]);
 
   const logout = () => {
     localStorage.removeItem('receipty-client-token');
     localStorage.removeItem('receipty-client-name');
     localStorage.removeItem('receipty-client-email');
     localStorage.removeItem('receipty-client-company');
+    localStorage.removeItem('receipty-celebrated');
     navigate('/client');
   };
 
