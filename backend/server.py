@@ -3,7 +3,7 @@ Receipty Agency - Main FastAPI Server
 Refactored architecture with modular routes
 """
 from fastapi import FastAPI, APIRouter, Depends
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as StarletteRequest
 from dotenv import load_dotenv
@@ -113,6 +113,88 @@ async def export_leads_csv(admin=Depends(verify_token)):
 
 # Include main router
 app.include_router(api_router)
+
+# Sitemap served directly by the backend to avoid static-file/Cloudflare issues
+_SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://receipty.fr/</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/"/>
+  </url>
+  <url>
+    <loc>https://receipty.fr/adn</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/adn"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/adn"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/adn"/>
+  </url>
+  <url>
+    <loc>https://receipty.fr/solutions</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/solutions"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/solutions"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/solutions"/>
+  </url>
+  <url>
+    <loc>https://receipty.fr/cases</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/cases"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/cases"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/cases"/>
+  </url>
+  <url>
+    <loc>https://receipty.fr/contact</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/contact"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/contact"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/contact"/>
+  </url>
+  <url>
+    <loc>https://receipty.fr/roi</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/roi"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/roi"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/roi"/>
+  </url>
+  <url>
+    <loc>https://receipty.fr/privacy</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/privacy"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/privacy"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/privacy"/>
+  </url>
+  <url>
+    <loc>https://receipty.fr/terms</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/terms"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/terms"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/terms"/>
+  </url>
+</urlset>"""
+
+@app.get("/sitemap.xml", include_in_schema=False)
+async def sitemap():
+    return Response(content=_SITEMAP, media_type="application/xml")
 
 # Security headers middleware
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
