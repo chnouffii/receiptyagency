@@ -306,6 +306,7 @@ function NPSModal({ isDark, lang, onSubmit, onSkip }) {
             ? 'Un commentaire ? (optionnel)'
             : 'Any comment? (optional)'}
           rows={3}
+          maxLength={500}
           className={`w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all mb-4 ${
             isDark
               ? 'bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-blue-500/50'
@@ -928,6 +929,7 @@ export default function ClientDashboardPage() {
                   onKeyDown={handleKeyDown}
                   placeholder={lang === 'fr' ? 'Votre message... (Entrée pour envoyer)' : 'Your message... (Enter to send)'}
                   rows={1}
+                  maxLength={2000}
                   className={`flex-1 rounded-xl px-4 py-2.5 text-sm resize-none outline-none transition-all ${
                     isDark
                       ? 'bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] text-white placeholder:text-gray-600 focus:border-blue-500/50'

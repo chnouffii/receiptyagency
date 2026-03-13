@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, Target, Lightbulb, TrendingUp, CheckCircle2 } fr
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Badge } from '../components/ui/badge';
-import SEOHead, { CaseStudySchema } from '../components/SEOHead';
+import SEOHead, { CaseStudySchema, BreadcrumbSchema } from '../components/SEOHead';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -65,6 +65,11 @@ export default function CaseStudyDetailPage() {
         description={caseDesc}
         url={`https://receipty.fr/cases/${id}`}
       />
+      <BreadcrumbSchema items={[
+        { name: 'Accueil', url: 'https://receipty.fr/' },
+        { name: 'Études de Cas', url: 'https://receipty.fr/cases' },
+        { name: caseTitle, url: `https://receipty.fr/cases/${id}` }
+      ]} />
       <div className="max-w-4xl mx-auto px-6 py-16">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <Link to="/cases" className={`inline-flex items-center gap-2 text-sm transition-colors duration-200 mb-10 ${isDark ? 'text-gray-500 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`} data-testid="back-to-cases">

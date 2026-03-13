@@ -138,6 +138,13 @@ class ReactionToggle(BaseModel):
     emoji: str  # 👍, ❤️, 🔥
 
 
+class AdminClientUpdate(BaseModel):
+    name: Optional[str] = None
+    company: Optional[str] = None
+    is_active: Optional[bool] = None
+    project_description: Optional[str] = None
+
+
 # ==================== CLIENT AUTH ====================
 
 @router.post("/client/login")
@@ -160,7 +167,7 @@ async def client_login(input: ClientLogin, request: Request):
         {
             "sub": f"{CLIENT_TOKEN_PREFIX}{client['email']}",
             "client_id": client["id"],
-            "exp": datetime.now(timezone.utc).timestamp() + 86400 * 7  # 7 days
+            "exp": datetime.now(timezone.utc).timestamp() + 86400  # 1 day
         },
         JWT_SECRET,
         algorithm="HS256"
@@ -452,10 +459,14 @@ async def create_client(body: AdminClientCreate, admin=Depends(verify_token)):
 
     # If linked to a lead, update lead status to "converted"
     if body.lead_id:
-        await db.leads.update_one(
-            {"id": body.lead_id},
-            {"$set": {"status": "converted", "client_account_id": client["id"]}}
-        )
+        try:
+            await db.leads.update_one(
+                {"id": body.lead_id},
+                {"$set": {"status": "converted", "client_account_id": client["id"]}}
+            )
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to update lead {body.lead_id} after client creation: {e}")
 
     client.pop("_id", None)
     client.pop("password", None)
@@ -488,10 +499,9 @@ async def get_client(client_id: str, admin=Depends(verify_token)):
 
 
 @router.patch("/admin/clients/{client_id}")
-async def update_client(client_id: str, body: dict, admin=Depends(verify_token)):
+async def update_client(client_id: str, body: AdminClientUpdate, admin=Depends(verify_token)):
     db = get_db()
-    allowed = {"name", "company", "is_active", "project_description"}
-    updates = {k: v for k, v in body.items() if k in allowed}
+    updates = {k: v for k, v in body.model_dump(exclude_none=True).items()}
     if not updates:
         raise HTTPException(status_code=400, detail="Aucun champ valide")
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()

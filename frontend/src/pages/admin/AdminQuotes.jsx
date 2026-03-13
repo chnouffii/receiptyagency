@@ -58,7 +58,7 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
       });
       setQuotes(res.data);
     } catch (err) {
-      console.error('Error fetching quotes:', err);
+      toast.error('Erreur lors du chargement des devis');
     } finally {
       setLoading(false);
     }
@@ -147,7 +147,6 @@ export default function AdminQuotes({ token, leadData, onLeadDataUsed, isDark })
       setShowForm(false);
       fetchQuotes();
     } catch (err) {
-      console.error('Error generating quote:', err);
       toast.error('Erreur lors de la génération du devis');
     } finally {
       setGenerating(false);
