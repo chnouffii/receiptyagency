@@ -311,19 +311,17 @@ async def generate_audit_pdf(audit_id: str, admin=Depends(verify_token)):
     company_info = site_content.get('company', {})
     contact_info = site_content.get('contact', {})
     
-    try:
-      pdf = AuditPDF(company_info, contact_info)
-      pdf.add_page()
-      pdf.set_auto_page_break(auto=True, margin=25)
+    pdf = AuditPDF(company_info, contact_info)
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=25)
 
-      # Title
-      pdf.set_font('Helvetica', 'B', 18)
-      pdf.set_text_color(30, 30, 30)
-      pdf.cell(0, 12, "RAPPORT D'AUDIT IA", ln=True, align='C')
-      pdf.set_font('Helvetica', '', 10)
-      pdf.set_text_color(100, 100, 100)
-      # #14: use UTC-aware datetime
-      pdf.cell(0, 6, f"Ref: {audit['audit_number']} | Date: {datetime.now(timezone.utc).strftime('%d/%m/%Y')}", ln=True, align='C')
+    # Title
+    pdf.set_font('Helvetica', 'B', 18)
+    pdf.set_text_color(30, 30, 30)
+    pdf.cell(0, 12, "RAPPORT D'AUDIT IA", ln=True, align='C')
+    pdf.set_font('Helvetica', '', 10)
+    pdf.set_text_color(100, 100, 100)
+    pdf.cell(0, 6, f"Ref: {audit['audit_number']} | Date: {datetime.now(timezone.utc).strftime('%d/%m/%Y')}", ln=True, align='C')
     pdf.ln(10)
     
     # Client info
@@ -410,10 +408,7 @@ async def generate_audit_pdf(audit_id: str, admin=Depends(verify_token)):
     pdf.set_text_color(120, 120, 120)
     pdf.multi_cell(0, 4, "Ce rapport est une estimation basee sur les donnees fournies. Les resultats reels peuvent varier selon l'implementation. Contactez-nous pour une etude detaillee.")
     
-      pdf_bytes = pdf.output()
-    except Exception as e:
-        logger.error(f"PDF generation error for audit {audit_id}: {e}")
-        raise HTTPException(status_code=500, detail="Erreur lors de la génération du PDF. Veuillez réessayer.")
+    pdf_bytes = pdf.output()
 
     return Response(
         content=bytes(pdf_bytes),
