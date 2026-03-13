@@ -1,9 +1,11 @@
 """Leads and Contact routes"""
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from typing import List, Optional
 import uuid
 import asyncio
 import re
+import time
+from collections import defaultdict
 from datetime import datetime, timezone
 from pydantic import BaseModel
 
@@ -11,6 +13,19 @@ from models.schemas import Lead, LeadCreate, LeadStatusUpdate, ContactMessage
 from utils.helpers import verify_token, send_notification_email
 
 router = APIRouter()
+
+# #12: simple in-memory rate limiter for public endpoints (10 req/min per IP)
+_public_rate: dict = defaultdict(list)
+_PUBLIC_LIMIT = 10
+_PUBLIC_WINDOW = 60  # seconds
+
+
+def _check_public_rate(ip: str):
+    now = time.time()
+    _public_rate[ip] = [t for t in _public_rate[ip] if now - t < _PUBLIC_WINDOW]
+    if len(_public_rate[ip]) >= _PUBLIC_LIMIT:
+        raise HTTPException(status_code=429, detail="Trop de requêtes. Réessayez dans une minute.")
+    _public_rate[ip].append(now)
 
 
 def get_db():
@@ -55,7 +70,10 @@ async def create_lead_admin(input: AdminLeadCreate, admin=Depends(verify_token))
 
 
 @router.post("/leads", response_model=Lead)
-async def create_lead(input: LeadCreate):
+async def create_lead(input: LeadCreate, request: Request):
+    # #12: rate limit public lead creation
+    client_ip = request.client.host if request.client else "unknown"
+    _check_public_rate(client_ip)
     db = get_db()
     lead = Lead(**input.model_dump())
     doc = lead.model_dump()
@@ -64,7 +82,10 @@ async def create_lead(input: LeadCreate):
 
 
 @router.post("/contact")
-async def create_contact(input: ContactMessage):
+async def create_contact(input: ContactMessage, request: Request):
+    # #12: rate limit public contact form
+    client_ip = request.client.host if request.client else "unknown"
+    _check_public_rate(client_ip)
     db = get_db()
     doc = {
         "id": str(uuid.uuid4()),

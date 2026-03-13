@@ -5,9 +5,11 @@ import bcrypt
 from jose import jwt
 import uuid
 import os
+import html
+import re
 import time
 from collections import defaultdict
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List
 
 from utils.helpers import verify_token
@@ -91,6 +93,15 @@ class AdminDocumentCreate(BaseModel):
     description: str = ""
     url: str
     doc_type: str = "document"  # document, devis, contrat, rapport
+
+    # #7: reject javascript: and data: URLs to prevent XSS via document links
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
+        stripped = v.strip().lower()
+        if re.match(r'^(javascript|data|vbscript):', stripped):
+            raise ValueError("URL non autorisée")
+        return v.strip()
 
 
 class ProjectStatusUpdate(BaseModel):
@@ -447,12 +458,14 @@ async def create_client(body: AdminClientCreate, admin=Depends(verify_token)):
     client.pop("password", None)
 
     # Send welcome message
+    # #6: escape name to prevent XSS/injection in the stored welcome message
+    safe_name = html.escape(body.name)
     welcome_msg = {
         "id": str(uuid.uuid4()),
         "client_id": client["id"],
         "author_type": "admin",
         "author_name": "Équipe Receipty",
-        "content": f"Bonjour {body.name} 👋\n\nBienvenue dans votre espace client Receipty ! C'est ici que vous pourrez suivre l'avancement de votre projet, consulter vos documents et échanger directement avec notre équipe.\n\nN'hésitez pas à nous poser toutes vos questions.",
+        "content": f"Bonjour {safe_name} 👋\n\nBienvenue dans votre espace client Receipty ! C'est ici que vous pourrez suivre l'avancement de votre projet, consulter vos documents et échanger directement avec notre équipe.\n\nN'hésitez pas à nous poser toutes vos questions.",
         "read_by_admin": True,
         "read_by_client": False,
         "created_at": datetime.now(timezone.utc).isoformat()

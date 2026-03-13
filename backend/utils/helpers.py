@@ -153,6 +153,17 @@ def sanitize_text(text):
     return text
 
 
+async def get_next_sequence(db, name: str) -> int:
+    """Atomic counter to avoid race conditions on sequential numbers (AUD-, DEV-, ...)"""
+    result = await db.counters.find_one_and_update(
+        {"_id": name},
+        {"$inc": {"seq": 1}},
+        upsert=True,
+        return_document=True
+    )
+    return result["seq"]
+
+
 def get_default_site_content():
     """Return default site content configuration"""
     return {

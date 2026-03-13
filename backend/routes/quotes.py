@@ -7,7 +7,7 @@ import os
 import logging
 
 from models.schemas import QuoteCreate
-from utils.helpers import verify_token, log_audit, sanitize_text, get_default_site_content
+from utils.helpers import verify_token, log_audit, sanitize_text, get_default_site_content, get_next_sequence
 
 try:
     from fpdf import FPDF
@@ -72,8 +72,9 @@ async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends
     tva_amount = round(price_ht * tva_rate, 2)
     price_ttc = round(price_ht + tva_amount, 2)
     
-    quote_count = await db.quotes.count_documents({})
-    quote_number = f"DEV-{datetime.now().strftime('%Y%m')}-{str(quote_count + 1).zfill(4)}"
+    # #5: atomic sequence to avoid race condition duplicates
+    seq = await get_next_sequence(db, "quotes")
+    quote_number = f"DEV-{datetime.now(timezone.utc).strftime('%Y%m')}-{str(seq).zfill(4)}"
     
     site_content = await db.site_content.find_one({"type": "main"}, {"_id": 0})
     if not site_content:
@@ -99,7 +100,8 @@ async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends
     pdf.set_xy(10, 55)
     pdf.set_font('Helvetica', 'B', 10)
     pdf.cell(95, 8, f"Devis N. : {quote_number}", border=0)
-    pdf.cell(95, 8, f"Date : {datetime.now().strftime('%d/%m/%Y')}", border=0, align='R', ln=True)
+    # #14: use UTC-aware datetime
+    pdf.cell(95, 8, f"Date : {datetime.now(timezone.utc).strftime('%d/%m/%Y')}", border=0, align='R', ln=True)
     pdf.set_font('Helvetica', '', 10)
     pdf.cell(95, 6, "Validite : 30 jours", ln=True)
     pdf.ln(10)

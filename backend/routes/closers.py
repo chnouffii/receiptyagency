@@ -1,6 +1,7 @@
 """Closer Management and Deals routes"""
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from datetime import datetime, timezone
+import asyncio
 import bcrypt
 import uuid
 import os
@@ -332,18 +333,23 @@ async def delete_closer(closer_id: str, request: Request, token_data=Depends(ver
 # ============== DEALS ==============
 
 @router.get("/deals")
-async def list_deals(token_data=Depends(verify_token)):
+async def list_deals(
+    token_data=Depends(verify_token),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500)
+):
     """List deals - Closers see only their own, Admins see all"""
     db = get_db()
     user = await db.admins.find_one({"email": token_data["sub"]}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
+    # #16: pagination with skip/limit
     if is_closer_role(user.get("role", "")):
-        deals = await db.deals.find({"closer_id": user["id"]}, {"_id": 0}).sort("created_at", -1).to_list(500)
+        deals = await db.deals.find({"closer_id": user["id"]}, {"_id": 0}).sort("created_at", -1).skip(skip).to_list(limit)
     else:
-        deals = await db.deals.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
-    
+        deals = await db.deals.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).to_list(limit)
+
     return deals
 
 
@@ -589,10 +595,11 @@ async def get_closer_monthly_stats(token_data=Depends(verify_token)):
         raise HTTPException(status_code=404, detail="User not found")
     
     # Aggregate deals by month
+    # #10: use $dateToString instead of $substr on ISO string (more robust)
     pipeline = [
         {"$match": {"closer_id": user["id"]}},
         {"$addFields": {
-            "month": {"$substr": ["$created_at", 0, 7]}
+            "month": {"$dateToString": {"format": "%Y-%m", "date": {"$toDate": "$created_at"}}}
         }},
         {"$group": {
             "_id": "$month",
@@ -820,7 +827,7 @@ async def closer_create_audit(request: Request, token_data=Depends(verify_token)
     # Generate AI report
     ai_report = None
     closing_args = "- Le projet s'autofinance rapidement\n- ROI garanti des la premiere annee\n- Solution sur-mesure adaptee a votre secteur"
-    
+
     try:
         EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
         if EMERGENT_LLM_KEY:
@@ -829,7 +836,7 @@ async def closer_create_audit(request: Request, token_data=Depends(verify_token)
                 session_id=f"audit-{uuid.uuid4()}",
                 system_message="Tu es un consultant expert en automatisation et IA pour les entreprises. Tu fournis des analyses strategiques et des recommandations professionnelles."
             ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-            
+
             prompt = f"""Contexte de l'audit:
 - Secteur: {input_data.client_sector}
 - Probleme identifie: {input_data.problem_description}
@@ -844,10 +851,20 @@ Genere un rapport d'audit structure avec:
 Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS de prix ou de tarifs."""
 
             from emergentintegrations.llm.chat import UserMessage
-            ai_report = await chat.send_message(UserMessage(text=prompt))
+            # #13: timeout 30s to avoid indefinite hang
+            ai_report = await asyncio.wait_for(
+                chat.send_message(UserMessage(text=prompt)),
+                timeout=30.0
+            )
+    except asyncio.TimeoutError:
+        import logging
+        logging.error("AI generation timed out for closer audit after 30s")
     except Exception as e:
         import logging
         logging.error(f"AI generation error for closer audit: {e}")
+
+    # #9: flag when LLM failed so the user can see the report is incomplete
+    ai_report_failed = ai_report is None
     
     audit_doc = {
         "id": str(uuid.uuid4()),
@@ -867,6 +884,7 @@ Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS 
         "roi_year1": roi_year1,
         "roi_year2": roi_year2,
         "ai_report": ai_report,
+        "ai_report_failed": ai_report_failed,
         "strategy": {
             "suggested_prices": suggested_prices,
             "profitability": profitability,
@@ -878,7 +896,7 @@ Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS 
         "created_at": datetime.now(timezone.utc).isoformat(),
         "created_by": token_data["sub"]
     }
-    
+
     await db.audits.insert_one(audit_doc)
     
     # Log activity
