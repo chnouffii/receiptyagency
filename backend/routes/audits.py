@@ -201,14 +201,16 @@ async def create_audit(input: AuditCreate, request: Request, admin=Depends(verif
     seq = await get_next_sequence(db, "audits")
     audit_number = f"AUD-{datetime.now(timezone.utc).strftime('%Y%m')}-{str(seq).zfill(4)}"
 
-    ai_report = await generate_ai_audit_content(
-        input.problem_description,
-        input.client_sector,
-        input.complexity,
-        annual_loss
+    # Run both LLM calls in parallel instead of sequentially
+    ai_report, closing_args = await asyncio.gather(
+        generate_ai_audit_content(
+            input.problem_description,
+            input.client_sector,
+            input.complexity,
+            annual_loss
+        ),
+        generate_closing_arguments(annual_savings, suggested_prices, input.client_sector)
     )
-
-    closing_args = await generate_closing_arguments(annual_savings, suggested_prices, input.client_sector)
 
     # #9: flag when LLM failed so the user knows the report is empty
     ai_report_failed = ai_report is None

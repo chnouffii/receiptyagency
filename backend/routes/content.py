@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import uuid
 
 from models.schemas import CaseStudyCreate, CaseStudyUpdate, SolutionCreate, SolutionUpdate
-from utils.helpers import verify_token
+from utils.helpers import verify_token, cache_get, cache_set, cache_invalidate
 
 router = APIRouter()
 
@@ -18,9 +18,14 @@ def get_db():
 
 @router.get("/case-studies")
 async def list_case_studies(published_only: bool = True):
+    cache_key = "case_studies_pub" if published_only else "case_studies_all"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
     db = get_db()
     query = {"published": True} if published_only else {}
     cases = await db.case_studies.find(query, {"_id": 0}).sort("order", 1).to_list(100)
+    cache_set(cache_key, cases, ttl=300)
     return cases
 
 
@@ -42,6 +47,8 @@ async def create_case_study(input: CaseStudyCreate, admin=Depends(verify_token))
     doc["order"] = existing
     doc["created_at"] = datetime.now(timezone.utc).isoformat()
     await db.case_studies.insert_one(doc)
+    cache_invalidate("case_studies_pub")
+    cache_invalidate("case_studies_all")
     doc.pop("_id", None)
     return doc
 
@@ -55,6 +62,8 @@ async def update_case_study(case_id: str, input: CaseStudyUpdate, admin=Depends(
     result = await db.case_studies.update_one({"id": case_id}, {"$set": updates})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Case study not found")
+    cache_invalidate("case_studies_pub")
+    cache_invalidate("case_studies_all")
     updated = await db.case_studies.find_one({"id": case_id}, {"_id": 0})
     return updated
 
@@ -65,6 +74,8 @@ async def delete_case_study(case_id: str, admin=Depends(verify_token)):
     result = await db.case_studies.delete_one({"id": case_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Case study not found")
+    cache_invalidate("case_studies_pub")
+    cache_invalidate("case_studies_all")
     return {"message": "Case study deleted"}
 
 
@@ -72,9 +83,14 @@ async def delete_case_study(case_id: str, admin=Depends(verify_token)):
 
 @router.get("/solutions")
 async def list_solutions(published_only: bool = True):
+    cache_key = "solutions_pub" if published_only else "solutions_all"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
     db = get_db()
     query = {"published": True} if published_only else {}
     sols = await db.solutions.find(query, {"_id": 0}).sort("order", 1).to_list(100)
+    cache_set(cache_key, sols, ttl=300)
     return sols
 
 
@@ -96,6 +112,8 @@ async def create_solution(input: SolutionCreate, admin=Depends(verify_token)):
     doc["order"] = existing
     doc["created_at"] = datetime.now(timezone.utc).isoformat()
     await db.solutions.insert_one(doc)
+    cache_invalidate("solutions_pub")
+    cache_invalidate("solutions_all")
     doc.pop("_id", None)
     return doc
 
@@ -109,6 +127,8 @@ async def update_solution(sol_id: str, input: SolutionUpdate, admin=Depends(veri
     result = await db.solutions.update_one({"id": sol_id}, {"$set": updates})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Solution not found")
+    cache_invalidate("solutions_pub")
+    cache_invalidate("solutions_all")
     updated = await db.solutions.find_one({"id": sol_id}, {"_id": 0})
     return updated
 
@@ -119,4 +139,6 @@ async def delete_solution(sol_id: str, admin=Depends(verify_token)):
     result = await db.solutions.delete_one({"id": sol_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Solution not found")
+    cache_invalidate("solutions_pub")
+    cache_invalidate("solutions_all")
     return {"message": "Solution deleted"}

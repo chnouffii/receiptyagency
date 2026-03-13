@@ -12,7 +12,7 @@ from models.schemas import (
     CloserCreate, CloserUpdate, CloserStats, CloserPermissions,
     AuditCreate, QuoteCreate
 )
-from utils.helpers import verify_token, log_audit
+from utils.helpers import verify_token, log_audit, cache_get, cache_set, cache_invalidate
 
 router = APIRouter()
 
@@ -45,40 +45,50 @@ def is_closer_role(role: str) -> bool:
 
 
 async def get_current_tier(db, signed_deals_count: int) -> dict:
-    """Get the commission tier based on number of signed deals"""
-    tiers = await db.commission_tiers.find({}, {"_id": 0}).sort("min_deals", -1).to_list(100)
+    """Get the commission tier based on number of signed deals (cached 5 min)"""
+    tiers = cache_get("commission_tiers")
+    if tiers is None:
+        tiers = await db.commission_tiers.find({}, {"_id": 0}).sort("min_deals", -1).to_list(100)
+        cache_set("commission_tiers", tiers, ttl=300)
     for tier in tiers:
         if signed_deals_count >= tier["min_deals"]:
             return tier
-    # Default tier if none configured
     return {"name": "Débutant", "rate": 10, "min_deals": 0}
 
 
 async def calculate_closer_stats(db, closer: dict) -> dict:
-    """Calculate statistics for a closer"""
+    """Calculate statistics for a closer — single aggregation instead of 4+ queries"""
     closer_id = closer["id"]
-    
-    # Count deals by status
-    total = await db.deals.count_documents({"closer_id": closer_id})
-    en_cours = await db.deals.count_documents({"closer_id": closer_id, "status": DealStatus.EN_COURS})
-    signes = await db.deals.count_documents({"closer_id": closer_id, "status": DealStatus.SIGNE})
-    perdus = await db.deals.count_documents({"closer_id": closer_id, "status": DealStatus.PERDU})
-    
-    # Calculate total CA and commissions
+
+    # One aggregation replaces 4 count_documents + 1 aggregate
     pipeline = [
-        {"$match": {"closer_id": closer_id, "status": DealStatus.SIGNE}},
-        {"$group": {"_id": None, "total_ca": {"$sum": "$amount_ht"}, "total_commission": {"$sum": "$commission_amount"}}}
+        {"$match": {"closer_id": closer_id}},
+        {"$group": {
+            "_id": "$status",
+            "count": {"$sum": 1},
+            "total_ca": {"$sum": {"$cond": [{"$eq": ["$status", DealStatus.SIGNE]}, "$amount_ht", 0]}},
+            "total_commission": {"$sum": {"$cond": [{"$eq": ["$status", DealStatus.SIGNE]}, "$commission_amount", 0]}}
+        }}
     ]
-    result = await db.deals.aggregate(pipeline).to_list(1)
-    total_ca = result[0]["total_ca"] if result else 0
-    total_commission = result[0]["total_commission"] if result else 0
-    
-    # Get current tier
+    rows = await db.deals.aggregate(pipeline).to_list(10)
+
+    total = en_cours = signes = perdus = 0
+    total_ca = total_commission = 0.0
+    for row in rows:
+        count = row["count"]
+        total += count
+        if row["_id"] == DealStatus.EN_COURS:
+            en_cours = count
+        elif row["_id"] == DealStatus.SIGNE:
+            signes = count
+            total_ca = row["total_ca"]
+            total_commission = row["total_commission"]
+        elif row["_id"] == DealStatus.PERDU:
+            perdus = count
+
     current_tier = await get_current_tier(db, signes)
-    
-    # Conversion rate
     conversion_rate = (signes / total * 100) if total > 0 else 0
-    
+
     return {
         "closer_id": closer_id,
         "closer_email": closer["email"],
@@ -130,10 +140,11 @@ async def create_commission_tier(input: CommissionTierCreate, request: Request, 
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.commission_tiers.insert_one(tier)
-    
+    cache_invalidate("commission_tiers")
+
     client_ip = request.client.host if request.client else None
     await log_audit(db, token_data["sub"], "create", "commission_tier", tier["id"], f"Created tier: {input.name}", client_ip)
-    
+
     tier.pop("_id", None)
     return tier
 
@@ -163,10 +174,11 @@ async def update_commission_tier(tier_id: str, input: CommissionTierUpdate, requ
     result = await db.commission_tiers.update_one({"id": tier_id}, {"$set": updates})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Tier not found")
-    
+    cache_invalidate("commission_tiers")
+
     client_ip = request.client.host if request.client else None
     await log_audit(db, token_data["sub"], "update", "commission_tier", tier_id, f"Updated fields: {list(updates.keys())}", client_ip)
-    
+
     updated = await db.commission_tiers.find_one({"id": tier_id}, {"_id": 0})
     return updated
 
@@ -184,6 +196,7 @@ async def delete_commission_tier(tier_id: str, request: Request, token_data=Depe
         raise HTTPException(status_code=404, detail="Tier not found")
     
     await db.commission_tiers.delete_one({"id": tier_id})
+    cache_invalidate("commission_tiers")
     
     client_ip = request.client.host if request.client else None
     await log_audit(db, token_data["sub"], "delete", "commission_tier", tier_id, f"Deleted tier: {tier['name']}", client_ip)
@@ -202,17 +215,10 @@ async def list_closers(token_data=Depends(verify_token)):
         raise HTTPException(status_code=403, detail="Admin access required")
     
     closers = await db.admins.find({"role": UserRole.CLOSER}, {"_id": 0, "password": 0}).sort("created_at", -1).to_list(100)
-    
-    # Calculate stats for each closer
-    result = []
-    for closer in closers:
-        stats = await calculate_closer_stats(db, closer)
-        result.append({
-            **closer,
-            "stats": stats
-        })
-    
-    return result
+
+    # Compute all stats in parallel
+    stats_list = await asyncio.gather(*[calculate_closer_stats(db, c) for c in closers])
+    return [{**closer, "stats": stats} for closer, stats in zip(closers, stats_list)]
 
 
 @router.post("/admin/closers")
@@ -639,13 +645,7 @@ async def get_all_closers_stats(token_data=Depends(verify_token)):
         raise HTTPException(status_code=403, detail="Admin access required")
     
     closers = await db.admins.find({"role": UserRole.CLOSER}, {"_id": 0, "password": 0}).to_list(100)
-    
-    result = []
-    for closer in closers:
-        stats = await calculate_closer_stats(db, closer)
-        result.append(stats)
-    
-    return result
+    return list(await asyncio.gather(*[calculate_closer_stats(db, c) for c in closers]))
 
 
 

@@ -4,7 +4,26 @@ import uuid
 import logging
 import asyncio
 import html
+import time as _time
 from datetime import datetime, timezone
+
+# ── Simple in-memory TTL cache ───────────────────────────────────────────────
+_cache: dict = {}
+
+def cache_get(key: str):
+    entry = _cache.get(key)
+    if entry:
+        value, expires_at = entry
+        if _time.time() < expires_at:
+            return value
+        del _cache[key]
+    return None
+
+def cache_set(key: str, value, ttl: int = 300):
+    _cache[key] = (value, _time.time() + ttl)
+
+def cache_invalidate(key: str):
+    _cache.pop(key, None)
 from jose import jwt, JWTError
 from fastapi import Header, HTTPException
 

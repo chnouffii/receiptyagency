@@ -411,14 +411,17 @@ async def list_clients(admin=Depends(verify_token)):
     db = get_db()
     clients = await db.client_accounts.find({}, {"_id": 0, "password": 0}).sort("created_at", -1).to_list(500)
 
-    # Add unread message count for each client
-    for client in clients:
-        unread = await db.client_messages.count_documents({
-            "client_id": client["id"],
-            "author_type": "client",
-            "read_by_admin": False
-        })
-        client["unread_messages"] = unread
+    # Single aggregation instead of one count_documents per client
+    if clients:
+        client_ids = [c["id"] for c in clients]
+        pipeline = [
+            {"$match": {"client_id": {"$in": client_ids}, "author_type": "client", "read_by_admin": False}},
+            {"$group": {"_id": "$client_id", "count": {"$sum": 1}}}
+        ]
+        unread_results = await db.client_messages.aggregate(pipeline).to_list(len(clients))
+        unread_map = {r["_id"]: r["count"] for r in unread_results}
+        for client in clients:
+            client["unread_messages"] = unread_map.get(client["id"], 0)
 
     return clients
 
