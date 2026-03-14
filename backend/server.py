@@ -262,6 +262,10 @@ async def startup():
     await db.audit_logs.create_index("user_id")
     await db.chat_messages.create_index("session_id")
     await db.chat_messages.create_index([("session_id", 1), ("created_at", 1)])
+    await db.appointments.create_index([("slot_date", 1), ("slot_time", 1)])
+    await db.appointments.create_index("client_id")
+    await db.appointments.create_index("status")
+    await db.client_documents.create_index([("client_id", 1), ("requires_approval", 1)])
     logger.info("MongoDB indexes ensured")
 
     # Create default admin if none exists — password is auto-generated and logged ONCE

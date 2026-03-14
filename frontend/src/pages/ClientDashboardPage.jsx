@@ -6,7 +6,8 @@ import {
   CheckCircle, Clock, Loader, Package, Star, ChevronRight,
   User, Building2, RefreshCw, ExternalLink, AlertCircle, BookOpen,
   Sparkles, Lightbulb, Wrench, Zap, Plus, X, ChevronDown, ChevronUp,
-  ThumbsUp, Heart, Flame, StickyNote
+  ThumbsUp, Heart, Flame, StickyNote, Calendar, ChevronLeft, Video,
+  ThumbsDown, MessageSquare, XCircle
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -376,6 +377,21 @@ export default function ClientDashboardPage() {
   const [evoPriority, setEvoPriority] = useState('normale');
   const [submittingEvo, setSubmittingEvo] = useState(false);
 
+  // Appointments
+  const [appointments, setAppointments] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsConfig, setSlotsConfig] = useState({});
+  const [currentWeekStart, setCurrentWeekStart] = useState(null);
+  const [bookingSlot, setBookingSlot] = useState(null); // {date, time}
+  const [bookingNotes, setBookingNotes] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+
+  // Document review
+  const [reviewingDoc, setReviewingDoc] = useState(null); // doc object
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
   const token = localStorage.getItem('receipty-client-token');
   const clientName = localStorage.getItem('receipty-client-name') || '';
   const clientCompany = localStorage.getItem('receipty-client-company') || '';
@@ -405,6 +421,38 @@ export default function ClientDashboardPage() {
     setNewUpdates(upds.filter(u => u.created_at > lastUpd).length);
     setNewEvolutions(evos.filter(e => e.updated_at && e.updated_at > lastEvo && e.status !== 'en_attente').length);
   }, []);
+
+  // Get Monday of current week
+  const getMondayOfWeek = (offset = 0) => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff + offset * 7);
+    return d.toISOString().split('T')[0];
+  };
+
+  const fetchSlots = useCallback(async (weekStart) => {
+    setSlotsLoading(true);
+    try {
+      const res = await axios.get(`${API}/client/appointments/slots`, {
+        headers, params: { week_start: weekStart }
+      });
+      setAvailableSlots(res.data.slots || []);
+      setSlotsConfig(res.data.config || {});
+    } catch {
+      setAvailableSlots([]);
+    } finally {
+      setSlotsLoading(false);
+    }
+  }, [headers]);
+
+  const fetchAppointments = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/client/appointments`, { headers });
+      setAppointments(res.data);
+    } catch {}
+  }, [headers]);
 
   const fetchAll = useCallback(async () => {
     if (!token) { navigate('/client'); return; }
@@ -451,7 +499,13 @@ export default function ClientDashboardPage() {
     }
   }, [token]);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => {
+    fetchAll();
+    fetchAppointments();
+    const ws = getMondayOfWeek(0);
+    setCurrentWeekStart(ws);
+    fetchSlots(ws);
+  }, [fetchAll, fetchAppointments, fetchSlots]);
 
   // Auto-scroll messages
   useEffect(() => {
@@ -467,6 +521,71 @@ export default function ClientDashboardPage() {
     if (tabId === 'messages') setUnreadMessages(0);
     if (tabId === 'updates') setNewUpdates(0);
     if (tabId === 'evolutions') setNewEvolutions(0);
+  };
+
+  const changeWeek = (offset) => {
+    if (!currentWeekStart) return;
+    const d = new Date(currentWeekStart);
+    d.setDate(d.getDate() + offset * 7);
+    const newWs = d.toISOString().split('T')[0];
+    setCurrentWeekStart(newWs);
+    fetchSlots(newWs);
+  };
+
+  const handleBookSlot = async () => {
+    if (!bookingSlot) return;
+    setBookingLoading(true);
+    try {
+      await axios.post(`${API}/client/appointments`, {
+        slot_date: bookingSlot.date,
+        slot_time: bookingSlot.time,
+        notes: bookingNotes.trim()
+      }, { headers });
+      toast.success(lang === 'fr' ? 'Demande de rendez-vous envoyée !' : 'Appointment request sent!');
+      setBookingSlot(null);
+      setBookingNotes('');
+      await fetchAppointments();
+      fetchSlots(currentWeekStart);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || (lang === 'fr' ? 'Erreur lors de la réservation.' : 'Booking failed.'));
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  const handleCancelAppointment = async (aptId) => {
+    try {
+      await axios.delete(`${API}/client/appointments/${aptId}`, { headers });
+      toast.success(lang === 'fr' ? 'Rendez-vous annulé.' : 'Appointment cancelled.');
+      await fetchAppointments();
+      fetchSlots(currentWeekStart);
+    } catch {
+      toast.error(lang === 'fr' ? 'Erreur annulation.' : 'Cancel failed.');
+    }
+  };
+
+  const handleReviewDoc = async (action) => {
+    if (!reviewingDoc) return;
+    setReviewSubmitting(true);
+    try {
+      await axios.post(`${API}/client/documents/${reviewingDoc.id}/review`, {
+        action,
+        comment: reviewComment.trim()
+      }, { headers });
+      toast.success(action === 'approved'
+        ? (lang === 'fr' ? 'Livrable validé !' : 'Deliverable approved!')
+        : (lang === 'fr' ? 'Corrections demandées.' : 'Corrections requested.')
+      );
+      setReviewingDoc(null);
+      setReviewComment('');
+      // Refresh docs
+      const res = await axios.get(`${API}/client/documents`, { headers });
+      setDocuments(res.data);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || (lang === 'fr' ? 'Erreur.' : 'Error.'));
+    } finally {
+      setReviewSubmitting(false);
+    }
   };
 
   // Auto-refresh messages every 30s
@@ -578,11 +697,14 @@ export default function ClientDashboardPage() {
     next:      { emoji: '⏭️', labelFr: 'Prochaine étape', labelEn: 'Next step',    color: 'text-gray-400',    bg: isDark ? 'bg-gray-500/10'    : 'bg-gray-50',    border: isDark ? 'border-gray-500/20'    : 'border-gray-200' },
   };
 
+  const pendingApprovalCount = documents.filter(d => d.requires_approval && d.approval_status === 'pending').length;
+
   const tabs = [
-    { id: 'updates',    labelFr: 'Journal',      labelEn: 'Journal',      icon: BookOpen,   badge: newUpdates },
-    { id: 'messages',   labelFr: 'Messages',     labelEn: 'Messages',     icon: MessageCircle, badge: unreadMessages },
-    { id: 'project',    labelFr: 'Mon Projet',   labelEn: 'My Project',   icon: CheckCircle, badge: 0 },
-    { id: 'documents',  labelFr: 'Documents',    labelEn: 'Documents',    icon: FolderOpen,  badge: 0 },
+    { id: 'updates',      labelFr: 'Journal',       labelEn: 'Journal',       icon: BookOpen,      badge: newUpdates },
+    { id: 'messages',     labelFr: 'Messages',      labelEn: 'Messages',      icon: MessageCircle, badge: unreadMessages },
+    { id: 'project',      labelFr: 'Mon Projet',    labelEn: 'My Project',    icon: CheckCircle,   badge: 0 },
+    { id: 'documents',    labelFr: 'Documents',     labelEn: 'Documents',     icon: FolderOpen,    badge: pendingApprovalCount },
+    { id: 'appointment',  labelFr: 'Rendez-vous',   labelEn: 'Appointment',   icon: Calendar,      badge: 0 },
     ...(isDelivered ? [{ id: 'evolutions', labelFr: 'Évolutions', labelEn: 'Evolutions', icon: Sparkles, badge: newEvolutions }] : []),
   ];
 
@@ -1060,35 +1182,129 @@ export default function ClientDashboardPage() {
                 </div>
               ) : (
                 <div className="divide-y divide-[var(--border-primary)]">
-                  {documents.map((doc, i) => (
-                    <motion.div
-                      key={doc.id || i}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className={`flex items-center gap-4 p-4 ${isDark ? 'hover:bg-[var(--bg-hover)]' : 'hover:bg-gray-50'} transition-colors`}
-                    >
-                      <span className="text-2xl">{docTypeIcons[doc.doc_type] || '📎'}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{doc.name}</p>
-                        {doc.description && (
-                          <p className={`text-xs truncate ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>{doc.description}</p>
-                        )}
-                        <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-                          {lang === 'fr' ? 'Partagé par' : 'Shared by'} {doc.uploaded_by} · {formatDate(doc.uploaded_at, lang)}
-                        </p>
-                      </div>
-                      <a
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 text-xs font-medium rounded-lg transition-all flex-shrink-0"
+                  {documents.map((doc, i) => {
+                    const needsApproval = doc.requires_approval;
+                    const approvalStatus = doc.approval_status;
+                    const isPending = needsApproval && approvalStatus === 'pending';
+                    const isApproved = approvalStatus === 'approved';
+                    const isCorrections = approvalStatus === 'corrections_requested';
+
+                    return (
+                      <motion.div
+                        key={doc.id || i}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className={`p-4 ${isDark ? 'hover:bg-[var(--bg-hover)]' : 'hover:bg-gray-50'} transition-colors`}
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        {lang === 'fr' ? 'Ouvrir' : 'Open'}
-                      </a>
-                    </motion.div>
-                  ))}
+                        <div className="flex items-center gap-4">
+                          <span className="text-2xl">{needsApproval ? '📦' : (docTypeIcons[doc.doc_type] || '📎')}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className={`text-sm font-medium truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{doc.name}</p>
+                              {isPending && (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 flex-shrink-0">
+                                  {lang === 'fr' ? '⏳ En attente' : '⏳ Pending'}
+                                </span>
+                              )}
+                              {isApproved && (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex-shrink-0">
+                                  ✅ {lang === 'fr' ? 'Validé' : 'Approved'}
+                                </span>
+                              )}
+                              {isCorrections && (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 flex-shrink-0">
+                                  ✏️ {lang === 'fr' ? 'Corrections demandées' : 'Corrections requested'}
+                                </span>
+                              )}
+                            </div>
+                            {doc.description && (
+                              <p className={`text-xs truncate mt-0.5 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>{doc.description}</p>
+                            )}
+                            <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                              {lang === 'fr' ? 'Partagé par' : 'Shared by'} {doc.uploaded_by} · {formatDate(doc.uploaded_at, lang)}
+                            </p>
+                          </div>
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 text-xs font-medium rounded-lg transition-all flex-shrink-0"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            {lang === 'fr' ? 'Ouvrir' : 'Open'}
+                          </a>
+                        </div>
+
+                        {/* Approval block */}
+                        {isPending && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className={`mt-3 pt-3 border-t ${isDark ? 'border-amber-500/20' : 'border-amber-200'}`}
+                          >
+                            <p className={`text-xs mb-3 ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>
+                              {lang === 'fr'
+                                ? '📋 Ce livrable nécessite votre validation. Consultez-le et donnez votre réponse.'
+                                : '📋 This deliverable requires your approval. Review it and share your response.'}
+                            </p>
+                            {reviewingDoc?.id === doc.id ? (
+                              <div className="space-y-2">
+                                <textarea
+                                  value={reviewComment}
+                                  onChange={e => setReviewComment(e.target.value)}
+                                  placeholder={lang === 'fr' ? 'Votre commentaire (optionnel)...' : 'Your comment (optional)...'}
+                                  rows={2}
+                                  className={`w-full px-3 py-2 rounded-xl text-xs outline-none resize-none transition-all ${
+                                    isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-amber-500/50' : 'bg-gray-50 border border-gray-200 text-gray-900 focus:border-amber-400'
+                                  }`}
+                                />
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => handleReviewDoc('approved')}
+                                    disabled={reviewSubmitting}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-medium rounded-lg transition-all disabled:opacity-50"
+                                  >
+                                    <CheckCircle className="w-3.5 h-3.5" />
+                                    {lang === 'fr' ? 'Valider' : 'Approve'}
+                                  </button>
+                                  <button
+                                    onClick={() => handleReviewDoc('corrections')}
+                                    disabled={reviewSubmitting}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600/20 hover:bg-orange-600/30 text-orange-400 border border-orange-500/30 text-xs font-medium rounded-lg transition-all disabled:opacity-50"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                    {lang === 'fr' ? 'Demander corrections' : 'Request changes'}
+                                  </button>
+                                  <button
+                                    onClick={() => { setReviewingDoc(null); setReviewComment(''); }}
+                                    className={`p-1.5 rounded-lg transition-colors ${isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => { setReviewingDoc(doc); setReviewComment(''); }}
+                                className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 text-xs font-medium rounded-xl transition-all"
+                              >
+                                <MessageSquare className="w-3.5 h-3.5" />
+                                {lang === 'fr' ? 'Répondre à ce livrable' : 'Respond to this deliverable'}
+                              </button>
+                            )}
+                          </motion.div>
+                        )}
+
+                        {/* Comment display if corrections were requested */}
+                        {isCorrections && doc.approval_comment && (
+                          <div className={`mt-2 text-xs px-3 py-2 rounded-lg ${isDark ? 'bg-orange-500/10 text-orange-300' : 'bg-orange-50 text-orange-700'}`}>
+                            💬 {doc.approval_comment}
+                          </div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -1330,6 +1546,212 @@ export default function ClientDashboardPage() {
                     </motion.div>
                   );
                 })}
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* === TAB: RENDEZ-VOUS === */}
+        {activeTab === 'appointment' && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-4"
+          >
+            {/* Upcoming appointments */}
+            {appointments.filter(a => a.status !== 'cancelled').length > 0 && (
+              <div className={`rounded-2xl border p-5 ${isDark ? 'bg-[var(--bg-secondary)] border-[var(--border-primary)]' : 'bg-white border-gray-200 shadow-sm'}`}>
+                <h2 className={`font-heading text-base font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <Calendar className="w-4 h-4 text-blue-400" />
+                  {lang === 'fr' ? 'Mes rendez-vous' : 'My appointments'}
+                </h2>
+                <div className="space-y-3">
+                  {appointments.filter(a => a.status !== 'cancelled').map(apt => {
+                    const statusColors = {
+                      pending:   { bg: 'bg-amber-500/10',   border: 'border-amber-500/20',   text: 'text-amber-400',   label: lang === 'fr' ? '⏳ En attente' : '⏳ Pending' },
+                      confirmed: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', label: lang === 'fr' ? '✅ Confirmé' : '✅ Confirmed' },
+                      cancelled: { bg: 'bg-red-500/10',     border: 'border-red-500/20',     text: 'text-red-400',     label: lang === 'fr' ? '❌ Annulé' : '❌ Cancelled' },
+                    };
+                    const s = statusColors[apt.status] || statusColors.pending;
+                    return (
+                      <div key={apt.id} className={`rounded-xl border p-4 ${s.bg} ${s.border}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <Calendar className={`w-4 h-4 ${s.text}`} />
+                              <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {new Date(apt.slot_date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} à {apt.slot_time}
+                              </span>
+                            </div>
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${s.bg} ${s.text} border ${s.border}`}>{s.label}</span>
+                            {apt.notes && <p className={`text-xs mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>📝 {apt.notes}</p>}
+                            {apt.admin_notes && <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>💬 {apt.admin_notes}</p>}
+                            {apt.meeting_link && (
+                              <a href={apt.meeting_link} target="_blank" rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 mt-2 text-xs text-blue-400 hover:text-blue-300 underline">
+                                <Video className="w-3.5 h-3.5" /> {lang === 'fr' ? 'Rejoindre la réunion' : 'Join meeting'}
+                              </a>
+                            )}
+                          </div>
+                          {apt.status === 'pending' && (
+                            <button
+                              onClick={() => handleCancelAppointment(apt.id)}
+                              className={`text-xs px-2 py-1 rounded-lg transition-colors flex items-center gap-1 ${isDark ? 'text-red-400 hover:bg-red-500/10' : 'text-red-500 hover:bg-red-50'}`}
+                            >
+                              <XCircle className="w-3.5 h-3.5" /> {lang === 'fr' ? 'Annuler' : 'Cancel'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Slot booking */}
+            {!appointments.find(a => ['pending', 'confirmed'].includes(a.status) && a.slot_date >= new Date().toISOString().split('T')[0]) ? (
+              <div className={`rounded-2xl border ${isDark ? 'bg-[var(--bg-secondary)] border-[var(--border-primary)]' : 'bg-white border-gray-200 shadow-sm'}`}>
+                <div className={`p-5 border-b ${isDark ? 'border-[var(--border-primary)]' : 'border-gray-100'}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-blue-500/20' : 'bg-blue-50'}`}>
+                        <Calendar className="w-5 h-5 text-blue-400" />
+                      </div>
+                      <div>
+                        <h2 className={`font-heading text-base font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {lang === 'fr' ? 'Prendre un rendez-vous' : 'Book an appointment'}
+                        </h2>
+                        <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                          {lang === 'fr' ? 'Choisissez un créneau disponible' : 'Choose an available time slot'}
+                        </p>
+                      </div>
+                    </div>
+                    {/* Week navigation */}
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => changeWeek(-1)} className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}>
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <span className={`text-xs font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {currentWeekStart ? new Date(currentWeekStart + 'T00:00:00').toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short' }) : ''}
+                      </span>
+                      <button onClick={() => changeWeek(1)} className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-5">
+                  {slotsLoading ? (
+                    <div className="py-8 text-center">
+                      <RefreshCw className="w-5 h-5 animate-spin mx-auto text-blue-400" />
+                    </div>
+                  ) : availableSlots.length === 0 ? (
+                    <div className="py-8 text-center">
+                      <Calendar className={`w-10 h-10 mx-auto mb-3 ${isDark ? 'text-gray-700' : 'text-gray-300'}`} />
+                      <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                        {lang === 'fr' ? 'Aucun créneau disponible cette semaine.' : 'No available slots this week.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      {/* Group slots by date */}
+                      {Object.entries(
+                        availableSlots.reduce((acc, slot) => {
+                          if (!acc[slot.date]) acc[slot.date] = [];
+                          acc[slot.date].push(slot.time);
+                          return acc;
+                        }, {})
+                      ).map(([date, times]) => (
+                        <div key={date} className="mb-4">
+                          <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                            {new Date(date + 'T00:00:00').toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' })}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {times.map(time => {
+                              const isSelected = bookingSlot?.date === date && bookingSlot?.time === time;
+                              return (
+                                <button
+                                  key={time}
+                                  onClick={() => setBookingSlot(isSelected ? null : { date, time })}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                                    isSelected
+                                      ? 'bg-blue-600 text-white border-blue-500'
+                                      : isDark
+                                        ? 'bg-white/5 text-gray-300 border-white/10 hover:bg-blue-500/20 hover:text-blue-300 hover:border-blue-500/30'
+                                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300'
+                                  }`}
+                                >
+                                  {time}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Booking form */}
+                  <AnimatePresence>
+                    {bookingSlot && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className={`mt-4 pt-4 border-t space-y-3 ${isDark ? 'border-white/10' : 'border-gray-100'}`}
+                      >
+                        <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          📅 {new Date(bookingSlot.date + 'T00:00:00').toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' })} à {bookingSlot.time}
+                        </p>
+                        <textarea
+                          value={bookingNotes}
+                          onChange={e => setBookingNotes(e.target.value)}
+                          placeholder={lang === 'fr' ? 'Notes pour l\'équipe (optionnel)...' : 'Notes for the team (optional)...'}
+                          rows={2}
+                          className={`w-full px-3 py-2 rounded-xl text-sm outline-none resize-none transition-all ${
+                            isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-blue-500/50' : 'bg-gray-50 border border-gray-200 text-gray-900 focus:border-blue-400'
+                          }`}
+                        />
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={handleBookSlot}
+                            disabled={bookingLoading}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-all"
+                          >
+                            {bookingLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Calendar className="w-3.5 h-3.5" />}
+                            {lang === 'fr' ? 'Confirmer le rendez-vous' : 'Confirm appointment'}
+                          </button>
+                          <button
+                            onClick={() => { setBookingSlot(null); setBookingNotes(''); }}
+                            className={`text-sm transition-colors ${isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
+                          >
+                            {lang === 'fr' ? 'Annuler' : 'Cancel'}
+                          </button>
+                        </div>
+                        {slotsConfig?.meeting_link && (
+                          <p className={`text-xs flex items-center gap-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                            <Video className="w-3 h-3" /> {lang === 'fr' ? 'La réunion se fera via' : 'Meeting via'}: <span className="text-blue-400">{slotsConfig.meeting_link}</span>
+                          </p>
+                        )}
+                        {slotsConfig?.notes && (
+                          <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>ℹ️ {slotsConfig.notes}</p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            ) : (
+              <div className={`rounded-2xl border p-5 text-center ${isDark ? 'bg-[var(--bg-secondary)] border-[var(--border-primary)]' : 'bg-white border-gray-200 shadow-sm'}`}>
+                <Calendar className={`w-10 h-10 mx-auto mb-3 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
+                <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  {lang === 'fr' ? 'Vous avez déjà un rendez-vous à venir.' : 'You already have an upcoming appointment.'}
+                </p>
+                <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  {lang === 'fr' ? 'Annulez-le ci-dessus si vous souhaitez en choisir un autre.' : 'Cancel it above if you\'d like to reschedule.'}
+                </p>
               </div>
             )}
           </motion.div>
