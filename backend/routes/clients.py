@@ -8,6 +8,7 @@ import os
 import html
 import re
 import time
+import logging
 from collections import defaultdict
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List
@@ -465,7 +466,6 @@ async def create_client(body: AdminClientCreate, admin=Depends(verify_token)):
                 {"$set": {"status": "converted", "client_account_id": client["id"]}}
             )
         except Exception as e:
-            import logging
             logging.getLogger(__name__).error(f"Failed to update lead {body.lead_id} after client creation: {e}")
 
     client.pop("_id", None)
