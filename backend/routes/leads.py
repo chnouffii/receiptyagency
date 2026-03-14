@@ -5,12 +5,15 @@ import uuid
 import asyncio
 import re
 import time
+import logging
 from collections import defaultdict
 from datetime import datetime, timezone
 from pydantic import BaseModel
 
 from models.schemas import Lead, LeadCreate, LeadStatusUpdate, ContactMessage
 from utils.helpers import verify_token, send_notification_email
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -141,3 +144,88 @@ async def delete_lead(lead_id: str, admin=Depends(verify_token)):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Lead not found")
     return {"message": "Lead deleted"}
+
+
+# ==================== NOTES D'APPEL + RÉSUMÉ IA ====================
+
+class CallNotesUpdate(BaseModel):
+    notes: str
+    generate_summary: bool = False
+
+
+@router.put("/admin/leads/{lead_id}/call-notes")
+async def save_call_notes(lead_id: str, body: CallNotesUpdate, admin=Depends(verify_token)):
+    """Save call notes for a lead and optionally generate an AI summary."""
+    db = get_db()
+    lead = await db.leads.find_one({"id": lead_id}, {"_id": 0})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead introuvable")
+
+    notes = body.notes.strip()[:5000]
+    updates = {
+        "call_notes": notes,
+        "call_notes_updated_at": datetime.now(timezone.utc).isoformat(),
+        "call_notes_by": admin.get("sub", "")
+    }
+
+    summary = None
+    if body.generate_summary and notes:
+        try:
+            import os
+            import json
+            from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+            key = os.environ.get("EMERGENT_LLM_KEY")
+            system_prompt = (
+                "Tu es un expert en analyse d'appels commerciaux B2B. "
+                "Tu reçois des notes brutes d'un appel avec un prospect et tu génères un résumé structuré. "
+                "Retourne UNIQUEMENT un objet JSON valide avec exactement ces champs :\n"
+                "{\n"
+                '  "solution": "Solution Receipty recommandée (Talent/Spend/Web-on-Demand) ou Indéfini",\n'
+                '  "budget": "Budget mentionné ou estimé, ou null",\n'
+                '  "next_step": "Prochaine étape convenue",\n'
+                '  "pain_points": ["problème 1", "problème 2"],\n'
+                '  "objections": ["objection 1"],\n'
+                '  "score": 75,\n'
+                '  "summary": "Résumé en 1-2 phrases"\n'
+                "}\n"
+                "Si une information est manquante, utilise null ou une liste vide."
+            )
+            user_msg = (
+                f"Notes d'appel avec {lead.get('name', 'prospect')} "
+                f"({lead.get('company', 'entreprise inconnue')}) :\n\n{notes}"
+            )
+            chat = LlmChat(
+                api_key=key,
+                session_id=f"call-summary-{lead_id}",
+                system_message=system_prompt
+            )
+            response_text = await chat.send_message(UserMessage(text=user_msg))
+            json_match = re.search(r'\{[\s\S]*\}', response_text)
+            if json_match:
+                summary = json.loads(json_match.group())
+                updates["call_summary"] = summary
+                updates["call_summary_at"] = datetime.now(timezone.utc).isoformat()
+        except Exception as e:
+            logger.error(f"AI summary error for lead {lead_id}: {e}")
+
+    await db.leads.update_one({"id": lead_id}, {"$set": updates})
+
+    result = {"message": "Notes sauvegardées", "notes": notes}
+    if summary:
+        result["summary"] = summary
+    return result
+
+
+@router.get("/admin/leads/{lead_id}/call-notes")
+async def get_call_notes(lead_id: str, admin=Depends(verify_token)):
+    """Get call notes and summary for a lead."""
+    db = get_db()
+    lead = await db.leads.find_one({"id": lead_id}, {"_id": 0, "call_notes": 1, "call_summary": 1, "call_notes_updated_at": 1})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead introuvable")
+    return {
+        "notes": lead.get("call_notes", ""),
+        "summary": lead.get("call_summary"),
+        "updated_at": lead.get("call_notes_updated_at")
+    }

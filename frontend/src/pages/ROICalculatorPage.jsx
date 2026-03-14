@@ -334,7 +334,7 @@ export default function ROICalculatorPage() {
 
             {/* CTA */}
             <Link
-              to="/contact"
+              to="/quote"
               className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-semibold text-white transition-all bg-blue-600 hover:bg-blue-500 shadow-lg"
             >
               {lang === 'fr' ? 'Démarrer mon projet' : 'Start my project'}

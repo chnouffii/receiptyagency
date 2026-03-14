@@ -8,6 +8,7 @@ import os
 import html
 import re
 import time
+import logging
 from collections import defaultdict
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List
@@ -92,7 +93,8 @@ class AdminDocumentCreate(BaseModel):
     name: str
     description: str = ""
     url: str
-    doc_type: str = "document"  # document, devis, contrat, rapport
+    doc_type: str = "document"  # document, devis, contrat, rapport, livrable
+    requires_approval: bool = False
 
     # #7: reject javascript: and data: URLs to prevent XSS via document links
     @field_validator("url")
@@ -102,6 +104,49 @@ class AdminDocumentCreate(BaseModel):
         if re.match(r'^(javascript|data|vbscript):', stripped):
             raise ValueError("URL non autorisée")
         return v.strip()
+
+
+class AvailabilityUpdate(BaseModel):
+    working_days: List[int] = [0, 1, 2, 3, 4]  # 0=Mon, 6=Sun (weekday index)
+    start_time: str = "09:00"
+    end_time: str = "18:00"
+    slot_duration: int = 30  # minutes
+    meeting_link: str = ""
+    notes: str = ""
+
+
+class AppointmentCreate(BaseModel):
+    slot_date: str  # YYYY-MM-DD
+    slot_time: str  # HH:MM
+    notes: str = ""
+
+    @field_validator("slot_date")
+    @classmethod
+    def validate_date(cls, v: str) -> str:
+        from datetime import date as _date
+        try:
+            _date.fromisoformat(v)
+        except ValueError:
+            raise ValueError("Format de date invalide (YYYY-MM-DD)")
+        return v
+
+    @field_validator("slot_time")
+    @classmethod
+    def validate_time(cls, v: str) -> str:
+        if not re.match(r'^\d{2}:\d{2}$', v):
+            raise ValueError("Format d'heure invalide (HH:MM)")
+        return v
+
+
+class AppointmentAdminUpdate(BaseModel):
+    status: str  # confirmed | cancelled
+    admin_notes: str = ""
+    meeting_link: str = ""
+
+
+class DocumentReview(BaseModel):
+    action: str  # approved | corrections
+    comment: str = ""
 
 
 class ProjectStatusUpdate(BaseModel):
@@ -138,6 +183,13 @@ class ReactionToggle(BaseModel):
     emoji: str  # 👍, ❤️, 🔥
 
 
+class AdminClientUpdate(BaseModel):
+    name: Optional[str] = None
+    company: Optional[str] = None
+    is_active: Optional[bool] = None
+    project_description: Optional[str] = None
+
+
 # ==================== CLIENT AUTH ====================
 
 @router.post("/client/login")
@@ -160,7 +212,7 @@ async def client_login(input: ClientLogin, request: Request):
         {
             "sub": f"{CLIENT_TOKEN_PREFIX}{client['email']}",
             "client_id": client["id"],
-            "exp": datetime.now(timezone.utc).timestamp() + 86400 * 7  # 7 days
+            "exp": datetime.now(timezone.utc).timestamp() + 86400  # 1 day
         },
         JWT_SECRET,
         algorithm="HS256"
@@ -452,10 +504,13 @@ async def create_client(body: AdminClientCreate, admin=Depends(verify_token)):
 
     # If linked to a lead, update lead status to "converted"
     if body.lead_id:
-        await db.leads.update_one(
-            {"id": body.lead_id},
-            {"$set": {"status": "converted", "client_account_id": client["id"]}}
-        )
+        try:
+            await db.leads.update_one(
+                {"id": body.lead_id},
+                {"$set": {"status": "converted", "client_account_id": client["id"]}}
+            )
+        except Exception as e:
+            logging.getLogger(__name__).error(f"Failed to update lead {body.lead_id} after client creation: {e}")
 
     client.pop("_id", None)
     client.pop("password", None)
@@ -488,10 +543,9 @@ async def get_client(client_id: str, admin=Depends(verify_token)):
 
 
 @router.patch("/admin/clients/{client_id}")
-async def update_client(client_id: str, body: dict, admin=Depends(verify_token)):
+async def update_client(client_id: str, body: AdminClientUpdate, admin=Depends(verify_token)):
     db = get_db()
-    allowed = {"name", "company", "is_active", "project_description"}
-    updates = {k: v for k, v in body.items() if k in allowed}
+    updates = {k: v for k, v in body.model_dump(exclude_none=True).items()}
     if not updates:
         raise HTTPException(status_code=400, detail="Aucun champ valide")
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
@@ -626,6 +680,10 @@ async def share_document(client_id: str, body: AdminDocumentCreate, admin=Depend
         "description": body.description,
         "url": body.url,
         "doc_type": body.doc_type,
+        "requires_approval": body.requires_approval,
+        "approval_status": "pending" if body.requires_approval else "none",
+        "approval_comment": "",
+        "reviewed_at": None,
         "uploaded_by": admin_name,
         "uploaded_at": datetime.now(timezone.utc).isoformat()
     }
@@ -633,12 +691,17 @@ async def share_document(client_id: str, body: AdminDocumentCreate, admin=Depend
     doc.pop("_id", None)
 
     # Notify client
+    if body.requires_approval:
+        notif_content = f"📦 Un livrable est en attente de votre validation : **{body.name}**" + (f"\n{body.description}" if body.description else "")
+    else:
+        notif_content = f"📎 Un nouveau document a été partagé avec vous : **{body.name}**" + (f"\n{body.description}" if body.description else "")
+
     notification = {
         "id": str(uuid.uuid4()),
         "client_id": client_id,
         "author_type": "system",
         "author_name": "Receipty",
-        "content": f"📎 Un nouveau document a été partagé avec vous : **{body.name}**" + (f"\n{body.description}" if body.description else ""),
+        "content": notif_content,
         "read_by_admin": True,
         "read_by_client": False,
         "created_at": datetime.now(timezone.utc).isoformat()
@@ -742,3 +805,307 @@ async def get_client_satisfaction_admin(client_id: str, admin=Depends(verify_tok
         {"client_id": client_id}, {"_id": 0}
     )
     return satisfaction or {}
+
+
+# ==================== RENDEZ-VOUS — DISPONIBILITÉS (ADMIN) ====================
+
+@router.get("/admin/appointments/availability")
+async def get_availability(admin=Depends(verify_token)):
+    db = get_db()
+    config = await db.availability.find_one({"type": "availability"}, {"_id": 0})
+    return config or {
+        "working_days": [0, 1, 2, 3, 4],
+        "start_time": "09:00",
+        "end_time": "18:00",
+        "slot_duration": 30,
+        "meeting_link": "",
+        "notes": ""
+    }
+
+
+@router.put("/admin/appointments/availability")
+async def update_availability(body: AvailabilityUpdate, admin=Depends(verify_token)):
+    db = get_db()
+    if not (1 <= body.slot_duration <= 240):
+        raise HTTPException(status_code=400, detail="Durée de créneau invalide (1-240 min)")
+    config = {
+        "type": "availability",
+        "working_days": body.working_days,
+        "start_time": body.start_time,
+        "end_time": body.end_time,
+        "slot_duration": body.slot_duration,
+        "meeting_link": body.meeting_link.strip(),
+        "notes": body.notes.strip()[:500],
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.availability.replace_one({"type": "availability"}, config, upsert=True)
+    return {"message": "Disponibilités mises à jour"}
+
+
+@router.get("/admin/appointments")
+async def list_appointments(admin=Depends(verify_token)):
+    db = get_db()
+    appointments = await db.appointments.find({}, {"_id": 0}).sort("slot_date", 1).to_list(500)
+    return appointments
+
+
+@router.patch("/admin/appointments/{apt_id}")
+async def update_appointment_admin(apt_id: str, body: AppointmentAdminUpdate, admin=Depends(verify_token)):
+    db = get_db()
+    if body.status not in ["confirmed", "cancelled"]:
+        raise HTTPException(status_code=400, detail="Statut invalide")
+
+    updates = {"status": body.status, "updated_at": datetime.now(timezone.utc).isoformat()}
+    if body.admin_notes:
+        updates["admin_notes"] = body.admin_notes.strip()[:500]
+    if body.meeting_link:
+        updates["meeting_link"] = body.meeting_link.strip()
+
+    result = await db.appointments.update_one({"id": apt_id}, {"$set": updates})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Rendez-vous introuvable")
+
+    apt = await db.appointments.find_one({"id": apt_id}, {"_id": 0})
+    if apt:
+        status_msg = "confirmé ✅" if body.status == "confirmed" else "annulé ❌"
+        content = f"📅 Votre rendez-vous du {apt['slot_date']} à {apt['slot_time']} a été {status_msg}."
+        if body.admin_notes:
+            content += f"\n💬 {body.admin_notes}"
+        if body.meeting_link:
+            content += f"\n🔗 Lien : {body.meeting_link}"
+        notification = {
+            "id": str(uuid.uuid4()),
+            "client_id": apt["client_id"],
+            "author_type": "system",
+            "author_name": "Receipty",
+            "content": content,
+            "read_by_admin": True,
+            "read_by_client": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.client_messages.insert_one(notification)
+
+    return {"message": "Mis à jour"}
+
+
+@router.delete("/admin/appointments/{apt_id}")
+async def delete_appointment_admin(apt_id: str, admin=Depends(verify_token)):
+    db = get_db()
+    result = await db.appointments.delete_one({"id": apt_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Rendez-vous introuvable")
+    return {"message": "Supprimé"}
+
+
+# ==================== RENDEZ-VOUS — PRISE DE RDV (CLIENT) ====================
+
+def _compute_slots(config: dict, booked: set, week_start_date) -> list:
+    """Generate available time slots for a 7-day window starting from week_start_date."""
+    from datetime import date as _date, timedelta
+
+    working_days = config.get("working_days", [0, 1, 2, 3, 4])
+    start_parts = config.get("start_time", "09:00").split(":")
+    end_parts = config.get("end_time", "18:00").split(":")
+    start_mins = int(start_parts[0]) * 60 + int(start_parts[1])
+    end_mins = int(end_parts[0]) * 60 + int(end_parts[1])
+    slot_duration = max(15, int(config.get("slot_duration", 30)))
+
+    slots = []
+    now_utc = datetime.now(timezone.utc)
+
+    for day_offset in range(7):
+        day = week_start_date + timedelta(days=day_offset)
+        if day.weekday() not in working_days:
+            continue
+        current_mins = start_mins
+        while current_mins + slot_duration <= end_mins:
+            hh = current_mins // 60
+            mm = current_mins % 60
+            slot_time = f"{hh:02d}:{mm:02d}"
+            slot_key = f"{day.isoformat()}T{slot_time}"
+
+            # Skip slots within the next 2 hours
+            slot_dt = datetime(day.year, day.month, day.day, hh, mm, tzinfo=timezone.utc)
+            if slot_dt > now_utc + timedelta(hours=2) and slot_key not in booked:
+                slots.append({"date": day.isoformat(), "time": slot_time})
+
+            current_mins += slot_duration
+
+    return slots
+
+
+@router.get("/client/appointments/slots")
+async def get_available_slots(week_start: Optional[str] = None, authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token manquant")
+    await _verify_client(authorization)
+    db = get_db()
+
+    from datetime import date as _date, timedelta
+    if week_start:
+        try:
+            ws = _date.fromisoformat(week_start)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Format de date invalide")
+    else:
+        today = _date.today()
+        ws = today - timedelta(days=today.weekday())
+
+    week_end = ws + timedelta(days=6)
+    config = await db.availability.find_one({"type": "availability"}, {"_id": 0}) or {}
+    booked_docs = await db.appointments.find(
+        {"slot_date": {"$gte": ws.isoformat(), "$lte": week_end.isoformat()}, "status": {"$ne": "cancelled"}},
+        {"_id": 0, "slot_date": 1, "slot_time": 1}
+    ).to_list(500)
+    booked = {f"{d['slot_date']}T{d['slot_time']}" for d in booked_docs}
+    slots = _compute_slots(config, booked, ws)
+    return {"week_start": ws.isoformat(), "slots": slots, "config": {k: config.get(k) for k in ("slot_duration", "meeting_link", "notes") if k in config}}
+
+
+@router.get("/client/appointments")
+async def get_client_appointments(authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token manquant")
+    payload = await _verify_client(authorization)
+    db = get_db()
+    appointments = await db.appointments.find(
+        {"client_id": payload["client_id"]}, {"_id": 0}
+    ).sort("slot_date", 1).to_list(100)
+    return appointments
+
+
+@router.post("/client/appointments")
+async def book_appointment(body: AppointmentCreate, authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token manquant")
+    payload = await _verify_client(authorization)
+    db = get_db()
+    client_id = payload["client_id"]
+
+    from datetime import date as _date
+    try:
+        slot_d = _date.fromisoformat(body.slot_date)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Date invalide")
+    if slot_d < _date.today():
+        raise HTTPException(status_code=400, detail="La date doit être dans le futur")
+
+    # Ensure slot isn't already taken
+    existing = await db.appointments.find_one({
+        "slot_date": body.slot_date,
+        "slot_time": body.slot_time,
+        "status": {"$ne": "cancelled"}
+    })
+    if existing:
+        raise HTTPException(status_code=409, detail="Ce créneau est déjà réservé")
+
+    # Client can only have one upcoming appointment at a time
+    pending = await db.appointments.find_one({
+        "client_id": client_id,
+        "slot_date": {"$gte": _date.today().isoformat()},
+        "status": {"$in": ["pending", "confirmed"]}
+    })
+    if pending:
+        raise HTTPException(status_code=400, detail="Vous avez déjà un rendez-vous à venir. Annulez-le d'abord.")
+
+    client = await db.client_accounts.find_one({"id": client_id}, {"_id": 0, "name": 1, "email": 1, "company": 1})
+    apt = {
+        "id": str(uuid.uuid4()),
+        "client_id": client_id,
+        "client_name": client.get("name", ""),
+        "client_email": client.get("email", ""),
+        "client_company": client.get("company", ""),
+        "slot_date": body.slot_date,
+        "slot_time": body.slot_time,
+        "notes": body.notes.strip()[:500] if body.notes else "",
+        "status": "pending",
+        "admin_notes": "",
+        "meeting_link": "",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.appointments.insert_one(apt)
+    apt.pop("_id", None)
+
+    # Confirm receipt to client
+    notification = {
+        "id": str(uuid.uuid4()),
+        "client_id": client_id,
+        "author_type": "system",
+        "author_name": "Receipty",
+        "content": f"📅 Votre demande de rendez-vous pour le {body.slot_date} à {body.slot_time} a bien été envoyée. Notre équipe va confirmer votre créneau très prochainement.",
+        "read_by_admin": False,
+        "read_by_client": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.client_messages.insert_one(notification)
+
+    return apt
+
+
+@router.delete("/client/appointments/{apt_id}")
+async def cancel_client_appointment(apt_id: str, authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token manquant")
+    payload = await _verify_client(authorization)
+    db = get_db()
+    apt = await db.appointments.find_one({"id": apt_id, "client_id": payload["client_id"]}, {"_id": 0})
+    if not apt:
+        raise HTTPException(status_code=404, detail="Rendez-vous introuvable")
+    await db.appointments.update_one(
+        {"id": apt_id},
+        {"$set": {"status": "cancelled", "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"message": "Rendez-vous annulé"}
+
+
+# ==================== APPROBATION DE LIVRABLES (CLIENT) ====================
+
+@router.post("/client/documents/{doc_id}/review")
+async def review_document(doc_id: str, body: DocumentReview, authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token manquant")
+    payload = await _verify_client(authorization)
+    db = get_db()
+    client_id = payload["client_id"]
+
+    if body.action not in ["approved", "corrections"]:
+        raise HTTPException(status_code=400, detail="Action invalide (approved | corrections)")
+
+    doc = await db.client_documents.find_one({"id": doc_id, "client_id": client_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document introuvable")
+    if not doc.get("requires_approval"):
+        raise HTTPException(status_code=400, detail="Ce document ne nécessite pas de validation")
+    if doc.get("approval_status") in ["approved", "corrections_requested"]:
+        raise HTTPException(status_code=400, detail="Ce document a déjà été traité")
+
+    new_status = "approved" if body.action == "approved" else "corrections_requested"
+    comment_clean = body.comment.strip()[:1000] if body.comment else ""
+    await db.client_documents.update_one(
+        {"id": doc_id},
+        {"$set": {
+            "approval_status": new_status,
+            "approval_comment": comment_clean,
+            "reviewed_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+
+    client = await db.client_accounts.find_one({"id": client_id}, {"_id": 0, "name": 1})
+    action_text = "validé ✅" if body.action == "approved" else "demandé des corrections ✏️"
+    content = f"📋 {html.escape(client.get('name', 'Client'))} a {action_text} le livrable **{html.escape(doc['name'])}**."
+    if comment_clean:
+        content += f"\n💬 {html.escape(comment_clean)}"
+
+    admin_notif = {
+        "id": str(uuid.uuid4()),
+        "client_id": client_id,
+        "author_type": "system",
+        "author_name": "Receipty",
+        "content": content,
+        "read_by_admin": False,
+        "read_by_client": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.client_messages.insert_one(admin_notif)
+
+    return {"message": "Réponse enregistrée", "approval_status": new_status}

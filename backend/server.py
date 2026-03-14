@@ -120,7 +120,7 @@ _SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://receipty.fr/</loc>
-    <lastmod>2026-03-13</lastmod>
+    <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/"/>
@@ -129,7 +129,7 @@ _SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
   </url>
   <url>
     <loc>https://receipty.fr/adn</loc>
-    <lastmod>2026-03-13</lastmod>
+    <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/adn"/>
@@ -138,7 +138,7 @@ _SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
   </url>
   <url>
     <loc>https://receipty.fr/solutions</loc>
-    <lastmod>2026-03-13</lastmod>
+    <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/solutions"/>
@@ -147,7 +147,7 @@ _SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
   </url>
   <url>
     <loc>https://receipty.fr/cases</loc>
-    <lastmod>2026-03-13</lastmod>
+    <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/cases"/>
@@ -156,7 +156,7 @@ _SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
   </url>
   <url>
     <loc>https://receipty.fr/contact</loc>
-    <lastmod>2026-03-13</lastmod>
+    <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/contact"/>
@@ -165,7 +165,7 @@ _SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
   </url>
   <url>
     <loc>https://receipty.fr/roi</loc>
-    <lastmod>2026-03-13</lastmod>
+    <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/roi"/>
@@ -174,7 +174,7 @@ _SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
   </url>
   <url>
     <loc>https://receipty.fr/privacy</loc>
-    <lastmod>2026-03-13</lastmod>
+    <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/privacy"/>
@@ -183,7 +183,7 @@ _SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
   </url>
   <url>
     <loc>https://receipty.fr/terms</loc>
-    <lastmod>2026-03-13</lastmod>
+    <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/terms"/>
@@ -194,7 +194,9 @@ _SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
 
 @app.get("/sitemap.xml", include_in_schema=False)
 async def sitemap():
-    return Response(content=_SITEMAP, media_type="application/xml")
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    dynamic_sitemap = _SITEMAP.replace("LASTMOD_PLACEHOLDER", today)
+    return Response(content=dynamic_sitemap, media_type="application/xml")
 
 # Security headers middleware
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -233,6 +235,14 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     """Initialize database with default admin and seed data"""
+    # Health check: verify MongoDB is reachable before proceeding
+    try:
+        await client.admin.command("ping")
+        logger.info("MongoDB connection verified")
+    except Exception as e:
+        logger.critical(f"MongoDB is unreachable at startup: {e}")
+        raise RuntimeError(f"Cannot connect to MongoDB: {e}")
+
     # #11: create indexes for performance on common query fields
     await db.leads.create_index("created_at")
     await db.leads.create_index("status")
@@ -251,6 +261,11 @@ async def startup():
     await db.audit_logs.create_index("created_at")
     await db.audit_logs.create_index("user_id")
     await db.chat_messages.create_index("session_id")
+    await db.chat_messages.create_index([("session_id", 1), ("created_at", 1)])
+    await db.appointments.create_index([("slot_date", 1), ("slot_time", 1)])
+    await db.appointments.create_index("client_id")
+    await db.appointments.create_index("status")
+    await db.client_documents.create_index([("client_id", 1), ("requires_approval", 1)])
     logger.info("MongoDB indexes ensured")
 
     # Create default admin if none exists — password is auto-generated and logged ONCE

@@ -4,7 +4,9 @@ import {
   Users, Plus, Send, FileUp, Trash2, X,
   MessageCircle, FolderOpen, BarChart2, CheckCircle, Clock,
   Eye, ExternalLink, User, Building, Mail, Lock, AlertCircle,
-  BookOpen, Zap, Flag, Rocket, ArrowRight, Pencil, Sparkles, Star
+  BookOpen, Zap, Flag, Rocket, ArrowRight, Pencil, Sparkles, Star,
+  Calendar, Settings, ChevronLeft, ChevronRight, Video, RefreshCw,
+  XCircle, MessageSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -20,8 +22,11 @@ const PROJECT_STATUSES = [
   { value: 'termine', labelFr: 'Terminé', labelEn: 'Completed', color: 'text-purple-400' },
 ];
 
-const DOC_TYPES = ['document', 'devis', 'contrat', 'rapport'];
-const DOC_EMOJIS = { document: '📄', devis: '💰', contrat: '📝', rapport: '📊' };
+const DOC_TYPES = ['document', 'devis', 'contrat', 'rapport', 'livrable'];
+const DOC_EMOJIS = { document: '📄', devis: '💰', contrat: '📝', rapport: '📊', livrable: '📦' };
+
+const DAYS_FR = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+const DAYS_EN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const UPDATE_TYPES = [
   { value: 'action',    emoji: '🔨', labelFr: 'Ce qu\'on fait',      labelEn: 'What we\'re doing',  color: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'border-blue-500/20' },
@@ -51,7 +56,7 @@ export default function AdminClients({ token, isDark }) {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState(null);
-  const [activePanel, setActivePanel] = useState('messages'); // messages | project | documents | journal | evolutions
+  const [activePanel, setActivePanel] = useState('messages'); // messages | project | documents | journal | evolutions | appointments
   const [showCreate, setShowCreate] = useState(false);
   const [leads, setLeads] = useState([]);
 
@@ -90,6 +95,25 @@ export default function AdminClients({ token, isDark }) {
   // Satisfaction state
   const [satisfaction, setSatisfaction] = useState(null);
 
+  // Appointments state
+  const [allAppointments, setAllAppointments] = useState([]);
+  const [availability, setAvailability] = useState(null);
+  const [savingAvailability, setSavingAvailability] = useState(false);
+  const [availabilityForm, setAvailabilityForm] = useState({
+    working_days: [0, 1, 2, 3, 4],
+    start_time: '09:00',
+    end_time: '18:00',
+    slot_duration: 30,
+    meeting_link: '',
+    notes: ''
+  });
+  const [updatingApt, setUpdatingApt] = useState(null);
+  const [aptMeetingLink, setAptMeetingLink] = useState('');
+  const [aptAdminNotes, setAptAdminNotes] = useState('');
+
+  // Document requires_approval state
+  const [docRequiresApproval, setDocRequiresApproval] = useState(false);
+
   // Create client form
   const [form, setForm] = useState({ name: '', email: '', password: '', company: '', lead_id: '' });
   const [creating, setCreating] = useState(false);
@@ -114,7 +138,12 @@ export default function AdminClients({ token, isDark }) {
     } catch {}
   }, [token]);
 
-  useEffect(() => { fetchClients(); fetchLeads(); }, [fetchClients, fetchLeads]);
+  useEffect(() => {
+    fetchClients();
+    fetchLeads();
+    fetchAllAppointments();
+    fetchAvailability();
+  }, [fetchClients, fetchLeads, fetchAllAppointments, fetchAvailability]);
 
   const fetchMessages = useCallback(async (clientId) => {
     try {
@@ -161,6 +190,28 @@ export default function AdminClients({ token, isDark }) {
     } catch {}
   }, [token]);
 
+  const fetchAllAppointments = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/admin/appointments`, { headers });
+      setAllAppointments(res.data);
+    } catch {}
+  }, [token]);
+
+  const fetchAvailability = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/admin/appointments/availability`, { headers });
+      setAvailability(res.data);
+      setAvailabilityForm({
+        working_days: res.data.working_days ?? [0, 1, 2, 3, 4],
+        start_time: res.data.start_time || '09:00',
+        end_time: res.data.end_time || '18:00',
+        slot_duration: res.data.slot_duration || 30,
+        meeting_link: res.data.meeting_link || '',
+        notes: res.data.notes || ''
+      });
+    } catch {}
+  }, [token]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -183,6 +234,59 @@ export default function AdminClients({ token, isDark }) {
     fetchUpdates(client.id);
     fetchEvolutions(client.id);
     fetchSatisfaction(client.id);
+  };
+
+  const handleSaveAvailability = async () => {
+    setSavingAvailability(true);
+    try {
+      await axios.put(`${API}/admin/appointments/availability`, availabilityForm, { headers });
+      toast.success(lang === 'fr' ? 'Disponibilités mises à jour !' : 'Availability updated!');
+      await fetchAvailability();
+    } catch {
+      toast.error(lang === 'fr' ? 'Erreur sauvegarde' : 'Save failed');
+    } finally {
+      setSavingAvailability(false);
+    }
+  };
+
+  const handleUpdateAppointment = async (aptId, status) => {
+    setUpdatingApt(aptId);
+    try {
+      await axios.patch(`${API}/admin/appointments/${aptId}`, {
+        status,
+        admin_notes: aptAdminNotes.trim(),
+        meeting_link: aptMeetingLink.trim()
+      }, { headers });
+      toast.success(status === 'confirmed'
+        ? (lang === 'fr' ? 'Rendez-vous confirmé !' : 'Appointment confirmed!')
+        : (lang === 'fr' ? 'Rendez-vous annulé.' : 'Appointment cancelled.'));
+      setAptAdminNotes('');
+      setAptMeetingLink('');
+      await fetchAllAppointments();
+    } catch {
+      toast.error(lang === 'fr' ? 'Erreur' : 'Error');
+    } finally {
+      setUpdatingApt(null);
+    }
+  };
+
+  const handleDeleteAppointment = async (aptId) => {
+    try {
+      await axios.delete(`${API}/admin/appointments/${aptId}`, { headers });
+      toast.success(lang === 'fr' ? 'Supprimé' : 'Deleted');
+      await fetchAllAppointments();
+    } catch {
+      toast.error(lang === 'fr' ? 'Erreur suppression' : 'Delete failed');
+    }
+  };
+
+  const toggleWorkingDay = (day) => {
+    setAvailabilityForm(f => ({
+      ...f,
+      working_days: f.working_days.includes(day)
+        ? f.working_days.filter(d => d !== day)
+        : [...f.working_days, day].sort()
+    }));
   };
 
   const handleAddUpdate = async () => {
@@ -237,9 +341,9 @@ export default function AdminClients({ token, isDark }) {
     setAddingDoc(true);
     try {
       await axios.post(`${API}/admin/clients/${selectedClient.id}/documents`, {
-        name: docName.trim(), url: docUrl.trim(), doc_type: docType
+        name: docName.trim(), url: docUrl.trim(), doc_type: docType, requires_approval: docRequiresApproval
       }, { headers });
-      setDocName(''); setDocUrl(''); setDocType('document');
+      setDocName(''); setDocUrl(''); setDocType('document'); setDocRequiresApproval(false);
       await fetchDocuments(selectedClient.id);
       toast.success(lang === 'fr' ? 'Document partagé !' : 'Document shared!');
     } catch {
@@ -544,6 +648,7 @@ export default function AdminClients({ token, isDark }) {
                     { key: 'documents', icon: FolderOpen, label: lang === 'fr' ? 'Documents' : 'Documents' },
                     { key: 'journal', icon: BookOpen, label: lang === 'fr' ? 'Journal' : 'Journal' },
                     { key: 'evolutions', icon: Sparkles, label: lang === 'fr' ? `Évolutions${evolutions.length > 0 ? ` (${evolutions.length})` : ''}` : `Evolutions${evolutions.length > 0 ? ` (${evolutions.length})` : ''}` },
+                    { key: 'appointments', icon: Calendar, label: lang === 'fr' ? `RDV${allAppointments.filter(a => a.client_id === selectedClient?.id && a.status === 'pending').length > 0 ? ' 🔴' : ''}` : `Apts${allAppointments.filter(a => a.client_id === selectedClient?.id && a.status === 'pending').length > 0 ? ' 🔴' : ''}` },
                   ].map(({ key, icon: Icon, label }) => (
                     <button
                       key={key}
@@ -762,6 +867,15 @@ export default function AdminClients({ token, isDark }) {
                       placeholder="https://..."
                       className={`w-full px-3 py-2 rounded-xl text-sm outline-none transition-all ${inputClass}`}
                     />
+                    <label className={`flex items-center gap-2 cursor-pointer text-xs ${labelClass}`}>
+                      <input
+                        type="checkbox"
+                        checked={docRequiresApproval}
+                        onChange={e => setDocRequiresApproval(e.target.checked)}
+                        className="w-3.5 h-3.5 rounded accent-blue-500"
+                      />
+                      {lang === 'fr' ? '✅ Requiert validation du client (livrable)' : '✅ Requires client approval (deliverable)'}
+                    </label>
                     <button
                       onClick={handleAddDoc}
                       disabled={addingDoc || !docName.trim() || !docUrl.trim()}
@@ -781,42 +895,61 @@ export default function AdminClients({ token, isDark }) {
                         {lang === 'fr' ? 'Aucun document partagé' : 'No documents shared yet'}
                       </p>
                     ) : (
-                      documents.map(doc => (
-                        <div
-                          key={doc.id}
-                          className={`flex items-center justify-between px-4 py-3 rounded-xl ${
-                            isDark ? 'bg-white/5 hover:bg-white/[0.07]' : 'bg-gray-50 hover:bg-gray-100'
-                          } transition-all`}
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <span className="text-lg flex-shrink-0">{DOC_EMOJIS[doc.doc_type] || '📄'}</span>
-                            <div className="min-w-0">
-                              <p className={`text-sm font-medium truncate ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-800'}`}>
-                                {doc.name}
-                              </p>
-                              <p className={`text-xs truncate ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-                                {doc.doc_type} · {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US') : ''}
-                              </p>
+                      documents.map(doc => {
+                        const approvalBadge = {
+                          pending:               { text: lang === 'fr' ? '⏳ En attente' : '⏳ Pending',     cls: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
+                          approved:              { text: '✅ Validé',                                         cls: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+                          corrections_requested: { text: lang === 'fr' ? '✏️ Corrections' : '✏️ Corrections', cls: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+                        }[doc.approval_status];
+                        return (
+                          <div
+                            key={doc.id}
+                            className={`px-4 py-3 rounded-xl ${
+                              isDark ? 'bg-white/5 hover:bg-white/[0.07]' : 'bg-gray-50 hover:bg-gray-100'
+                            } transition-all`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <span className="text-lg flex-shrink-0">{doc.requires_approval ? '📦' : (DOC_EMOJIS[doc.doc_type] || '📄')}</span>
+                                <div className="min-w-0">
+                                  <p className={`text-sm font-medium truncate ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-800'}`}>
+                                    {doc.name}
+                                  </p>
+                                  <p className={`text-xs truncate ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                                    {doc.doc_type} · {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US') : ''}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                {approvalBadge && (
+                                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${approvalBadge.cls}`}>
+                                    {approvalBadge.text}
+                                  </span>
+                                )}
+                                <a
+                                  href={doc.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`p-1.5 rounded-lg transition-colors ${isDark ? 'text-gray-500 hover:text-blue-400' : 'text-gray-400 hover:text-blue-600'}`}
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </a>
+                                <button
+                                  onClick={() => handleDeleteDoc(doc.id)}
+                                  className={`p-1.5 rounded-lg transition-colors ${isDark ? 'text-gray-600 hover:text-red-400' : 'text-gray-300 hover:text-red-500'}`}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </div>
+                            {doc.approval_status === 'corrections_requested' && doc.approval_comment && (
+                              <p className={`mt-2 text-xs px-3 py-1.5 rounded-lg ${isDark ? 'bg-orange-500/10 text-orange-300' : 'bg-orange-50 text-orange-700'}`}>
+                                💬 {doc.approval_comment}
+                              </p>
+                            )}
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                            <a
-                              href={doc.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`p-1.5 rounded-lg transition-colors ${isDark ? 'text-gray-500 hover:text-blue-400' : 'text-gray-400 hover:text-blue-600'}`}
-                            >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                            </a>
-                            <button
-                              onClick={() => handleDeleteDoc(doc.id)}
-                              className={`p-1.5 rounded-lg transition-colors ${isDark ? 'text-gray-600 hover:text-red-400' : 'text-gray-300 hover:text-red-500'}`}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 </div>
@@ -1037,9 +1170,169 @@ export default function AdminClients({ token, isDark }) {
                   )}
                 </div>
               )}
+
+              {/* Appointments panel */}
+              {activePanel === 'appointments' && (
+                <div className="px-6 py-5 space-y-5">
+                  {/* Client appointments */}
+                  <div>
+                    <h4 className={`text-xs font-semibold uppercase tracking-wider mb-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                      {lang === 'fr' ? 'Rendez-vous du client' : 'Client appointments'}
+                    </h4>
+                    {allAppointments.filter(a => a.client_id === selectedClient?.id).length === 0 ? (
+                      <p className={`text-sm text-center py-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                        {lang === 'fr' ? 'Aucun rendez-vous' : 'No appointments'}
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {allAppointments.filter(a => a.client_id === selectedClient?.id).map(apt => {
+                          const statusStyle = {
+                            pending:   { cls: 'bg-amber-500/10 border-amber-500/20',   dot: 'bg-amber-400',   label: lang === 'fr' ? 'En attente' : 'Pending' },
+                            confirmed: { cls: 'bg-emerald-500/10 border-emerald-500/20', dot: 'bg-emerald-400', label: lang === 'fr' ? 'Confirmé' : 'Confirmed' },
+                            cancelled: { cls: 'bg-red-500/10 border-red-500/20',         dot: 'bg-red-400',     label: lang === 'fr' ? 'Annulé' : 'Cancelled' },
+                          }[apt.status] || { cls: '', dot: 'bg-gray-400', label: apt.status };
+                          return (
+                            <div key={apt.id} className={`rounded-xl border p-4 ${statusStyle.cls}`}>
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <div className={`w-2 h-2 rounded-full ${statusStyle.dot}`} />
+                                    <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                      {new Date(apt.slot_date + 'T00:00:00').toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })} · {apt.slot_time}
+                                    </span>
+                                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${isDark ? 'bg-white/5 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>{statusStyle.label}</span>
+                                  </div>
+                                  {apt.notes && <p className={`text-xs mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>📝 {apt.notes}</p>}
+                                  {apt.meeting_link && <a href={apt.meeting_link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline flex items-center gap-1">🔗 {apt.meeting_link}</a>}
+                                </div>
+                                {apt.status !== 'cancelled' && (
+                                  <button onClick={() => handleDeleteAppointment(apt.id)} className={`p-1.5 rounded-lg ${isDark ? 'text-gray-600 hover:text-red-400' : 'text-gray-300 hover:text-red-500'} transition-colors`}>
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+
+                              {apt.status === 'pending' && (
+                                <div className={`mt-3 pt-3 border-t space-y-2 ${isDark ? 'border-amber-500/20' : 'border-amber-200'}`}>
+                                  <input
+                                    type="text"
+                                    placeholder={lang === 'fr' ? 'Lien réunion (Zoom, Meet...)' : 'Meeting link (Zoom, Meet...)'}
+                                    value={updatingApt === apt.id ? aptMeetingLink : ''}
+                                    onChange={e => { setUpdatingApt(apt.id); setAptMeetingLink(e.target.value); }}
+                                    onClick={() => setUpdatingApt(apt.id)}
+                                    className={`w-full px-3 py-2 rounded-xl text-xs outline-none transition-all ${inputClass}`}
+                                  />
+                                  <textarea
+                                    placeholder={lang === 'fr' ? 'Note pour le client (optionnel)...' : 'Note to client (optional)...'}
+                                    value={updatingApt === apt.id ? aptAdminNotes : ''}
+                                    onChange={e => { setUpdatingApt(apt.id); setAptAdminNotes(e.target.value); }}
+                                    onClick={() => setUpdatingApt(apt.id)}
+                                    rows={1}
+                                    className={`w-full px-3 py-2 rounded-xl text-xs outline-none resize-none transition-all ${inputClass}`}
+                                  />
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => handleUpdateAppointment(apt.id, 'confirmed')}
+                                      disabled={updatingApt === apt.id && !aptMeetingLink}
+                                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-medium rounded-lg transition-all disabled:opacity-50"
+                                    >
+                                      <CheckCircle className="w-3.5 h-3.5" />
+                                      {lang === 'fr' ? 'Confirmer' : 'Confirm'}
+                                    </button>
+                                    <button
+                                      onClick={() => handleUpdateAppointment(apt.id, 'cancelled')}
+                                      className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-medium rounded-lg transition-all"
+                                    >
+                                      <XCircle className="w-3.5 h-3.5" />
+                                      {lang === 'fr' ? 'Refuser' : 'Decline'}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
+      </div>
+
+      {/* Global Availability Config */}
+      <div className={`rounded-2xl p-6 space-y-4 mt-6 ${cardClass}`}>
+        <div className="flex items-center gap-3">
+          <Settings className={`w-5 h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+          <h3 className={`font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
+            {lang === 'fr' ? 'Configuration des disponibilités' : 'Availability Configuration'}
+          </h3>
+        </div>
+
+        {/* Working days */}
+        <div>
+          <label className={`block text-xs font-medium mb-2 ${labelClass}`}>{lang === 'fr' ? 'Jours ouvrés' : 'Working days'}</label>
+          <div className="flex flex-wrap gap-2">
+            {(lang === 'fr' ? DAYS_FR : DAYS_EN).map((day, i) => (
+              <button
+                key={i}
+                onClick={() => toggleWorkingDay(i)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                  availabilityForm.working_days.includes(i)
+                    ? 'bg-blue-600/20 text-blue-400 border-blue-500/30'
+                    : isDark ? 'border-[var(--border-secondary)] text-gray-500 hover:text-gray-300' : 'border-gray-200 text-gray-400 hover:text-gray-700'
+                }`}
+              >
+                {day}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Time range + slot duration */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div>
+            <label className={`block text-xs font-medium mb-1 ${labelClass}`}>{lang === 'fr' ? 'Début' : 'Start'}</label>
+            <input type="time" value={availabilityForm.start_time} onChange={e => setAvailabilityForm(f => ({...f, start_time: e.target.value}))}
+              className={`w-full px-3 py-2 rounded-xl text-sm outline-none transition-all ${inputClass}`} />
+          </div>
+          <div>
+            <label className={`block text-xs font-medium mb-1 ${labelClass}`}>{lang === 'fr' ? 'Fin' : 'End'}</label>
+            <input type="time" value={availabilityForm.end_time} onChange={e => setAvailabilityForm(f => ({...f, end_time: e.target.value}))}
+              className={`w-full px-3 py-2 rounded-xl text-sm outline-none transition-all ${inputClass}`} />
+          </div>
+          <div>
+            <label className={`block text-xs font-medium mb-1 ${labelClass}`}>{lang === 'fr' ? 'Durée (min)' : 'Duration (min)'}</label>
+            <select value={availabilityForm.slot_duration} onChange={e => setAvailabilityForm(f => ({...f, slot_duration: Number(e.target.value)}))}
+              className={`w-full px-3 py-2 rounded-xl text-sm outline-none transition-all ${inputClass}`}>
+              {[15,20,30,45,60,90].map(v => <option key={v} value={v}>{v} min</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={`block text-xs font-medium mb-1 ${labelClass}`}>{lang === 'fr' ? 'Lien réunion' : 'Meeting link'}</label>
+            <input type="text" value={availabilityForm.meeting_link} onChange={e => setAvailabilityForm(f => ({...f, meeting_link: e.target.value}))}
+              placeholder="https://meet.google.com/..."
+              className={`w-full px-3 py-2 rounded-xl text-sm outline-none transition-all ${inputClass}`} />
+          </div>
+        </div>
+
+        <div>
+          <label className={`block text-xs font-medium mb-1 ${labelClass}`}>{lang === 'fr' ? 'Message affiché aux clients (optionnel)' : 'Message shown to clients (optional)'}</label>
+          <input type="text" value={availabilityForm.notes} onChange={e => setAvailabilityForm(f => ({...f, notes: e.target.value}))}
+            placeholder={lang === 'fr' ? 'Ex: Pensez à préparer vos questions...' : 'E.g.: Please prepare your questions...'}
+            className={`w-full px-3 py-2 rounded-xl text-sm outline-none transition-all ${inputClass}`} />
+        </div>
+
+        <button
+          onClick={handleSaveAvailability}
+          disabled={savingAvailability}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-all"
+        >
+          {savingAvailability ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Settings className="w-4 h-4" />}
+          {lang === 'fr' ? 'Sauvegarder les disponibilités' : 'Save availability'}
+        </button>
       </div>
     </div>
   );
