@@ -4,11 +4,10 @@ from fastapi.responses import Response
 from datetime import datetime, timezone
 import uuid
 import os
-import asyncio
 import logging
 
 from models.schemas import AuditCreate, QuoteCreate
-from utils.helpers import verify_token, log_audit, sanitize_text, get_default_site_content, get_next_sequence
+from utils.helpers import verify_token, log_audit, sanitize_text, get_default_site_content
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 try:
@@ -94,7 +93,7 @@ async def generate_ai_audit_content(problem: str, sector: str, complexity: str, 
             session_id=f"audit-{uuid.uuid4()}",
             system_message="Tu es un consultant expert en automatisation et IA pour les entreprises. Tu fournis des analyses strategiques et des recommandations professionnelles."
         ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-
+        
         prompt = f"""Contexte de l'audit:
 - Secteur: {sector}
 - Probleme identifie: {problem}
@@ -116,15 +115,8 @@ Explique les economies potentielles sur 1 et 2 ans
 
 Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS de prix ou de tarifs."""
 
-        # #13: timeout 30s to avoid indefinite hang
-        response = await asyncio.wait_for(
-            chat.send_message(UserMessage(text=prompt)),
-            timeout=30.0
-        )
+        response = await chat.send_message(UserMessage(text=prompt))
         return response
-    except asyncio.TimeoutError:
-        logger.error("AI audit generation timed out after 30s")
-        return None
     except Exception as e:
         logger.error(f"AI generation error: {e}")
         return None
@@ -132,14 +124,13 @@ Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS 
 
 async def generate_closing_arguments(annual_savings: float, suggested_prices: dict, sector: str):
     """Generate AI closing arguments for internal use"""
-    _fallback = "- Le projet s'autofinance rapidement\n- ROI garanti des la premiere annee\n- Solution sur-mesure adaptee a votre secteur"
     try:
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
             session_id=f"closing-{uuid.uuid4()}",
             system_message="Tu es un expert en negociation commerciale B2B pour une agence IA. Tu fournis des arguments de vente percutants et professionnels."
         ).with_model("anthropic", "claude-sonnet-4-5-20250929")
-
+        
         prompt = f"""Contexte:
 - Economie annuelle pour le client: {annual_savings:.2f} EUR
 - Prix suggeres: Essentiel {suggested_prices['essential']:.0f} EUR, Business {suggested_prices['business']:.0f} EUR, Premium {suggested_prices['premium']:.0f} EUR
@@ -154,18 +145,11 @@ Exemple de style:
 
 Reponds uniquement avec les 3 arguments, sans introduction."""
 
-        # #13: timeout 30s
-        response = await asyncio.wait_for(
-            chat.send_message(UserMessage(text=prompt)),
-            timeout=30.0
-        )
+        response = await chat.send_message(UserMessage(text=prompt))
         return response
-    except asyncio.TimeoutError:
-        logger.error("AI closing generation timed out after 30s")
-        return _fallback
     except Exception as e:
         logger.error(f"AI closing generation error: {e}")
-        return _fallback
+        return "- Le projet s'autofinance rapidement\n- ROI garanti des la premiere annee\n- Solution sur-mesure adaptee a votre secteur"
 
 
 @router.post("/admin/audits")
@@ -197,24 +181,18 @@ async def create_audit(input: AuditCreate, request: Request, admin=Depends(verif
         "premium_months": round(suggested_prices["premium"] / monthly_fixed_costs, 1)
     }
     
-    # #5: atomic sequence to avoid race condition duplicates
-    seq = await get_next_sequence(db, "audits")
-    audit_number = f"AUD-{datetime.now(timezone.utc).strftime('%Y%m')}-{str(seq).zfill(4)}"
-
-    # Run both LLM calls in parallel instead of sequentially
-    ai_report, closing_args = await asyncio.gather(
-        generate_ai_audit_content(
-            input.problem_description,
-            input.client_sector,
-            input.complexity,
-            annual_loss
-        ),
-        generate_closing_arguments(annual_savings, suggested_prices, input.client_sector)
+    audit_count = await db.audits.count_documents({})
+    audit_number = f"AUD-{datetime.now().strftime('%Y%m')}-{str(audit_count + 1).zfill(4)}"
+    
+    ai_report = await generate_ai_audit_content(
+        input.problem_description, 
+        input.client_sector, 
+        input.complexity,
+        annual_loss
     )
-
-    # #9: flag when LLM failed so the user knows the report is empty
-    ai_report_failed = ai_report is None
-
+    
+    closing_args = await generate_closing_arguments(annual_savings, suggested_prices, input.client_sector)
+    
     audit_doc = {
         "id": str(uuid.uuid4()),
         "audit_number": audit_number,
@@ -233,7 +211,6 @@ async def create_audit(input: AuditCreate, request: Request, admin=Depends(verif
         "roi_year1": roi_year1,
         "roi_year2": roi_year2,
         "ai_report": ai_report,
-        "ai_report_failed": ai_report_failed,
         "strategy": {
             "suggested_prices": suggested_prices,
             "profitability": profitability,
@@ -311,19 +288,17 @@ async def generate_audit_pdf(audit_id: str, admin=Depends(verify_token)):
     company_info = site_content.get('company', {})
     contact_info = site_content.get('contact', {})
     
-    try:
-      pdf = AuditPDF(company_info, contact_info)
-      pdf.add_page()
-      pdf.set_auto_page_break(auto=True, margin=25)
-
-      # Title
-      pdf.set_font('Helvetica', 'B', 18)
-      pdf.set_text_color(30, 30, 30)
-      pdf.cell(0, 12, "RAPPORT D'AUDIT IA", ln=True, align='C')
-      pdf.set_font('Helvetica', '', 10)
-      pdf.set_text_color(100, 100, 100)
-      # #14: use UTC-aware datetime
-      pdf.cell(0, 6, f"Ref: {audit['audit_number']} | Date: {datetime.now(timezone.utc).strftime('%d/%m/%Y')}", ln=True, align='C')
+    pdf = AuditPDF(company_info, contact_info)
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=25)
+    
+    # Title
+    pdf.set_font('Helvetica', 'B', 18)
+    pdf.set_text_color(30, 30, 30)
+    pdf.cell(0, 12, "RAPPORT D'AUDIT IA", ln=True, align='C')
+    pdf.set_font('Helvetica', '', 10)
+    pdf.set_text_color(100, 100, 100)
+    pdf.cell(0, 6, f"Ref: {audit['audit_number']} | Date: {datetime.now().strftime('%d/%m/%Y')}", ln=True, align='C')
     pdf.ln(10)
     
     # Client info
@@ -410,11 +385,8 @@ async def generate_audit_pdf(audit_id: str, admin=Depends(verify_token)):
     pdf.set_text_color(120, 120, 120)
     pdf.multi_cell(0, 4, "Ce rapport est une estimation basee sur les donnees fournies. Les resultats reels peuvent varier selon l'implementation. Contactez-nous pour une etude detaillee.")
     
-      pdf_bytes = pdf.output()
-    except Exception as e:
-        logger.error(f"PDF generation error for audit {audit_id}: {e}")
-        raise HTTPException(status_code=500, detail="Erreur lors de la génération du PDF. Veuillez réessayer.")
-
+    pdf_bytes = pdf.output()
+    
     return Response(
         content=bytes(pdf_bytes),
         media_type="application/pdf",
