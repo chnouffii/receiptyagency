@@ -228,7 +228,7 @@ export default function AdminSiteContent({ token, isDark }) {
         });
       }
     } catch (err) {
-      console.error('Error fetching content:', err);
+      toast.error('Erreur lors du chargement du contenu');
     } finally {
       setLoading(false);
     }

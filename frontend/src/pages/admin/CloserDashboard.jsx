@@ -75,7 +75,7 @@ export default function CloserDashboard() {
       const res = await axios.get(`${API}/closer/permissions`, { headers });
       setPermissions(res.data.permissions || { modules: [], can_view_all_data: false });
     } catch (err) {
-      console.error('Failed to fetch permissions');
+      // permissions fetch failed silently — default to no permissions
     }
   };
 

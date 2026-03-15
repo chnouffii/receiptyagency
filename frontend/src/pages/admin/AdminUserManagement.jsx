@@ -45,7 +45,7 @@ export default function AdminUserManagement({ token, isDark }) {
       });
       setLogs(res.data);
     } catch (err) {
-      console.error('Error fetching logs:', err);
+      // log fetch failed — non-critical
     }
   }, [token, logFilter]);
 

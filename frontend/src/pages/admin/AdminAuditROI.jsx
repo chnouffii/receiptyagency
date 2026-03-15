@@ -77,7 +77,7 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
       });
       setAudits(res.data);
     } catch (err) {
-      console.error('Error fetching audits:', err);
+      toast.error('Erreur lors du chargement des audits');
     } finally {
       setLoading(false);
     }
@@ -122,7 +122,6 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
       });
       fetchAudits();
     } catch (err) {
-      console.error('Error creating audit:', err);
       toast.error('Erreur lors de la création de l\'audit');
     } finally {
       setGenerating(false);
@@ -160,7 +159,6 @@ export default function AdminAuditROI({ token, leadData, onLeadDataUsed, onCreat
       
       toast.success('PDF téléchargé');
     } catch (err) {
-      console.error('Error downloading PDF:', err);
       toast.error('Erreur lors du téléchargement');
     }
   };
