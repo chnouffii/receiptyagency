@@ -138,6 +138,28 @@ export default function AdminClients({ token, isDark }) {
     } catch {}
   }, [token]);
 
+  const fetchAllAppointments = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/admin/appointments`, { headers });
+      setAllAppointments(res.data);
+    } catch {}
+  }, [token]);
+
+  const fetchAvailability = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/admin/appointments/availability`, { headers });
+      setAvailability(res.data);
+      setAvailabilityForm({
+        working_days: res.data.working_days ?? [0, 1, 2, 3, 4],
+        start_time: res.data.start_time || '09:00',
+        end_time: res.data.end_time || '18:00',
+        slot_duration: res.data.slot_duration || 30,
+        meeting_link: res.data.meeting_link || '',
+        notes: res.data.notes || ''
+      });
+    } catch {}
+  }, [token]);
+
   useEffect(() => {
     fetchClients();
     fetchLeads();
@@ -187,28 +209,6 @@ export default function AdminClients({ token, isDark }) {
     try {
       const res = await axios.get(`${API}/admin/clients/${clientId}/satisfaction`, { headers });
       setSatisfaction(res.data?.rating ? res.data : null);
-    } catch {}
-  }, [token]);
-
-  const fetchAllAppointments = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/admin/appointments`, { headers });
-      setAllAppointments(res.data);
-    } catch {}
-  }, [token]);
-
-  const fetchAvailability = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/admin/appointments/availability`, { headers });
-      setAvailability(res.data);
-      setAvailabilityForm({
-        working_days: res.data.working_days ?? [0, 1, 2, 3, 4],
-        start_time: res.data.start_time || '09:00',
-        end_time: res.data.end_time || '18:00',
-        slot_duration: res.data.slot_duration || 30,
-        meeting_link: res.data.meeting_link || '',
-        notes: res.data.notes || ''
-      });
     } catch {}
   }, [token]);
 
