@@ -108,8 +108,8 @@ export default function AdminClients({ token, isDark }) {
     notes: ''
   });
   const [updatingApt, setUpdatingApt] = useState(null);
-  const [aptMeetingLink, setAptMeetingLink] = useState('');
-  const [aptAdminNotes, setAptAdminNotes] = useState('');
+  // Per-appointment edit state: { [apt_id]: { meetingLink, adminNotes } }
+  const [aptEditState, setAptEditState] = useState({});
 
   // Document requires_approval state
   const [docRequiresApproval, setDocRequiresApproval] = useState(false);
@@ -251,17 +251,17 @@ export default function AdminClients({ token, isDark }) {
 
   const handleUpdateAppointment = async (aptId, status) => {
     setUpdatingApt(aptId);
+    const edit = aptEditState[aptId] || {};
     try {
       await axios.patch(`${API}/admin/appointments/${aptId}`, {
         status,
-        admin_notes: aptAdminNotes.trim(),
-        meeting_link: aptMeetingLink.trim()
+        admin_notes: (edit.adminNotes || '').trim(),
+        meeting_link: (edit.meetingLink || '').trim()
       }, { headers });
       toast.success(status === 'confirmed'
         ? (lang === 'fr' ? 'Rendez-vous confirmé !' : 'Appointment confirmed!')
         : (lang === 'fr' ? 'Rendez-vous annulé.' : 'Appointment cancelled.'));
-      setAptAdminNotes('');
-      setAptMeetingLink('');
+      setAptEditState(s => { const n = { ...s }; delete n[aptId]; return n; });
       await fetchAllAppointments();
     } catch {
       toast.error(lang === 'fr' ? 'Erreur' : 'Error');
@@ -1217,16 +1217,14 @@ export default function AdminClients({ token, isDark }) {
                                   <input
                                     type="text"
                                     placeholder={lang === 'fr' ? 'Lien réunion (Zoom, Meet...) — optionnel' : 'Meeting link (Zoom, Meet...) — optional'}
-                                    value={updatingApt === apt.id ? aptMeetingLink : ''}
-                                    onChange={e => { setUpdatingApt(apt.id); setAptMeetingLink(e.target.value); }}
-                                    onClick={() => setUpdatingApt(apt.id)}
+                                    value={aptEditState[apt.id]?.meetingLink ?? ''}
+                                    onChange={e => setAptEditState(s => ({ ...s, [apt.id]: { ...s[apt.id], meetingLink: e.target.value } }))}
                                     className={`w-full px-3 py-2 rounded-xl text-xs outline-none transition-all ${inputClass}`}
                                   />
                                   <textarea
                                     placeholder={lang === 'fr' ? 'Note pour le client (optionnel)...' : 'Note to client (optional)...'}
-                                    value={updatingApt === apt.id ? aptAdminNotes : ''}
-                                    onChange={e => { setUpdatingApt(apt.id); setAptAdminNotes(e.target.value); }}
-                                    onClick={() => setUpdatingApt(apt.id)}
+                                    value={aptEditState[apt.id]?.adminNotes ?? ''}
+                                    onChange={e => setAptEditState(s => ({ ...s, [apt.id]: { ...s[apt.id], adminNotes: e.target.value } }))}
                                     rows={1}
                                     className={`w-full px-3 py-2 rounded-xl text-xs outline-none resize-none transition-all ${inputClass}`}
                                   />
@@ -1302,7 +1300,6 @@ export default function AdminClients({ token, isDark }) {
                   confirmed: { cls: 'bg-emerald-500/10 border-emerald-500/20', dot: 'bg-emerald-400', label: lang === 'fr' ? 'Confirmé' : 'Confirmed' },
                   cancelled: { cls: 'bg-red-500/10 border-red-500/20',         dot: 'bg-red-400',     label: lang === 'fr' ? 'Annulé' : 'Cancelled' },
                 }[apt.status] || { cls: '', dot: 'bg-gray-400', label: apt.status };
-                const isEditingThis = updatingApt === apt.id;
                 return (
                   <div key={apt.id} className={`rounded-xl border p-4 ${statusStyle.cls}`}>
                     <div className="flex items-start justify-between gap-2">
@@ -1337,16 +1334,14 @@ export default function AdminClients({ token, isDark }) {
                         <input
                           type="text"
                           placeholder={lang === 'fr' ? 'Lien réunion (Zoom, Meet...) — optionnel' : 'Meeting link (Zoom, Meet...) — optional'}
-                          value={isEditingThis ? aptMeetingLink : ''}
-                          onChange={e => { setUpdatingApt(apt.id); setAptMeetingLink(e.target.value); }}
-                          onClick={() => { if (!isEditingThis) { setUpdatingApt(apt.id); setAptMeetingLink(''); setAptAdminNotes(''); } }}
+                          value={aptEditState[apt.id]?.meetingLink ?? ''}
+                          onChange={e => setAptEditState(s => ({ ...s, [apt.id]: { ...s[apt.id], meetingLink: e.target.value } }))}
                           className={`w-full px-3 py-2 rounded-xl text-xs outline-none transition-all ${inputClass}`}
                         />
                         <textarea
                           placeholder={lang === 'fr' ? 'Note pour le client (optionnel)...' : 'Note to client (optional)...'}
-                          value={isEditingThis ? aptAdminNotes : ''}
-                          onChange={e => { setUpdatingApt(apt.id); setAptAdminNotes(e.target.value); }}
-                          onClick={() => { if (!isEditingThis) { setUpdatingApt(apt.id); setAptMeetingLink(''); setAptAdminNotes(''); } }}
+                          value={aptEditState[apt.id]?.adminNotes ?? ''}
+                          onChange={e => setAptEditState(s => ({ ...s, [apt.id]: { ...s[apt.id], adminNotes: e.target.value } }))}
                           rows={1}
                           className={`w-full px-3 py-2 rounded-xl text-xs outline-none resize-none transition-all ${inputClass}`}
                         />
