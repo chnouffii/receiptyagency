@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Users, UserPlus, UserCheck, Trophy, DollarSign, CalendarClock, Search, Download, Filter, FileText, CheckCircle, FileSearch, Plus, X, Building2, Mail, Phone, Euro, Tag, Phone as PhoneIcon, Sparkles, StickyNote, ChevronDown, ChevronUp, RefreshCw, Target, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Trash2, Users, UserPlus, UserCheck, Trophy, DollarSign, CalendarClock, Search, Download, Filter, FileText, CheckCircle, FileSearch, Plus, X, Building2, Mail, Phone, Euro, Tag, Sparkles, StickyNote, ChevronDown, ChevronUp, RefreshCw, Target, AlertTriangle, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../../context/LanguageContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';

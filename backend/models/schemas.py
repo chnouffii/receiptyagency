@@ -29,7 +29,13 @@ class Lead(BaseModel):
     type: str = "lead"
     subject: str = ""
     message: str = ""
+    notes: str = ""
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    # Additional fields added by admin or enrichment
+    has_quote: Optional[bool] = None
+    has_audit: Optional[bool] = None
+    call_notes: Optional[str] = None
+    call_notes_updated_at: Optional[str] = None
 
 
 class LeadCreate(BaseModel):
