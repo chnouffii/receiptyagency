@@ -1216,7 +1216,7 @@ export default function AdminClients({ token, isDark }) {
                                 <div className={`mt-3 pt-3 border-t space-y-2 ${isDark ? 'border-amber-500/20' : 'border-amber-200'}`}>
                                   <input
                                     type="text"
-                                    placeholder={lang === 'fr' ? 'Lien réunion (Zoom, Meet...)' : 'Meeting link (Zoom, Meet...)'}
+                                    placeholder={lang === 'fr' ? 'Lien réunion (Zoom, Meet...) — optionnel' : 'Meeting link (Zoom, Meet...) — optional'}
                                     value={updatingApt === apt.id ? aptMeetingLink : ''}
                                     onChange={e => { setUpdatingApt(apt.id); setAptMeetingLink(e.target.value); }}
                                     onClick={() => setUpdatingApt(apt.id)}
@@ -1233,8 +1233,7 @@ export default function AdminClients({ token, isDark }) {
                                   <div className="flex gap-2">
                                     <button
                                       onClick={() => handleUpdateAppointment(apt.id, 'confirmed')}
-                                      disabled={updatingApt === apt.id && !aptMeetingLink}
-                                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-medium rounded-lg transition-all disabled:opacity-50"
+                                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-medium rounded-lg transition-all"
                                     >
                                       <CheckCircle className="w-3.5 h-3.5" />
                                       {lang === 'fr' ? 'Confirmer' : 'Confirm'}
@@ -1260,6 +1259,120 @@ export default function AdminClients({ token, isDark }) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Global Appointments Overview */}
+      <div className={`rounded-2xl p-6 space-y-4 mt-6 ${cardClass}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Calendar className={`w-5 h-5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+            <h3 className={`font-semibold ${isDark ? 'text-[var(--text-primary)]' : 'text-gray-900'}`}>
+              {lang === 'fr' ? 'Tous les rendez-vous' : 'All Appointments'}
+            </h3>
+            {allAppointments.filter(a => a.status === 'pending').length > 0 && (
+              <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium rounded-full">
+                {allAppointments.filter(a => a.status === 'pending').length} {lang === 'fr' ? 'en attente' : 'pending'}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={fetchAllAppointments}
+            className={`p-1.5 rounded-lg transition-colors ${isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
+            title={lang === 'fr' ? 'Actualiser' : 'Refresh'}
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
+
+        {allAppointments.length === 0 ? (
+          <p className={`text-sm text-center py-6 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+            {lang === 'fr' ? 'Aucun rendez-vous pour l\'instant' : 'No appointments yet'}
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {[...allAppointments]
+              .sort((a, b) => {
+                if (a.status === 'pending' && b.status !== 'pending') return -1;
+                if (a.status !== 'pending' && b.status === 'pending') return 1;
+                return (a.slot_date + a.slot_time).localeCompare(b.slot_date + b.slot_time);
+              })
+              .map(apt => {
+                const statusStyle = {
+                  pending:   { cls: 'bg-amber-500/10 border-amber-500/20',    dot: 'bg-amber-400',   label: lang === 'fr' ? 'En attente' : 'Pending' },
+                  confirmed: { cls: 'bg-emerald-500/10 border-emerald-500/20', dot: 'bg-emerald-400', label: lang === 'fr' ? 'Confirmé' : 'Confirmed' },
+                  cancelled: { cls: 'bg-red-500/10 border-red-500/20',         dot: 'bg-red-400',     label: lang === 'fr' ? 'Annulé' : 'Cancelled' },
+                }[apt.status] || { cls: '', dot: 'bg-gray-400', label: apt.status };
+                const isEditingThis = updatingApt === apt.id;
+                return (
+                  <div key={apt.id} className={`rounded-xl border p-4 ${statusStyle.cls}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${statusStyle.dot}`} />
+                          <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            {new Date(apt.slot_date + 'T00:00:00').toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} · {apt.slot_time}
+                          </span>
+                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${isDark ? 'bg-white/5 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>{statusStyle.label}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <User className={`w-3 h-3 flex-shrink-0 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+                          <span className={`text-xs font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{apt.client_name}</span>
+                          {apt.client_company && <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>· {apt.client_company}</span>}
+                        </div>
+                        {apt.notes && <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>📝 {apt.notes}</p>}
+                        {apt.admin_notes && <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>💬 {apt.admin_notes}</p>}
+                        {apt.meeting_link && <a href={apt.meeting_link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline flex items-center gap-1">🔗 {apt.meeting_link}</a>}
+                      </div>
+                      <button
+                        onClick={() => handleDeleteAppointment(apt.id)}
+                        className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${isDark ? 'text-gray-600 hover:text-red-400' : 'text-gray-300 hover:text-red-500'}`}
+                        title={lang === 'fr' ? 'Supprimer' : 'Delete'}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {apt.status === 'pending' && (
+                      <div className={`mt-3 pt-3 border-t space-y-2 ${isDark ? 'border-amber-500/20' : 'border-amber-200'}`}>
+                        <input
+                          type="text"
+                          placeholder={lang === 'fr' ? 'Lien réunion (Zoom, Meet...) — optionnel' : 'Meeting link (Zoom, Meet...) — optional'}
+                          value={isEditingThis ? aptMeetingLink : ''}
+                          onChange={e => { setUpdatingApt(apt.id); setAptMeetingLink(e.target.value); }}
+                          onClick={() => { if (!isEditingThis) { setUpdatingApt(apt.id); setAptMeetingLink(''); setAptAdminNotes(''); } }}
+                          className={`w-full px-3 py-2 rounded-xl text-xs outline-none transition-all ${inputClass}`}
+                        />
+                        <textarea
+                          placeholder={lang === 'fr' ? 'Note pour le client (optionnel)...' : 'Note to client (optional)...'}
+                          value={isEditingThis ? aptAdminNotes : ''}
+                          onChange={e => { setUpdatingApt(apt.id); setAptAdminNotes(e.target.value); }}
+                          onClick={() => { if (!isEditingThis) { setUpdatingApt(apt.id); setAptMeetingLink(''); setAptAdminNotes(''); } }}
+                          rows={1}
+                          className={`w-full px-3 py-2 rounded-xl text-xs outline-none resize-none transition-all ${inputClass}`}
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUpdateAppointment(apt.id, 'confirmed')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-medium rounded-lg transition-all"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            {lang === 'fr' ? 'Confirmer' : 'Confirm'}
+                          </button>
+                          <button
+                            onClick={() => handleUpdateAppointment(apt.id, 'cancelled')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-medium rounded-lg transition-all"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                            {lang === 'fr' ? 'Refuser' : 'Decline'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+        )}
       </div>
 
       {/* Global Availability Config */}
