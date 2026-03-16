@@ -4,7 +4,7 @@
 
   <url>
     <loc>https://receipty.fr/</loc>
-    <lastmod>2026-03-12</lastmod>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/"/>
@@ -14,7 +14,7 @@
 
   <url>
     <loc>https://receipty.fr/adn</loc>
-    <lastmod>2026-03-12</lastmod>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/adn"/>
@@ -24,7 +24,7 @@
 
   <url>
     <loc>https://receipty.fr/solutions</loc>
-    <lastmod>2026-03-12</lastmod>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/solutions"/>
@@ -34,7 +34,7 @@
 
   <url>
     <loc>https://receipty.fr/cases</loc>
-    <lastmod>2026-03-12</lastmod>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/cases"/>
@@ -44,7 +44,7 @@
 
   <url>
     <loc>https://receipty.fr/contact</loc>
-    <lastmod>2026-03-12</lastmod>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/contact"/>
@@ -54,7 +54,7 @@
 
   <url>
     <loc>https://receipty.fr/roi</loc>
-    <lastmod>2026-03-12</lastmod>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/roi"/>
@@ -64,7 +64,7 @@
 
   <url>
     <loc>https://receipty.fr/privacy</loc>
-    <lastmod>2026-03-12</lastmod>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/privacy"/>
@@ -74,7 +74,7 @@
 
   <url>
     <loc>https://receipty.fr/terms</loc>
-    <lastmod>2026-03-12</lastmod>
+    <lastmod>2026-03-16</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/terms"/>

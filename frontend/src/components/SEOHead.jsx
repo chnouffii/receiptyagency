@@ -7,79 +7,79 @@ const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
 const SEO_DATA = {
   home: {
     fr: {
-      title: "Receipty | Agence IA — Automatisation & Intégration Intelligence Artificielle",
-      description: "Receipty est l'agence IA qui automatise vos processus métier. Solutions ML sur mesure, automatisation des workflows et ROI mesurable dès le premier mois.",
-      keywords: "agence IA, intelligence artificielle, automatisation, machine learning, intégration IA, workflows intelligents, transformation digitale",
+      title: "Receipty | Agence IA Strasbourg — Automatisation & Intelligence Artificielle",
+      description: "Receipty, agence IA basée à Strasbourg (Alsace), automatise vos processus métier. Solutions ML sur mesure, automatisation des workflows et ROI mesurable dès le premier mois.",
+      keywords: "agence IA Strasbourg, agence intelligence artificielle Strasbourg, automatisation entreprise Strasbourg, agence IA Alsace, agence IA Grand Est, machine learning Strasbourg, intégration IA, transformation digitale Alsace, agence IA France",
     },
     en: {
-      title: "Receipty | AI Agency — Business Automation & Artificial Intelligence",
-      description: "Receipty is the AI agency that automates your business processes. Custom ML solutions, workflow automation and measurable ROI from the first month.",
-      keywords: "AI agency, artificial intelligence, automation, machine learning, AI integration, intelligent workflows, digital transformation",
+      title: "Receipty | AI Agency Strasbourg — Business Automation & Artificial Intelligence",
+      description: "Receipty, AI agency based in Strasbourg (Alsace, France), automates your business processes. Custom ML solutions, workflow automation and measurable ROI from the first month.",
+      keywords: "AI agency Strasbourg, artificial intelligence agency Alsace, business automation Strasbourg, machine learning Strasbourg, AI integration France, digital transformation Grand Est",
     },
     path: '/',
   },
   adn: {
     fr: {
-      title: "ADN & Vision — Qui sommes-nous | Receipty Agence IA",
-      description: "Découvrez l'ADN de Receipty : notre équipe d'experts en IA et International Business qui transforme vos défis business en systèmes automatisés performants.",
-      keywords: "équipe Receipty, agence IA Paris, experts intelligence artificielle, Data Science, transformation digitale",
+      title: "ADN & Vision — Qui sommes-nous | Receipty Agence IA Strasbourg",
+      description: "Découvrez l'ADN de Receipty : notre équipe d'experts en IA basée à Strasbourg qui transforme vos défis business en systèmes automatisés performants.",
+      keywords: "équipe Receipty, agence IA Strasbourg, experts intelligence artificielle Alsace, Data Science Strasbourg, transformation digitale Grand Est",
     },
     en: {
-      title: "DNA & Vision — Who We Are | Receipty AI Agency",
-      description: "Discover Receipty's DNA: our team of AI and International Business experts who turn your business challenges into high-performance automated systems.",
-      keywords: "Receipty team, AI agency, artificial intelligence experts, Data Science, digital transformation",
+      title: "DNA & Vision — Who We Are | Receipty AI Agency Strasbourg",
+      description: "Discover Receipty's DNA: our AI expert team based in Strasbourg turning your business challenges into high-performance automated systems.",
+      keywords: "Receipty team, AI agency Strasbourg, artificial intelligence experts Alsace, Data Science, digital transformation Grand Est",
     },
     path: '/adn',
   },
   solutions: {
     fr: {
-      title: "Solutions IA — Talent, Spend & Web-on-Demand | Receipty",
-      description: "Receipty Talent pour le recrutement IA, Receipty Spend pour la finance intelligente, Web-on-Demand pour vos plateformes web. Trois solutions pour automatiser votre entreprise.",
-      keywords: "Receipty Talent, Receipty Spend, Web-on-Demand, automatisation RH, gestion financière IA, développement web IA",
+      title: "Solutions IA Strasbourg — Talent, Spend & Web-on-Demand | Receipty",
+      description: "Receipty Talent pour le recrutement IA, Receipty Spend pour la finance intelligente, Web-on-Demand pour vos plateformes web. Trois solutions IA à Strasbourg pour automatiser votre entreprise.",
+      keywords: "Receipty Talent, Receipty Spend, Web-on-Demand, automatisation RH Strasbourg, gestion financière IA Alsace, développement web IA Strasbourg",
     },
     en: {
-      title: "AI Solutions — Talent, Spend & Web-on-Demand | Receipty",
-      description: "Receipty Talent for AI recruitment, Receipty Spend for intelligent finance, Web-on-Demand for web platforms. Three solutions to automate your business.",
-      keywords: "Receipty Talent, Receipty Spend, Web-on-Demand, HR automation, AI financial management, AI web development",
+      title: "AI Solutions Strasbourg — Talent, Spend & Web-on-Demand | Receipty",
+      description: "Receipty Talent for AI recruitment, Receipty Spend for intelligent finance, Web-on-Demand for web platforms. Three AI solutions in Strasbourg to automate your business.",
+      keywords: "Receipty Talent, Receipty Spend, Web-on-Demand, HR automation Strasbourg, AI financial management Alsace, AI web development Strasbourg",
     },
     path: '/solutions',
   },
   cases: {
     fr: {
-      title: "Études de Cas — Résultats Clients IA | Receipty",
-      description: "Découvrez comment Receipty a transformé des entreprises grâce à l'IA : gains de temps, réduction des coûts et automatisation mesurable pour nos clients.",
-      keywords: "études de cas IA, résultats automatisation, ROI intelligence artificielle, projets IA réalisés",
+      title: "Études de Cas — Résultats Clients IA | Receipty Strasbourg",
+      description: "Découvrez comment Receipty (Strasbourg) a transformé des entreprises grâce à l'IA : gains de temps, réduction des coûts et automatisation mesurable pour nos clients.",
+      keywords: "études de cas IA Strasbourg, résultats automatisation Alsace, ROI intelligence artificielle, projets IA Grand Est",
     },
     en: {
-      title: "Case Studies — AI Client Results | Receipty",
-      description: "Discover how Receipty has transformed businesses with AI: time savings, cost reductions and measurable automation results for our clients.",
-      keywords: "AI case studies, automation results, artificial intelligence ROI, completed AI projects",
+      title: "Case Studies — AI Client Results | Receipty Strasbourg",
+      description: "Discover how Receipty (Strasbourg) has transformed businesses with AI: time savings, cost reductions and measurable automation for our clients.",
+      keywords: "AI case studies Strasbourg, automation results Alsace, artificial intelligence ROI Grand Est, completed AI projects France",
     },
     path: '/cases',
   },
   contact: {
     fr: {
-      title: "Contactez-nous — Diagnostic IA Gratuit | Receipty",
-      description: "Lancez votre diagnostic IA avec Receipty. Réponse sous 24h pour discuter de l'automatisation de vos processus métier. Consultation gratuite.",
-      keywords: "contact agence IA, diagnostic IA gratuit, consultation intelligence artificielle, automatisation entreprise",
+      title: "Contactez Receipty à Strasbourg — Diagnostic IA Gratuit",
+      description: "Contactez notre agence IA à Strasbourg. Diagnostic gratuit sous 24h pour automatiser vos processus métier. Rendez-vous en présentiel ou visio.",
+      keywords: "contact agence IA Strasbourg, diagnostic IA gratuit Alsace, consultation intelligence artificielle Strasbourg, automatisation entreprise Bas-Rhin",
     },
     en: {
-      title: "Contact Us — Free AI Audit | Receipty",
-      description: "Start your AI audit with Receipty. Response within 24h to discuss automating your business processes. Free consultation.",
-      keywords: "contact AI agency, free AI audit, artificial intelligence consultation, business automation",
+      title: "Contact Receipty in Strasbourg — Free AI Audit",
+      description: "Contact our AI agency in Strasbourg. Free AI audit within 24h to automate your business processes. In-person or online meeting.",
+      keywords: "contact AI agency Strasbourg, free AI audit Alsace, artificial intelligence consultation Strasbourg, business automation Bas-Rhin",
     },
     path: '/contact',
   },
   roi: {
     fr: {
-      title: "Calculateur ROI IA — Estimez vos Gains | Receipty",
-      description: "Calculez le retour sur investissement de l'automatisation IA pour votre entreprise. Estimation personnalisée en 2 minutes avec le calculateur ROI Receipty.",
-      keywords: "calculateur ROI IA, retour investissement intelligence artificielle, estimation automatisation, gains IA entreprise",
+      title: "Calculateur ROI IA — Estimez vos Gains | Receipty Strasbourg",
+      description: "Calculez le retour sur investissement de l'automatisation IA pour votre entreprise. Estimation personnalisée en 2 minutes — agence IA Receipty, Strasbourg.",
+      keywords: "calculateur ROI IA Strasbourg, retour investissement intelligence artificielle, estimation automatisation Alsace, gains IA entreprise Grand Est",
     },
     en: {
-      title: "AI ROI Calculator — Estimate Your Gains | Receipty",
-      description: "Calculate the return on investment of AI automation for your business. Personalized estimate in 2 minutes with the Receipty ROI calculator.",
-      keywords: "AI ROI calculator, artificial intelligence investment return, automation estimate, business AI gains",
+      title: "AI ROI Calculator — Estimate Your Gains | Receipty Strasbourg",
+      description: "Calculate the return on investment of AI automation for your business. Personalized estimate in 2 minutes — Receipty AI agency, Strasbourg.",
+      keywords: "AI ROI calculator Strasbourg, artificial intelligence investment return Alsace, automation estimate Grand Est, business AI gains France",
     },
     path: '/roi',
   },
@@ -116,8 +116,8 @@ export default function SEOHead({ page, customTitle, customDescription, customIm
   const data = SEO_DATA[page];
   const localData = data?.[lang] || data?.fr || {};
 
-  const title = customTitle || localData.title || "Receipty | Agence d'IA";
-  const description = customDescription || localData.description || "Receipty — Agence d'intégration IA";
+  const title = customTitle || localData.title || "Receipty | Agence IA Strasbourg";
+  const description = customDescription || localData.description || "Receipty — Agence IA basée à Strasbourg, Alsace";
   const keywords = localData.keywords || '';
   const image = customImage || DEFAULT_OG_IMAGE;
   const path = canonicalPath || data?.path || '/';
@@ -159,24 +159,105 @@ export default function SEOHead({ page, customTitle, customDescription, customIm
 }
 
 // JSON-LD helpers
+
+/**
+ * LocalBusiness schema — critical pour le SEO local "Agence IA Strasbourg"
+ * Remplace l'ancien OrganizationSchema générique
+ */
 export function OrganizationSchema() {
   const schema = {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": ["Organization", "LocalBusiness", "ProfessionalService"],
     "name": "Receipty",
+    "legalName": "Receipty Agency",
     "url": SITE_URL,
-    "logo": `${SITE_URL}/favicon.png`,
-    "description": "Agence d'intégration IA spécialisée dans l'automatisation des processus métier.",
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${SITE_URL}/favicon.png`,
+      "width": 512,
+      "height": 512
+    },
+    "image": `${SITE_URL}/og-image.png`,
+    "description": "Agence IA basée à Strasbourg spécialisée dans l'automatisation des processus métier, l'intégration de l'intelligence artificielle et le machine learning sur mesure.",
     "address": {
       "@type": "PostalAddress",
+      "streetAddress": "1 Place de la Gare",
+      "postalCode": "67000",
+      "addressLocality": "Strasbourg",
+      "addressRegion": "Alsace",
       "addressCountry": "FR"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 48.5850,
+      "longitude": 7.7341
+    },
+    "telephone": "+33388000000",
+    "email": "contact@receipty.ai",
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "09:00",
+        "closes": "18:00"
+      }
+    ],
+    "areaServed": [
+      { "@type": "City", "name": "Strasbourg" },
+      { "@type": "AdministrativeArea", "name": "Alsace" },
+      { "@type": "AdministrativeArea", "name": "Grand Est" },
+      { "@type": "Country", "name": "France" }
+    ],
+    "knowsAbout": [
+      "Intelligence Artificielle",
+      "Automatisation des processus",
+      "Machine Learning",
+      "Intégration IA",
+      "Transformation digitale",
+      "Recrutement IA",
+      "Finance intelligente"
+    ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Solutions IA Receipty",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Receipty Talent",
+            "description": "Automatisation du recrutement et matching IA de candidats"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Receipty Spend",
+            "description": "Gestion financière intelligente et détection d'anomalies"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Web-on-Demand",
+            "description": "Développement web sur mesure avec intégration IA"
+          }
+        }
+      ]
     },
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "customer service",
+      "availableLanguage": ["French", "English"],
       "url": `${SITE_URL}/contact`
     },
-    "sameAs": []
+    "sameAs": [
+      "https://www.google.com/maps/search/Receipty+Strasbourg",
+      "https://www.linkedin.com/company/receipty"
+    ],
+    "priceRange": "€€"
   };
   return (
     <Helmet>
@@ -190,11 +271,25 @@ export function ServiceSchema() {
     "@context": "https://schema.org",
     "@type": "Service",
     "serviceType": "Intelligence Artificielle & Automatisation",
+    "name": "Agence IA Strasbourg — Receipty",
+    "description": "Services d'intégration IA et d'automatisation des processus métier pour les entreprises en Alsace et dans le Grand Est.",
     "provider": {
-      "@type": "Organization",
+      "@type": "LocalBusiness",
       "name": "Receipty",
-      "url": SITE_URL
+      "url": SITE_URL,
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "1 Place de la Gare",
+        "postalCode": "67000",
+        "addressLocality": "Strasbourg",
+        "addressCountry": "FR"
+      }
     },
+    "areaServed": [
+      { "@type": "City", "name": "Strasbourg" },
+      { "@type": "AdministrativeArea", "name": "Alsace" },
+      { "@type": "AdministrativeArea", "name": "Grand Est" }
+    ],
     "hasOfferCatalog": {
       "@type": "OfferCatalog",
       "name": "Solutions IA Receipty",
@@ -282,7 +377,12 @@ export function CaseStudySchema({ title, description, url }) {
     "url": url,
     "author": {
       "@type": "Organization",
-      "name": "Receipty"
+      "name": "Receipty",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Strasbourg",
+        "addressCountry": "FR"
+      }
     },
     "publisher": {
       "@type": "Organization",
