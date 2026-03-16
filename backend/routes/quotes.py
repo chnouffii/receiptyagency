@@ -41,7 +41,7 @@ class QuotePDF(FPDF):
         self.set_xy(140, 10)
         self.set_font('Helvetica', '', 9)
         self.set_text_color(80, 80, 80)
-        address = f"{self.contact_info.get('address_line1', '1 Place de la Gare')}\n{self.contact_info.get('address_line2', '67000 Strasbourg, France')}\n{self.contact_info.get('email', 'contact@receipty.ai')}\n{self.contact_info.get('phone', '+33 3 88 00 00 00')}"
+        address = f"{self.contact_info.get('address_line1', '91 Route des Romains')}\n{self.contact_info.get('address_line2', '67000 Strasbourg, France')}\n{self.contact_info.get('email', 'contact@receipty.ai')}\n{self.contact_info.get('phone', '+33 3 88 00 00 00')}"
         self.multi_cell(60, 4, sanitize_text(address), align='R')
         
         self.set_y(35)

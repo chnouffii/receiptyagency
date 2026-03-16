@@ -33,7 +33,7 @@ export default function ContactPage() {
     phone: '+33 3 88 00 00 00',
     email: 'contact@receipty.ai',
     urgent_email: 'urgent@receipty.ai',
-    address_line1: '1 Place de la Gare',
+    address_line1: '91 Route des Romains',
     address_line2: '67000 Strasbourg, France',
     hours_fr: 'Lun - Ven : 9h00 - 18h00',
     hours_en: 'Mon - Fri: 9:00 AM - 6:00 PM'

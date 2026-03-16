@@ -22,12 +22,12 @@ export default function PrivacyPolicyPage() {
   const company = siteContent?.company || {
     name: 'Receipty Agency',
     legal_form: 'SARL en cours de formation',
-    address_line1: '1 Place de la Gare',
+    address_line1: '91 Route des Romains',
     address_line2: '67000 Strasbourg, France',
     dpo_email: 'dpo@receipty.ai'
   };
   const contact = siteContent?.contact || {
-    address_line1: '1 Place de la Gare',
+    address_line1: '91 Route des Romains',
     address_line2: '67000 Strasbourg, France'
   };
   const privacy = siteContent?.privacy || {

@@ -32,7 +32,7 @@ export default function TermsPage() {
   const contact = siteContent?.contact || {
     phone: '+33 3 88 00 00 00',
     email: 'contact@receipty.ai',
-    address_line1: '1 Place de la Gare',
+    address_line1: '91 Route des Romains',
     address_line2: '67000 Strasbourg, France'
   };
   const terms = siteContent?.terms || {

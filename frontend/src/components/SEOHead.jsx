@@ -181,7 +181,7 @@ export function OrganizationSchema() {
     "description": "Agence IA basée à Strasbourg spécialisée dans l'automatisation des processus métier, l'intégration de l'intelligence artificielle et le machine learning sur mesure.",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "1 Place de la Gare",
+      "streetAddress": "91 Route des Romains",
       "postalCode": "67000",
       "addressLocality": "Strasbourg",
       "addressRegion": "Alsace",
@@ -279,7 +279,7 @@ export function ServiceSchema() {
       "url": SITE_URL,
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "1 Place de la Gare",
+        "streetAddress": "91 Route des Romains",
         "postalCode": "67000",
         "addressLocality": "Strasbourg",
         "addressCountry": "FR"
