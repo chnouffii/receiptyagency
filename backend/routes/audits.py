@@ -324,92 +324,92 @@ async def generate_audit_pdf(audit_id: str, admin=Depends(verify_token)):
       pdf.set_text_color(100, 100, 100)
       # #14: use UTC-aware datetime
       pdf.cell(0, 6, f"Ref: {audit['audit_number']} | Date: {datetime.now(timezone.utc).strftime('%d/%m/%Y')}", ln=True, align='C')
-    pdf.ln(10)
-    
-    # Client info
-    pdf.set_fill_color(248, 250, 252)
-    pdf.set_font('Helvetica', 'B', 11)
-    pdf.set_text_color(30, 64, 175)
-    pdf.cell(0, 8, 'CLIENT', ln=True)
-    pdf.set_font('Helvetica', '', 10)
-    pdf.set_text_color(40, 40, 40)
-    pdf.cell(0, 6, sanitize_text(f"Entreprise: {audit['client_name']}"), ln=True)
-    if audit.get('client_city'):
-        pdf.cell(0, 6, sanitize_text(f"Localisation: {audit['client_city']}"), ln=True)
-    if audit.get('client_sector'):
-        pdf.cell(0, 6, sanitize_text(f"Secteur: {audit['client_sector']}"), ln=True)
-    pdf.ln(8)
-    
-    # Diagnostic
-    pdf.set_font('Helvetica', 'B', 11)
-    pdf.set_text_color(30, 64, 175)
-    pdf.cell(0, 8, 'DIAGNOSTIC', ln=True)
-    pdf.set_font('Helvetica', '', 10)
-    pdf.set_text_color(40, 40, 40)
-    pdf.multi_cell(0, 5, sanitize_text(audit['problem_description']))
-    pdf.ln(5)
-    
-    complexity_labels = {"low": "Basse", "medium": "Moyenne", "high": "Haute"}
-    pdf.cell(0, 6, f"Complexite estimee: {complexity_labels.get(audit['complexity'], 'Moyenne')}", ln=True)
-    pdf.ln(8)
-    
-    # Cost of inaction
-    pdf.set_fill_color(254, 242, 242)
-    pdf.set_draw_color(239, 68, 68)
-    pdf.set_font('Helvetica', 'B', 11)
-    pdf.set_text_color(185, 28, 28)
-    pdf.cell(0, 10, " COUT DE L'INACTION", ln=True, fill=True)
-    pdf.set_font('Helvetica', '', 10)
-    pdf.set_text_color(40, 40, 40)
-    pdf.ln(3)
-    pdf.cell(0, 6, f"Heures perdues par semaine: {audit['hours_lost_per_week']}h", ln=True)
-    pdf.cell(0, 6, f"Heures perdues par an: {audit['hours_per_year']:.0f}h", ln=True)
-    pdf.set_font('Helvetica', 'B', 12)
-    pdf.set_text_color(185, 28, 28)
-    pdf.cell(0, 8, f"Perte financiere annuelle: {audit['annual_loss']:,.0f} EUR".replace(',', ' '), ln=True)
-    pdf.ln(8)
-    
-    # Chart
-    pdf.set_font('Helvetica', 'B', 11)
-    pdf.set_text_color(30, 64, 175)
-    pdf.cell(0, 8, 'COMPARATIF TEMPS (heures/semaine)', ln=True)
-    chart_y = pdf.get_y()
-    pdf.draw_bar_chart(60, chart_y, audit['hours_lost_per_week'], audit['hours_after_optimization'])
-    pdf.ln(60)
-    
-    # AI Report
-    if audit.get('ai_report'):
-        pdf.set_font('Helvetica', 'B', 11)
-        pdf.set_text_color(30, 64, 175)
-        pdf.cell(0, 8, 'ANALYSE & RECOMMANDATIONS', ln=True)
-        pdf.set_font('Helvetica', '', 10)
-        pdf.set_text_color(40, 40, 40)
-        ai_text = audit['ai_report'].replace('**', '').replace('*', '-')
-        pdf.multi_cell(0, 5, sanitize_text(ai_text))
-        pdf.ln(8)
-    
-    # ROI Projections
-    pdf.set_fill_color(236, 253, 245)
-    pdf.set_draw_color(34, 197, 94)
-    pdf.set_font('Helvetica', 'B', 11)
-    pdf.set_text_color(21, 128, 61)
-    pdf.cell(0, 10, ' PROJECTION DES ECONOMIES', ln=True, fill=True)
-    pdf.set_font('Helvetica', '', 10)
-    pdf.set_text_color(40, 40, 40)
-    pdf.ln(3)
-    pdf.cell(0, 6, f"Economies estimees - Annee 1: {audit['roi_year1']:,.0f} EUR".replace(',', ' '), ln=True)
-    pdf.cell(0, 6, f"Economies estimees - Annee 2: {audit['roi_year2']:,.0f} EUR".replace(',', ' '), ln=True)
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.set_text_color(21, 128, 61)
-    reduction_pct = round((1 - audit['hours_after_optimization'] / audit['hours_lost_per_week']) * 100)
-    pdf.cell(0, 8, f"Reduction du temps estimee: {reduction_pct}%", ln=True)
-    pdf.ln(10)
-    
-    # Footer note
-    pdf.set_font('Helvetica', 'I', 9)
-    pdf.set_text_color(120, 120, 120)
-    pdf.multi_cell(0, 4, "Ce rapport est une estimation basee sur les donnees fournies. Les resultats reels peuvent varier selon l'implementation. Contactez-nous pour une etude detaillee.")
-    
+      pdf.ln(10)
+      
+      # Client info
+      pdf.set_fill_color(248, 250, 252)
+      pdf.set_font('Helvetica', 'B', 11)
+      pdf.set_text_color(30, 64, 175)
+      pdf.cell(0, 8, 'CLIENT', ln=True)
+      pdf.set_font('Helvetica', '', 10)
+      pdf.set_text_color(40, 40, 40)
+      pdf.cell(0, 6, sanitize_text(f"Entreprise: {audit['client_name']}"), ln=True)
+      if audit.get('client_city'):
+          pdf.cell(0, 6, sanitize_text(f"Localisation: {audit['client_city']}"), ln=True)
+      if audit.get('client_sector'):
+          pdf.cell(0, 6, sanitize_text(f"Secteur: {audit['client_sector']}"), ln=True)
+      pdf.ln(8)
+      
+      # Diagnostic
+      pdf.set_font('Helvetica', 'B', 11)
+      pdf.set_text_color(30, 64, 175)
+      pdf.cell(0, 8, 'DIAGNOSTIC', ln=True)
+      pdf.set_font('Helvetica', '', 10)
+      pdf.set_text_color(40, 40, 40)
+      pdf.multi_cell(0, 5, sanitize_text(audit['problem_description']))
+      pdf.ln(5)
+      
+      complexity_labels = {"low": "Basse", "medium": "Moyenne", "high": "Haute"}
+      pdf.cell(0, 6, f"Complexite estimee: {complexity_labels.get(audit['complexity'], 'Moyenne')}", ln=True)
+      pdf.ln(8)
+      
+      # Cost of inaction
+      pdf.set_fill_color(254, 242, 242)
+      pdf.set_draw_color(239, 68, 68)
+      pdf.set_font('Helvetica', 'B', 11)
+      pdf.set_text_color(185, 28, 28)
+      pdf.cell(0, 10, " COUT DE L'INACTION", ln=True, fill=True)
+      pdf.set_font('Helvetica', '', 10)
+      pdf.set_text_color(40, 40, 40)
+      pdf.ln(3)
+      pdf.cell(0, 6, f"Heures perdues par semaine: {audit['hours_lost_per_week']}h", ln=True)
+      pdf.cell(0, 6, f"Heures perdues par an: {audit['hours_per_year']:.0f}h", ln=True)
+      pdf.set_font('Helvetica', 'B', 12)
+      pdf.set_text_color(185, 28, 28)
+      pdf.cell(0, 8, f"Perte financiere annuelle: {audit['annual_loss']:,.0f} EUR".replace(',', ' '), ln=True)
+      pdf.ln(8)
+      
+      # Chart
+      pdf.set_font('Helvetica', 'B', 11)
+      pdf.set_text_color(30, 64, 175)
+      pdf.cell(0, 8, 'COMPARATIF TEMPS (heures/semaine)', ln=True)
+      chart_y = pdf.get_y()
+      pdf.draw_bar_chart(60, chart_y, audit['hours_lost_per_week'], audit['hours_after_optimization'])
+      pdf.ln(60)
+      
+      # AI Report
+      if audit.get('ai_report'):
+          pdf.set_font('Helvetica', 'B', 11)
+          pdf.set_text_color(30, 64, 175)
+          pdf.cell(0, 8, 'ANALYSE & RECOMMANDATIONS', ln=True)
+          pdf.set_font('Helvetica', '', 10)
+          pdf.set_text_color(40, 40, 40)
+          ai_text = audit['ai_report'].replace('**', '').replace('*', '-')
+          pdf.multi_cell(0, 5, sanitize_text(ai_text))
+          pdf.ln(8)
+      
+      # ROI Projections
+      pdf.set_fill_color(236, 253, 245)
+      pdf.set_draw_color(34, 197, 94)
+      pdf.set_font('Helvetica', 'B', 11)
+      pdf.set_text_color(21, 128, 61)
+      pdf.cell(0, 10, ' PROJECTION DES ECONOMIES', ln=True, fill=True)
+      pdf.set_font('Helvetica', '', 10)
+      pdf.set_text_color(40, 40, 40)
+      pdf.ln(3)
+      pdf.cell(0, 6, f"Economies estimees - Annee 1: {audit['roi_year1']:,.0f} EUR".replace(',', ' '), ln=True)
+      pdf.cell(0, 6, f"Economies estimees - Annee 2: {audit['roi_year2']:,.0f} EUR".replace(',', ' '), ln=True)
+      pdf.set_font('Helvetica', 'B', 10)
+      pdf.set_text_color(21, 128, 61)
+      reduction_pct = round((1 - audit['hours_after_optimization'] / audit['hours_lost_per_week']) * 100)
+      pdf.cell(0, 8, f"Reduction du temps estimee: {reduction_pct}%", ln=True)
+      pdf.ln(10)
+      
+      # Footer note
+      pdf.set_font('Helvetica', 'I', 9)
+      pdf.set_text_color(120, 120, 120)
+      pdf.multi_cell(0, 4, "Ce rapport est une estimation basee sur les donnees fournies. Les resultats reels peuvent varier selon l'implementation. Contactez-nous pour une etude detaillee.")
+      
       pdf_bytes = pdf.output()
     except Exception as e:
         logger.error(f"PDF generation error for audit {audit_id}: {e}")
