@@ -44,7 +44,7 @@ export default function TermsPage() {
     fr: {
       title: "Conditions Générales d'Utilisation",
       lastUpdate: `Dernière mise à jour : ${terms.last_update_fr}`,
-      intro: `Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation du site web receipty.ai ainsi que les services proposés par ${company.name}.`,
+      intro: `Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation du site web receipty.fr ainsi que les services proposés par ${company.name}.`,
       sections: [
         {
           icon: Building2,
@@ -72,7 +72,7 @@ Le site est hébergé sur des serveurs sécurisés au sein de l'Union Européenn
         {
           icon: FileText,
           title: '2. Objet et acceptation',
-          content: `Les présentes CGU ont pour objet de définir les conditions d'accès et d'utilisation du site receipty.ai.
+          content: `Les présentes CGU ont pour objet de définir les conditions d'accès et d'utilisation du site receipty.fr.
 
 **Acceptation des CGU :**
 L'accès et l'utilisation du site impliquent l'acceptation pleine et entière des présentes CGU. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre site.
@@ -100,7 +100,7 @@ Les estimations de ROI et de performance présentées sur le site sont basées s
           icon: Shield,
           title: '4. Propriété intellectuelle',
           content: `**Contenu du site :**
-L'ensemble du contenu présent sur le site receipty.ai (textes, graphiques, logos, images, vidéos, structure, base de données) est la propriété exclusive de Receipty Agency ou de ses partenaires et est protégé par les lois françaises et internationales relatives à la propriété intellectuelle.
+L'ensemble du contenu présent sur le site receipty.fr (textes, graphiques, logos, images, vidéos, structure, base de données) est la propriété exclusive de Receipty Agency ou de ses partenaires et est protégé par les lois françaises et internationales relatives à la propriété intellectuelle.
 
 **Marques :**
 Les marques "Receipty", "Receipty Agency", "Receipty Talent", "Receipty Spend" et "Web-on-Demand" sont des marques déposées ou en cours de dépôt de Receipty Agency.
@@ -150,7 +150,7 @@ ${company.legal_email}`
     en: {
       title: 'Terms of Service',
       lastUpdate: `Last updated: ${terms.last_update_en}`,
-      intro: `These Terms of Service govern access to and use of the receipty.ai website and services offered by ${company.name}.`,
+      intro: `These Terms of Service govern access to and use of the receipty.fr website and services offered by ${company.name}.`,
       sections: [
         {
           icon: Building2,
@@ -178,7 +178,7 @@ The website is hosted on secure servers within the European Union.`
         {
           icon: FileText,
           title: '2. Purpose and Acceptance',
-          content: `These Terms of Service define the conditions of access and use of the receipty.ai website.
+          content: `These Terms of Service define the conditions of access and use of the receipty.fr website.
 
 **Acceptance of Terms:**
 Access to and use of the site implies full acceptance of these Terms of Service. If you do not accept these conditions, please do not use our site.
@@ -206,7 +206,7 @@ ROI and performance estimates presented on the site are based on real case studi
           icon: Shield,
           title: '4. Intellectual Property',
           content: `**Website Content:**
-All content on the receipty.ai website (texts, graphics, logos, images, videos, structure, database) is the exclusive property of ${company.name} or its partners and is protected by French and international intellectual property laws.
+All content on the receipty.fr website (texts, graphics, logos, images, videos, structure, database) is the exclusive property of ${company.name} or its partners and is protected by French and international intellectual property laws.
 
 **Trademarks:**
 The trademarks "Receipty", "Receipty Agency", "Receipty Talent", "Receipty Spend" and "Web-on-Demand" are registered or pending trademarks of ${company.name}.
