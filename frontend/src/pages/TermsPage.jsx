@@ -27,11 +27,11 @@ export default function TermsPage() {
     ceo1_role_fr: 'Co-CEO',
     ceo2_name: 'DE FURST Valère',
     ceo2_role_fr: 'Co-CEO',
-    legal_email: 'juridique@receipty.ai'
+    legal_email: 'juridique@receipty.fr'
   };
   const contact = siteContent?.contact || {
     phone: '+33 3 88 00 00 00',
-    email: 'contact@receipty.ai',
+    email: 'contact@receipty.fr',
     address_line1: '91 Route des Romains',
     address_line2: '67000 Strasbourg, France'
   };

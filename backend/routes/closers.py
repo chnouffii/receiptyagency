@@ -964,7 +964,7 @@ async def closer_generate_quote(request: Request, token_data=Depends(verify_toke
             self.set_xy(140, 10)
             self.set_font('Helvetica', '', 9)
             self.set_text_color(80, 80, 80)
-            address = f"{contact_info.get('address_line1', '91 Route des Romains')}\n{contact_info.get('address_line2', '67000 Strasbourg, France')}\n{contact_info.get('email', 'contact@receipty.ai')}"
+            address = f"{contact_info.get('address_line1', '91 Route des Romains')}\n{contact_info.get('address_line2', '67000 Strasbourg, France')}\n{contact_info.get('email', 'contact@receipty.fr')}"
             self.multi_cell(60, 4, sanitize_text(address), align='R')
             self.set_y(35)
             self.set_draw_color(30, 64, 175)

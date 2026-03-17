@@ -189,8 +189,8 @@ def get_default_site_content():
         "type": "main",
         "contact": {
             "phone": "+33 3 88 00 00 00",
-            "email": "contact@receipty.ai",
-            "urgent_email": "urgent@receipty.ai",
+            "email": "contact@receipty.fr",
+            "urgent_email": "urgent@receipty.fr",
             "address_line1": "91 Route des Romains",
             "address_line2": "67000 Strasbourg, France",
             "hours_fr": "Lun - Ven : 9h00 - 18h00",
@@ -206,8 +206,8 @@ def get_default_site_content():
             "ceo2_name": "DE FURST Valere",
             "ceo2_role_fr": "Co-CEO & Strategiste Business",
             "ceo2_role_en": "Co-CEO & Business Strategist",
-            "dpo_email": "dpo@receipty.ai",
-            "legal_email": "juridique@receipty.ai"
+            "dpo_email": "dpo@receipty.fr",
+            "legal_email": "juridique@receipty.fr"
         },
         "privacy": {
             "data_retention_years": "3",

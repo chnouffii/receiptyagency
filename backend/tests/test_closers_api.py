@@ -10,9 +10,9 @@ import time
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
 # Test credentials
-ADMIN_EMAIL = "admin@receipty.ai"
+ADMIN_EMAIL = "admin@receipty.fr"
 ADMIN_PASSWORD = "Receipty2024!"
-CLOSER_EMAIL = "closer1@receipty.ai"
+CLOSER_EMAIL = "closer1@receipty.fr"
 CLOSER_PASSWORD = "Closer123!"
 
 
@@ -190,7 +190,7 @@ class TestClosersCRUD:
     def test_create_closer(self):
         """Test POST /api/admin/closers - Create new closer account"""
         closer_data = {
-            "email": "test_closer@receipty.ai",
+            "email": "test_closer@receipty.fr",
             "password": "TestCloser123!",
             "name": "TEST_Closer"
         }
@@ -201,7 +201,7 @@ class TestClosersCRUD:
         )
         assert response.status_code == 200, f"Create closer failed: {response.text}"
         data = response.json()
-        assert data["email"] == "test_closer@receipty.ai"
+        assert data["email"] == "test_closer@receipty.fr"
         assert data["name"] == "TEST_Closer"
         assert data["role"] == "closer"
         assert "password" not in data  # Password should not be returned

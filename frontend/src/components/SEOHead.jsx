@@ -193,7 +193,7 @@ export function OrganizationSchema() {
       "longitude": 7.7341
     },
     "telephone": "+33388000000",
-    "email": "contact@receipty.ai",
+    "email": "contact@receipty.fr",
     "openingHoursSpecification": [
       {
         "@type": "OpeningHoursSpecification",

@@ -31,8 +31,8 @@ export default function ContactPage() {
 
   const contact = siteContent?.contact || {
     phone: '+33 3 88 00 00 00',
-    email: 'contact@receipty.ai',
-    urgent_email: 'urgent@receipty.ai',
+    email: 'contact@receipty.fr',
+    urgent_email: 'urgent@receipty.fr',
     address_line1: '91 Route des Romains',
     address_line2: '67000 Strasbourg, France',
     hours_fr: 'Lun - Ven : 9h00 - 18h00',

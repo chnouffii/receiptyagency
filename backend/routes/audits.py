@@ -45,7 +45,7 @@ class AuditPDF(FPDF):
         self.set_xy(140, 10)
         self.set_font('Helvetica', '', 9)
         self.set_text_color(80, 80, 80)
-        address = f"{self.contact_info.get('address_line1', '91 Route des Romains')}\n{self.contact_info.get('address_line2', '67000 Strasbourg, France')}\n{self.contact_info.get('email', 'contact@receipty.ai')}"
+        address = f"{self.contact_info.get('address_line1', '91 Route des Romains')}\n{self.contact_info.get('address_line2', '67000 Strasbourg, France')}\n{self.contact_info.get('email', 'contact@receipty.fr')}"
         self.multi_cell(60, 4, sanitize_text(address), align='R')
         
         self.set_y(35)

@@ -275,7 +275,7 @@ async def startup():
         hashed = bcrypt.hashpw(default_password.encode(), bcrypt.gensalt()).decode()
         await db.admins.insert_one({
             "id": str(uuid.uuid4()),
-            "email": "admin@receipty.ai",
+            "email": "admin@receipty.fr",
             "password": hashed,
             "name": "Admin",
             "role": "super_admin",
@@ -283,7 +283,7 @@ async def startup():
             "created_at": datetime.now(timezone.utc).isoformat()
         })
         logger.warning(
-            f"Default admin created — email: admin@receipty.ai | "
+            f"Default admin created — email: admin@receipty.fr | "
             f"password: {default_password} | CHANGE THIS IMMEDIATELY"
         )
 

@@ -24,7 +24,7 @@ export default function PrivacyPolicyPage() {
     legal_form: 'SARL en cours de formation',
     address_line1: '91 Route des Romains',
     address_line2: '67000 Strasbourg, France',
-    dpo_email: 'dpo@receipty.ai'
+    dpo_email: 'dpo@receipty.fr'
   };
   const contact = siteContent?.contact || {
     address_line1: '91 Route des Romains',
@@ -90,7 +90,7 @@ Nous ne transférons pas vos données en dehors de l'Union Européenne.`
 • **Droit à la portabilité** (Art. 20) : Recevoir vos données dans un format structuré
 • **Droit d'opposition** (Art. 21) : Vous opposer au traitement de vos données
 
-Pour exercer ces droits, contactez-nous à : **dpo@receipty.ai**`
+Pour exercer ces droits, contactez-nous à : **dpo@receipty.fr**`
         },
         {
           icon: Shield,

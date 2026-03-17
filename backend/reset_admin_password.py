@@ -26,17 +26,17 @@ async def reset():
 
     hashed = bcrypt.hashpw(NEW_PASSWORD.encode(), bcrypt.gensalt()).decode()
     result = await db.admins.update_one(
-        {"email": "admin@receipty.ai"},
+        {"email": "admin@receipty.fr"},
         {"$set": {"password": hashed}}
     )
 
     if result.modified_count > 0:
         print(f"\n✓ Mot de passe réinitialisé avec succès !")
-        print(f"  Email    : admin@receipty.ai")
+        print(f"  Email    : admin@receipty.fr")
         print(f"  Password : {NEW_PASSWORD}")
         print(f"  → Changez-le dès votre première connexion.")
     else:
-        print("\n⚠ Aucun compte 'admin@receipty.ai' trouvé.")
+        print("\n⚠ Aucun compte 'admin@receipty.fr' trouvé.")
         print("Modifiez le filtre {'email': ...} ci-dessus avec l'email correct.")
 
     client.close()

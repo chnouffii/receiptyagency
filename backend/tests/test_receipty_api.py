@@ -10,7 +10,7 @@ import time
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
 # Test credentials
-ADMIN_EMAIL = "admin@receipty.ai"
+ADMIN_EMAIL = "admin@receipty.fr"
 ADMIN_PASSWORD = "Receipty2024!"
 
 

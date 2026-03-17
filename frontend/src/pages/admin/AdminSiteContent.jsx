@@ -161,8 +161,8 @@ export default function AdminSiteContent({ token, isDark }) {
   
   const [contactInfo, setContactInfo] = useState({
     phone: '+33 3 88 00 00 00',
-    email: 'contact@receipty.ai',
-    urgent_email: 'urgent@receipty.ai',
+    email: 'contact@receipty.fr',
+    urgent_email: 'urgent@receipty.fr',
     address_line1: '91 Route des Romains',
     address_line2: '67000 Strasbourg, France',
     hours_fr: 'Lun - Ven : 9h00 - 18h00',
@@ -179,8 +179,8 @@ export default function AdminSiteContent({ token, isDark }) {
     ceo2_name: 'DE FURST Valère',
     ceo2_role_fr: 'Co-CEO & Stratégiste Business',
     ceo2_role_en: 'Co-CEO & Business Strategist',
-    dpo_email: 'dpo@receipty.ai',
-    legal_email: 'juridique@receipty.ai'
+    dpo_email: 'dpo@receipty.fr',
+    legal_email: 'juridique@receipty.fr'
   });
 
   const [trustedCompanies, setTrustedCompanies] = useState([
