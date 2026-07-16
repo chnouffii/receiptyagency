@@ -150,33 +150,60 @@ export default function SEOHead({ page, customTitle, customDescription, customIm
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
 
-      {/* hreflang */}
-      <link rel="alternate" hrefLang="fr" href={`${SITE_URL}${path}`} />
-      <link rel="alternate" hrefLang="en" href={`${SITE_URL}${path}`} />
-      <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}${path}`} />
+      {/* Note: pas de hreflang fr/en distincts — le site sert la même URL pour
+          les deux langues (bascule côté client). Des balises hreflang pointant
+          vers une URL identique sont trompeuses pour Google, on ne les met donc
+          pas. À réintroduire le jour où des routes localisées (/en/...) existent. */}
     </Helmet>
   );
 }
 
 // JSON-LD helpers
+// ── Coordonnées de référence (NAP) — source unique pour les schémas ──────────
+const ORG_PHONE = "+33619518963";        // 06 19 51 89 63
+const ORG_EMAIL = "contact@receipty.fr";
+// Renseignez ici vos profils publics (LinkedIn, X, etc.) — améliore le GEO/E-E-A-T.
+const ORG_SAME_AS = [];
+
 export function OrganizationSchema() {
   const schema = {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": "ProfessionalService",
+    "@id": `${SITE_URL}/#organization`,
     "name": "Receipty",
+    "legalName": "Receipty Agency",
     "url": SITE_URL,
     "logo": `${SITE_URL}/favicon.png`,
-    "description": "Agence d'intégration IA spécialisée dans l'automatisation des processus métier.",
+    "image": DEFAULT_OG_IMAGE,
+    "description": "Agence d'intégration IA spécialisée dans l'automatisation des processus métier : recrutement, finance et développement web sur mesure.",
+    "email": ORG_EMAIL,
+    "telephone": ORG_PHONE,
+    "priceRange": "€€",
     "address": {
       "@type": "PostalAddress",
       "addressCountry": "FR"
     },
+    "areaServed": {
+      "@type": "Country",
+      "name": "France"
+    },
+    "founder": [
+      { "@type": "Person", "name": "Quentin Both", "jobTitle": "Co-CEO & Expert IA" },
+      { "@type": "Person", "name": "Valère de Furst", "jobTitle": "Co-CEO & Stratégiste Business" }
+    ],
+    "knowsAbout": [
+      "Intelligence artificielle", "Automatisation des processus", "Machine Learning",
+      "Automatisation RH", "Gestion financière IA", "Développement web IA"
+    ],
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "customer service",
+      "telephone": ORG_PHONE,
+      "email": ORG_EMAIL,
+      "availableLanguage": ["fr", "en"],
       "url": `${SITE_URL}/contact`
     },
-    "sameAs": []
+    "sameAs": ORG_SAME_AS
   };
   return (
     <Helmet>
