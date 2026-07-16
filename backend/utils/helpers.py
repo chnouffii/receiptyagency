@@ -188,13 +188,13 @@ def get_default_site_content():
     return {
         "type": "main",
         "contact": {
-            "phone": "+33 3 88 00 00 00",
-            "email": "contact@receipty.ai",
-            "urgent_email": "urgent@receipty.ai",
-            "address_line1": "1 Place de la Gare",
-            "address_line2": "67000 Strasbourg, France",
-            "hours_fr": "Lun - Ven : 9h00 - 18h00",
-            "hours_en": "Mon - Fri: 9:00 AM - 6:00 PM"
+            "phone": "06 19 51 89 63",
+            "email": "contact@receipty.fr",
+            "urgent_email": "contact@receipty.fr",
+            "address_line1": "Uniquement sur rendez-vous",
+            "address_line2": "",
+            "hours_fr": "Lundi au samedi : 9h - 19h",
+            "hours_en": "Monday to Saturday: 9am - 7pm"
         },
         "company": {
             "name": "Receipty Agency",
