@@ -81,6 +81,8 @@ async def create_lead(input: LeadCreate, request: Request):
     lead = Lead(**input.model_dump())
     doc = lead.model_dump()
     await db.leads.insert_one(doc)
+    # Alert the team by email — quote configurator submissions were previously silent
+    asyncio.create_task(send_notification_email(doc))
     return lead
 
 
