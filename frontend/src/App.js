@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "sonner";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -22,6 +22,8 @@ const AdminLoginPage = lazy(() => import("./pages/AdminLoginPage"));
 const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage"));
 const CloserDashboard = lazy(() => import("./pages/admin/CloserDashboard"));
 const ROICalculatorPage = lazy(() => import("./pages/ROICalculatorPage"));
+const InstantQuotePage = lazy(() => import("./pages/InstantQuotePage"));
+const FAQPage = lazy(() => import("./pages/FAQPage"));
 const ClientLoginPage = lazy(() => import("./pages/ClientLoginPage"));
 const ClientDashboardPage = lazy(() => import("./pages/ClientDashboardPage"));
 
@@ -79,8 +81,12 @@ function AppContent() {
             <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboardPage /></AdminLayout>} />
             <Route path="/closer" element={<AdminLayout><CloserDashboard /></AdminLayout>} />
             <Route path="/roi" element={<AppLayout><ROICalculatorPage /></AppLayout>} />
+            <Route path="/quote" element={<AppLayout><InstantQuotePage /></AppLayout>} />
+            <Route path="/faq" element={<AppLayout><FAQPage /></AppLayout>} />
             <Route path="/client" element={<ClientLayout><ClientLoginPage /></ClientLayout>} />
             <Route path="/client/dashboard" element={<ClientLayout><ClientDashboardPage /></ClientLayout>} />
+            {/* Fallback: toute URL inconnue renvoie à l'accueil (évite l'écran blanc) */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
         <ChatWidget />

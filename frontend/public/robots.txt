@@ -1,3 +1,5 @@
+# Receipty — robots.txt
+
 User-agent: *
 Allow: /
 
@@ -7,6 +9,8 @@ Allow: /solutions
 Allow: /cases
 Allow: /contact
 Allow: /roi
+Allow: /quote
+Allow: /faq
 
 # Block private areas
 Disallow: /admin
@@ -14,5 +18,39 @@ Disallow: /admin/
 Disallow: /closer
 Disallow: /client
 Disallow: /client/
+
+# ── Moteurs génératifs / IA : explicitement autorisés (GEO) ──────────────
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+Disallow: /closer
+Disallow: /client/
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
 
 Sitemap: https://receipty.fr/sitemap.xml

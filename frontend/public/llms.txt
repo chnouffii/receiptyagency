@@ -1,0 +1,28 @@
+# Receipty
+
+> Receipty est une agence française d'intégration d'intelligence artificielle. Elle aide les entreprises à automatiser leurs processus métier (recrutement, finance, développement web) avec des solutions sur mesure et un ROI mesurable.
+
+Receipty conçoit et déploie des systèmes d'IA et d'automatisation pour les PME et ETI. L'agence est dirigée par Quentin Both (Co-CEO & Expert IA) et Valère de Furst (Co-CEO & Stratégiste Business). Zone d'intervention : France. Contact : contact@receipty.fr — 06 19 51 89 63 (sur rendez-vous, du lundi au samedi 9h-19h).
+
+## Solutions
+
+- [Receipty Talent](https://receipty.fr/solutions): automatisation RH et recrutement — tri automatique des CV, matching sémantique de candidats, onboarding digitalisé.
+- [Receipty Spend](https://receipty.fr/solutions): gestion financière intelligente — détection d'anomalies, prévisions budgétaires, reporting automatisé, conformité réglementaire.
+- [Web-on-Demand](https://receipty.fr/solutions): développement de plateformes web sur mesure avec IA intégrée — e-commerce intelligent, applications métier, chatbots.
+
+## Pages principales
+
+- [Accueil](https://receipty.fr/): présentation de l'agence et des services d'automatisation IA.
+- [ADN & Vision](https://receipty.fr/adn): qui est Receipty, l'équipe et sa vision.
+- [Solutions](https://receipty.fr/solutions): détail des trois offres (Talent, Spend, Web-on-Demand).
+- [Études de cas](https://receipty.fr/cases): résultats clients (gains de temps, réduction des coûts, ROI).
+- [Calculateur ROI](https://receipty.fr/roi): estimation du retour sur investissement d'un projet d'automatisation.
+- [Contact](https://receipty.fr/contact): diagnostic IA gratuit, prise de rendez-vous.
+
+## Ce que Receipty propose
+
+- Audit et diagnostic des processus automatisables
+- Intégration de modèles de Machine Learning sur mesure
+- Automatisation de workflows métier
+- Développement d'applications et de plateformes web avec IA
+- Accompagnement au ROI mesurable dès les premières semaines

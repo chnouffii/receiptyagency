@@ -63,6 +63,26 @@
   </url>
 
   <url>
+    <loc>https://receipty.fr/faq</loc>
+    <lastmod>2026-07-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/faq"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/faq"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/faq"/>
+  </url>
+
+  <url>
+    <loc>https://receipty.fr/quote</loc>
+    <lastmod>2026-07-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/quote"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/quote"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/quote"/>
+  </url>
+
+  <url>
     <loc>https://receipty.fr/privacy</loc>
     <lastmod>2026-03-12</lastmod>
     <changefreq>yearly</changefreq>
