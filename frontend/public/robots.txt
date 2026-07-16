@@ -9,6 +9,8 @@ Allow: /solutions
 Allow: /cases
 Allow: /contact
 Allow: /roi
+Allow: /quote
+Allow: /faq
 
 # Block private areas
 Disallow: /admin

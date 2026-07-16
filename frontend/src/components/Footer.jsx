@@ -35,6 +35,9 @@ export const Footer = () => {
             <Link to="/solutions" className={`transition-colors duration-200 ${
               isDark ? 'hover:text-gray-300' : 'hover:text-gray-900'
             }`}>{t.nav.solutions}</Link>
+            <Link to="/faq" className={`transition-colors duration-200 ${
+              isDark ? 'hover:text-gray-300' : 'hover:text-gray-900'
+            }`}>FAQ</Link>
             <Link to="/contact" className={`transition-colors duration-200 ${
               isDark ? 'hover:text-gray-300' : 'hover:text-gray-900'
             }`}>{t.nav.contact}</Link>

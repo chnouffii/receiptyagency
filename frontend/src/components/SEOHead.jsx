@@ -83,6 +83,19 @@ const SEO_DATA = {
     },
     path: '/roi',
   },
+  faq: {
+    fr: {
+      title: "FAQ — Questions fréquentes sur l'IA & l'automatisation | Receipty",
+      description: "Toutes les réponses sur Receipty : solutions d'automatisation IA, méthode, délais et tarifs. Diagnostic gratuit et réponse sous 24h.",
+      keywords: "FAQ IA, questions automatisation, tarifs agence IA, délais projet IA, Receipty",
+    },
+    en: {
+      title: "FAQ — Common Questions on AI & Automation | Receipty",
+      description: "All the answers about Receipty: AI automation solutions, method, timelines and pricing. Free audit and 24h response.",
+      keywords: "AI FAQ, automation questions, AI agency pricing, AI project timeline, Receipty",
+    },
+    path: '/faq',
+  },
   privacy: {
     fr: {
       title: "Politique de Confidentialité | Receipty",
