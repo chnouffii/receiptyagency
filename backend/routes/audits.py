@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from datetime import datetime, timezone
+import asyncio
 import uuid
 import os
 import logging
@@ -115,8 +116,11 @@ Explique les economies potentielles sur 1 et 2 ans
 
 Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS de prix ou de tarifs."""
 
-        response = await chat.send_message(UserMessage(text=prompt))
+        response = await asyncio.wait_for(chat.send_message(UserMessage(text=prompt)), timeout=30.0)
         return response
+    except asyncio.TimeoutError:
+        logger.error("AI audit generation timed out after 30s")
+        return None
     except Exception as e:
         logger.error(f"AI generation error: {e}")
         return None
@@ -145,8 +149,11 @@ Exemple de style:
 
 Reponds uniquement avec les 3 arguments, sans introduction."""
 
-        response = await chat.send_message(UserMessage(text=prompt))
+        response = await asyncio.wait_for(chat.send_message(UserMessage(text=prompt)), timeout=30.0)
         return response
+    except asyncio.TimeoutError:
+        logger.error("AI closing generation timed out after 30s")
+        return "- Le projet s'autofinance rapidement\n- ROI garanti des la premiere annee\n- Solution sur-mesure adaptee a votre secteur"
     except Exception as e:
         logger.error(f"AI closing generation error: {e}")
         return "- Le projet s'autofinance rapidement\n- ROI garanti des la premiere annee\n- Solution sur-mesure adaptee a votre secteur"

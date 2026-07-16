@@ -42,7 +42,7 @@ export default function AdnVisionPage() {
   const teamInView = useInView(teamRef, { once: true, margin: '-80px' });
 
   const stats = [
-    { value: 147, suffix: '+', label: t.adn.stats.projects },
+    { value: 10, suffix: '+', label: t.adn.stats.projects },
     { value: 52000, suffix: '+', label: t.adn.stats.hours },
     { value: 94, suffix: '%', label: t.adn.stats.automation },
   ];

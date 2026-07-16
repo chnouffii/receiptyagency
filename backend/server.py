@@ -212,20 +212,26 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 app.add_middleware(SecurityHeadersMiddleware)
 
 # CORS middleware — set CORS_ORIGINS env var to restrict in production
-# e.g. CORS_ORIGINS=https://receipty.agency,https://www.receipty.agency
+# e.g. CORS_ORIGINS=https://receipty.fr,https://www.receipty.fr
 _cors_env = os.environ.get('CORS_ORIGINS', '')
 if _cors_env.strip():
     _cors_origins = [o.strip() for o in _cors_env.split(',') if o.strip()]
+    # Explicit origins are safe to combine with credentials.
+    _allow_credentials = True
 else:
     _cors_origins = ["*"]
+    # A wildcard origin combined with allow_credentials=True is invalid and
+    # rejected by browsers. The app authenticates via Bearer tokens (not cookies),
+    # so credentials aren't needed with the wildcard fallback.
+    _allow_credentials = False
     logger.warning(
         "CORS_ORIGINS not set — allowing all origins. "
-        "Set CORS_ORIGINS=https://yourdomain.com in production."
+        "Set CORS_ORIGINS=https://receipty.fr,https://www.receipty.fr in production."
     )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
+    allow_credentials=_allow_credentials,
     allow_origins=_cors_origins,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept"],
