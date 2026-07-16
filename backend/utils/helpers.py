@@ -32,6 +32,11 @@ logger = logging.getLogger(__name__)
 JWT_SECRET = os.environ.get('JWT_SECRET')
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
 NOTIFICATION_EMAIL = os.environ.get('NOTIFICATION_EMAIL', 'contact@receipty.fr')
+# Expéditeur des emails. En prod, utilisez une adresse de votre domaine VÉRIFIÉ
+# dans Resend (ex: "Receipty <contact@receipty.fr>"). L'adresse onboarding@resend.dev
+# est l'expéditeur de TEST de Resend : il ne délivre qu'à votre propre email et
+# finit souvent en spam.
+RESEND_FROM = os.environ.get('RESEND_FROM', 'Receipty <onboarding@resend.dev>')
 
 # Import resend if available
 try:
@@ -76,68 +81,86 @@ async def log_audit(db, admin_email: str, action: str, target_type: str, target_
     await db.audit_logs.insert_one(log_entry)
 
 
+def _row(label: str, value) -> str:
+    """Build one escaped table row for the notification email."""
+    safe = html.escape(str(value)) if value not in (None, "") else "Non renseigne"
+    return (
+        '<tr>'
+        f'<td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:bold;color:#374151;">{html.escape(label)}</td>'
+        f'<td style="padding:10px 0;border-bottom:1px solid #eee;color:#6b7280;">{safe}</td>'
+        '</tr>'
+    )
+
+
 async def send_notification_email(contact_data: dict):
-    """Send email notification for new contact form submission"""
+    """Send an email notification for a new contact message OR a new quote/lead."""
     if not RESEND_AVAILABLE or not RESEND_API_KEY:
-        logger.warning("Resend not configured, skipping email notification")
+        logger.warning("Resend not configured (RESEND_API_KEY manquant) — email non envoyé")
         return False
-    
-    # Escape all user-supplied fields to prevent HTML injection
-    _esc = html.escape
-    c_name = _esc(contact_data.get('name', 'N/A'))
-    c_email = _esc(contact_data.get('email', 'N/A'))
-    c_phone = _esc(contact_data.get('phone', 'Non renseigne'))
-    c_subject = _esc(contact_data.get('subject', 'Non renseigne'))
-    c_message = _esc(contact_data.get('message', 'N/A'))
-    c_lang = _esc(contact_data.get('language', 'fr').upper())
+
+    is_quote = contact_data.get('type') == 'lead'
+    name = contact_data.get('name', 'Inconnu')
+    lang = html.escape(str(contact_data.get('language', 'fr')).upper())
+
+    if is_quote:
+        heading = "Nouvelle demande de devis"
+        subject = f"[Receipty] Nouveau devis — {name}"
+        if contact_data.get('company'):
+            subject += f" ({contact_data.get('company')})"
+        features = contact_data.get('features') or []
+        features_str = ", ".join(features) if isinstance(features, list) else str(features)
+        rows = (
+            _row("Nom", contact_data.get('name'))
+            + _row("Email", contact_data.get('email'))
+            + _row("Telephone", contact_data.get('phone'))
+            + _row("Societe", contact_data.get('company'))
+            + _row("Solution", contact_data.get('category'))
+            + _row("Taille entreprise", contact_data.get('company_size'))
+            + _row("Fonctionnalites", features_str)
+            + _row("Setup estime (EUR)", contact_data.get('estimated_setup'))
+            + _row("Mensuel estime (EUR)", contact_data.get('estimated_monthly'))
+        )
+        extra = ""
+    else:
+        heading = "Nouvelle demande de contact"
+        subject = f"[Receipty] Nouvelle demande de {name}"
+        rows = (
+            _row("Nom", contact_data.get('name'))
+            + _row("Email", contact_data.get('email'))
+            + _row("Telephone", contact_data.get('phone'))
+            + _row("Sujet", contact_data.get('subject'))
+        )
+        msg = html.escape(str(contact_data.get('message', 'N/A')))
+        extra = (
+            '<div style="margin-top:20px;padding:15px;background:#f8fafc;border-radius:8px;">'
+            '<p style="font-weight:bold;color:#374151;margin-bottom:10px;">Message :</p>'
+            f'<p style="color:#6b7280;line-height:1.6;">{msg}</p></div>'
+        )
 
     html_content = f"""
     <html>
     <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
         <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h2 style="color: #1e40af; margin-bottom: 20px;">Nouvelle demande de contact</h2>
-
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Nom</td>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{c_name}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Email</td>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{c_email}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Telephone</td>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{c_phone}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #374151;">Sujet</td>
-                    <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #6b7280;">{c_subject}</td>
-                </tr>
-            </table>
-
-            <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px;">
-                <p style="font-weight: bold; color: #374151; margin-bottom: 10px;">Message :</p>
-                <p style="color: #6b7280; line-height: 1.6;">{c_message}</p>
-            </div>
-
+            <h2 style="color: #1e40af; margin-bottom: 20px;">{heading}</h2>
+            <table style="width: 100%; border-collapse: collapse;">{rows}</table>
+            {extra}
             <p style="margin-top: 20px; font-size: 12px; color: #9ca3af;">
-                Recu le {datetime.now().strftime('%d/%m/%Y a %H:%M')} | Langue: {c_lang}
+                Recu le {datetime.now().strftime('%d/%m/%Y a %H:%M')} | Langue: {lang}
             </p>
         </div>
     </body>
     </html>
     """
-    
+
     try:
         params = {
-            "from": "Receipty Agency <onboarding@resend.dev>",
+            "from": RESEND_FROM,
             "to": [NOTIFICATION_EMAIL],
-            "subject": f"[Receipty] Nouvelle demande de {contact_data.get('name', 'Inconnu')}",
-            "html": html_content
+            "subject": subject,
+            "html": html_content,
         }
         await asyncio.to_thread(resend.Emails.send, params)
-        logger.info(f"Notification email sent to {NOTIFICATION_EMAIL}")
+        logger.info(f"Notification email sent to {NOTIFICATION_EMAIL} (type={'devis' if is_quote else 'contact'})")
         return True
     except Exception as e:
         logger.error(f"Failed to send notification email: {e}")
