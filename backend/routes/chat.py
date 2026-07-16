@@ -1,17 +1,33 @@
 """Chat and Chatbot Analytics routes"""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Request
 from datetime import datetime, timezone
 import os
+import time
 import logging
+from collections import defaultdict
 
 from models.schemas import ChatMessageInput
 from utils.helpers import verify_token
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from utils.llm import LlmChat, UserMessage
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
+
+# Rate limiter for the public /chat endpoint — each call hits the LLM (billable),
+# so limit abuse: max 15 messages / minute per IP.
+_chat_rate: dict = defaultdict(list)
+_CHAT_LIMIT = 15
+_CHAT_WINDOW = 60  # seconds
+
+
+def _check_chat_rate(ip: str):
+    now = time.time()
+    _chat_rate[ip] = [t for t in _chat_rate[ip] if now - t < _CHAT_WINDOW]
+    if len(_chat_rate[ip]) >= _CHAT_LIMIT:
+        raise HTTPException(status_code=429, detail="Trop de messages. Réessayez dans une minute.")
+    _chat_rate[ip].append(now)
 
 SYSTEM_PROMPT_FR = """Tu es l'assistant IA de Receipty Agency, une agence specialisee en integration d'intelligence artificielle pour les entreprises. Ton role est de pre-qualifier les prospects de maniere professionnelle et amicale.
 
@@ -48,7 +64,17 @@ def get_db():
 
 
 @router.post("/chat")
-async def chat_endpoint(input: ChatMessageInput):
+async def chat_endpoint(input: ChatMessageInput, request: Request):
+    client_ip = request.client.host if request.client else "unknown"
+    _check_chat_rate(client_ip)
+
+    message = input.message.strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="Message vide")
+    if len(message) > 2000:
+        raise HTTPException(status_code=400, detail="Message trop long (max 2000 caractères)")
+    input.message = message
+
     db = get_db()
     system_prompt = SYSTEM_PROMPT_FR if input.language == "fr" else SYSTEM_PROMPT_EN
 
