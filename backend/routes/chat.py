@@ -6,7 +6,7 @@ import logging
 
 from models.schemas import ChatMessageInput
 from utils.helpers import verify_token
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from utils.llm import LlmChat, UserMessage
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

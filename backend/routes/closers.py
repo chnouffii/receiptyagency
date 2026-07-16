@@ -779,7 +779,7 @@ async def get_closer_activity(closer_id: str, limit: int = 50, token_data=Depend
 @router.post("/closer/audits")
 async def closer_create_audit(request: Request, token_data=Depends(verify_token)):
     """Create a new audit (Closer with audits permission)"""
-    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    from utils.llm import LlmChat, UserMessage
     
     db = get_db()
     user = await db.admins.find_one({"email": token_data["sub"]}, {"_id": 0})
@@ -850,7 +850,7 @@ Genere un rapport d'audit structure avec:
 
 Reponds en francais, de maniere professionnelle et concise. Ne mentionne JAMAIS de prix ou de tarifs."""
 
-            from emergentintegrations.llm.chat import UserMessage
+            from utils.llm import UserMessage
             # #13: timeout 30s to avoid indefinite hang
             ai_report = await asyncio.wait_for(
                 chat.send_message(UserMessage(text=prompt)),

@@ -8,7 +8,7 @@ import logging
 
 from models.schemas import AuditCreate, QuoteCreate
 from utils.helpers import verify_token, log_audit, sanitize_text, get_default_site_content
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from utils.llm import LlmChat, UserMessage
 
 try:
     from fpdf import FPDF

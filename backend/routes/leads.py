@@ -173,7 +173,7 @@ async def save_call_notes(lead_id: str, body: CallNotesUpdate, admin=Depends(ver
         try:
             import os
             import json
-            from emergentintegrations.llm.chat import LlmChat, UserMessage
+            from utils.llm import LlmChat, UserMessage
 
             key = os.environ.get("EMERGENT_LLM_KEY")
             system_prompt = (
