@@ -43,8 +43,8 @@ export default function AdnVisionPage() {
 
   const stats = [
     { value: 10, suffix: '+', label: t.adn.stats.projects },
-    { value: 52000, suffix: '+', label: t.adn.stats.hours },
-    { value: 94, suffix: '%', label: t.adn.stats.automation },
+    { value: 2000, suffix: '+', label: t.adn.stats.hours },
+    { value: 90, suffix: '%', label: t.adn.stats.automation },
   ];
 
   const colors = ['bg-blue-600', 'bg-cyan-500', 'bg-indigo-500', 'bg-sky-500'];
