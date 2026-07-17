@@ -15,7 +15,7 @@ RUN npm run build
 RUN (apt-get update \
       && apt-get install -y --no-install-recommends chromium ca-certificates fonts-liberation \
       && rm -rf /var/lib/apt/lists/* \
-      && npm install --no-save --legacy-peer-deps puppeteer-core@23 sirv@2 \
+      && npm install --no-save --legacy-peer-deps puppeteer-core@23 \
       && CHROMIUM_PATH=/usr/bin/chromium node prerender.mjs) \
     || echo "⚠ Étape de prérendu ignorée — livraison du build SPA standard."
 
