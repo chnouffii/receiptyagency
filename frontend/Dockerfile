@@ -8,6 +8,17 @@ ARG REACT_APP_BACKEND_URL
 ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
 RUN npm run build
 
+# --- Prérendu statique (SEO/GEO) — NON-FATAL ---------------------------------
+# Génère un HTML complet par page vitrine pour les robots qui n'exécutent pas
+# le JS. Tout le bloc est protégé par `|| echo` : si l'installation de Chromium,
+# de puppeteer ou le rendu échoue, le build SPA déjà produit est livré tel quel.
+RUN (apt-get update \
+      && apt-get install -y --no-install-recommends chromium ca-certificates fonts-liberation \
+      && rm -rf /var/lib/apt/lists/* \
+      && npm install --no-save --legacy-peer-deps puppeteer-core@23 sirv@2 \
+      && CHROMIUM_PATH=/usr/bin/chromium node prerender.mjs) \
+    || echo "⚠ Étape de prérendu ignorée — livraison du build SPA standard."
+
 FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
