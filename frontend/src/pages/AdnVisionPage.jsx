@@ -1,9 +1,12 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { ShieldCheck, Landmark, GraduationCap } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import SEOHead from '../components/SEOHead';
+
+const SOV_ICONS = { shield: ShieldCheck, landmark: Landmark, graduation: GraduationCap };
 
 function AnimatedCounter({ target, suffix = '', inView }) {
   const [count, setCount] = useState(0);
@@ -40,6 +43,8 @@ export default function AdnVisionPage() {
   const statsInView = useInView(statsRef, { once: true, margin: '-80px' });
   const teamRef = useRef(null);
   const teamInView = useInView(teamRef, { once: true, margin: '-80px' });
+  const sovRef = useRef(null);
+  const sovInView = useInView(sovRef, { once: true, margin: '-80px' });
 
   const stats = [
     { value: 10, suffix: '+', label: t.adn.stats.projects },
@@ -97,6 +102,44 @@ export default function AdnVisionPage() {
               <span className={`mt-3 text-sm font-medium ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>{stat.label}</span>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* Souveraineté & accompagnement */}
+      <section ref={sovRef} className="max-w-6xl mx-auto px-6 py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={sovInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className={`font-heading text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            {t.adn.sovereignty.title}
+          </h2>
+          <p className={`mt-3 text-base max-w-2xl ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            {t.adn.sovereignty.subtitle}
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+          {t.adn.sovereignty.items.map((item, i) => {
+            const Icon = SOV_ICONS[item.icon] || ShieldCheck;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={sovInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: i * 0.15, duration: 0.5 }}
+                className={`rounded-2xl border p-8 ${isDark ? 'border-white/5 bg-white/[0.02]' : 'border-gray-200 bg-white shadow-sm'}`}
+                data-testid={`sovereignty-card-${i}`}
+              >
+                <div className="w-12 h-12 rounded-xl bg-blue-600/10 flex items-center justify-center mb-5">
+                  <Icon className="w-6 h-6 text-blue-400" />
+                </div>
+                <h3 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{item.title}</h3>
+                <p className={`text-sm mt-2 leading-relaxed ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>{item.desc}</p>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
