@@ -32,7 +32,28 @@ export const translations = {
       members: [
         { name: 'BOTH Quentin', role: 'Co-CEO & Expert IA', desc: 'Entrepreneur visionnaire spécialisé en intelligence artificielle. Expert en déploiement de solutions ML/Deep Learning à grande échelle, il pilote la stratégie technologique et l\'innovation produit. Certifié en Data Science et architectures cloud, il transforme les défis business complexes en systèmes automatisés performants.' },
         { name: 'DE FURST Valère', role: 'Co-CEO & Stratégiste Business', desc: 'Entrepreneur aguerri avec une expertise pointue en International Business et développement stratégique. Diplômé en commerce international, il orchestre les partenariats clés, le développement commercial et la croissance de l\'agence. Sa vision globale et son sens aigu du marché garantissent des solutions alignées sur les enjeux réels des entreprises.' }
-      ]
+      ],
+      sovereignty: {
+        title: 'Souveraineté & accompagnement',
+        subtitle: "Une IA performante, hébergée en France et co-financée par l'État.",
+        items: [
+          {
+            icon: 'shield',
+            title: 'Infrastructure 100% française',
+            desc: "Vos VPS et bases de données sont hébergés à Strasbourg. Vos données restent en France : souveraineté totale, conformité RGPD native, aucune dépendance aux géants étrangers."
+          },
+          {
+            icon: 'landmark',
+            title: "Jusqu'à 40% financés par l'État",
+            desc: "L'installation d'une infrastructure IA en entreprise peut être subventionnée jusqu'à 40%. Nous vous accompagnons dans le montage du dossier et l'obtention des aides, selon votre éligibilité et les dispositifs en vigueur."
+          },
+          {
+            icon: 'graduation',
+            title: 'Formation de vos équipes',
+            desc: "Nous ne livrons pas qu'un outil : nous formons vos collaborateurs pour qu'ils maîtrisent et exploitent pleinement vos nouvelles solutions IA au quotidien."
+          }
+        ]
+      }
     },
     solutions: {
       title: 'Solutions Verticales',
@@ -212,7 +233,28 @@ export const translations = {
       members: [
         { name: 'BOTH Quentin', role: 'Co-CEO & AI Expert', desc: 'Visionary entrepreneur specialized in artificial intelligence. Expert in deploying ML/Deep Learning solutions at scale, he drives the technological strategy and product innovation. Certified in Data Science and cloud architectures, he transforms complex business challenges into high-performance automated systems.' },
         { name: 'DE FURST Valere', role: 'Co-CEO & Business Strategist', desc: 'Seasoned entrepreneur with sharp expertise in International Business and strategic development. Graduate in international commerce, he orchestrates key partnerships, business development and agency growth. His global vision and keen market sense ensure solutions aligned with real business challenges.' }
-      ]
+      ],
+      sovereignty: {
+        title: 'Sovereignty & support',
+        subtitle: 'High-performance AI, hosted in France and co-funded by the State.',
+        items: [
+          {
+            icon: 'shield',
+            title: '100% French infrastructure',
+            desc: 'Your VPS and databases are hosted in Strasbourg. Your data stays in France: full data sovereignty, native GDPR compliance, no dependency on foreign tech giants.'
+          },
+          {
+            icon: 'landmark',
+            title: 'Up to 40% funded by the State',
+            desc: 'Installing AI infrastructure within a company can be subsidised by up to 40%. We guide you through the application and securing the grants, subject to your eligibility and the schemes in force.'
+          },
+          {
+            icon: 'graduation',
+            title: 'Training your teams',
+            desc: "We don't just deliver a tool: we train your staff so they fully master and leverage your new AI solutions day to day."
+          }
+        ]
+      }
     },
     solutions: {
       title: 'Vertical Solutions',
