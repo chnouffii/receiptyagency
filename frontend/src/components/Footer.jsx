@@ -1,61 +1,38 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { useTheme } from '../context/ThemeContext';
 
 export const Footer = () => {
   const { t } = useLanguage();
-  const { isDark } = useTheme();
   const year = new Date().getFullYear();
 
+  const linkStyle = { color: 'var(--text2)', fontSize: 14, transition: 'color .2s', textDecoration: 'none' };
+  const hover = (e) => { e.currentTarget.style.color = 'var(--text)'; };
+  const unhover = (e) => { e.currentTarget.style.color = 'var(--text2)'; };
+
   return (
-    <footer 
-      data-testid="footer" 
-      className={`border-t transition-colors duration-300 ${
-        isDark 
-          ? 'border-white/5 bg-[#050505]' 
-          : 'border-gray-200 bg-white'
-      }`}
-    >
+    <footer data-testid="footer" style={{ borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
         <div className="flex flex-col md:flex-row justify-between items-start gap-8">
           <div>
-            <span className={`font-heading text-xl font-bold tracking-tight ${
-              isDark ? 'text-white' : 'text-gray-900'
-            }`}>
-              Receipty<span className="text-blue-500">.</span>
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 21, fontWeight: 700, letterSpacing: '-.02em', color: 'var(--text)' }}>
+              Receipty<span style={{ color: 'var(--accent)' }}>.</span>
             </span>
-            <p className={`mt-3 text-sm max-w-xs leading-relaxed ${
-              isDark ? 'text-gray-500' : 'text-gray-600'
-            }`}>{t.footer.tagline}</p>
+            <p style={{ marginTop: 12, fontSize: 14, maxWidth: 280, lineHeight: 1.6, color: 'var(--text3)' }}>{t.footer.tagline}</p>
           </div>
-          <div className={`flex gap-8 text-sm ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>
-            <Link to="/adn" className={`transition-colors duration-200 ${
-              isDark ? 'hover:text-gray-300' : 'hover:text-gray-900'
-            }`}>{t.nav.adn}</Link>
-            <Link to="/solutions" className={`transition-colors duration-200 ${
-              isDark ? 'hover:text-gray-300' : 'hover:text-gray-900'
-            }`}>{t.nav.solutions}</Link>
-            <Link to="/faq" className={`transition-colors duration-200 ${
-              isDark ? 'hover:text-gray-300' : 'hover:text-gray-900'
-            }`}>FAQ</Link>
-            <Link to="/contact" className={`transition-colors duration-200 ${
-              isDark ? 'hover:text-gray-300' : 'hover:text-gray-900'
-            }`}>{t.nav.contact}</Link>
+          <div className="flex flex-wrap gap-8">
+            <Link to="/adn" style={linkStyle} onMouseEnter={hover} onMouseLeave={unhover}>{t.nav.adn}</Link>
+            <Link to="/solutions" style={linkStyle} onMouseEnter={hover} onMouseLeave={unhover}>{t.nav.solutions}</Link>
+            <Link to="/faq" style={linkStyle} onMouseEnter={hover} onMouseLeave={unhover}>FAQ</Link>
+            <Link to="/contact" style={linkStyle} onMouseEnter={hover} onMouseLeave={unhover}>{t.nav.contact}</Link>
           </div>
         </div>
-        <div className={`mt-12 pt-6 border-t flex flex-col md:flex-row justify-between items-center gap-4 ${
-          isDark ? 'border-white/5' : 'border-gray-200'
-        }`}>
-          <p className={`text-xs ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>
+        <div className="mt-12 pt-6 flex flex-col md:flex-row justify-between items-center gap-4" style={{ borderTop: '1px solid var(--border)' }}>
+          <p style={{ fontSize: 12.5, color: 'var(--text3)' }}>
             &copy; {year} Receipty Agency. {t.footer.rights}
           </p>
-          <div className={`flex gap-6 text-xs ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>
-            <Link to="/privacy" className={`transition-colors duration-200 ${
-              isDark ? 'hover:text-gray-400' : 'hover:text-gray-700'
-            }`}>{t.footer.privacy}</Link>
-            <Link to="/terms" className={`transition-colors duration-200 ${
-              isDark ? 'hover:text-gray-400' : 'hover:text-gray-700'
-            }`}>{t.footer.terms}</Link>
+          <div className="flex gap-6" style={{ fontSize: 12.5 }}>
+            <Link to="/privacy" style={linkStyle} onMouseEnter={hover} onMouseLeave={unhover}>{t.footer.privacy}</Link>
+            <Link to="/terms" style={linkStyle} onMouseEnter={hover} onMouseLeave={unhover}>{t.footer.terms}</Link>
           </div>
         </div>
       </div>
