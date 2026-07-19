@@ -8,6 +8,7 @@ import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { ChatWidget } from "./components/ChatWidget";
+import { mountCursor } from "./lib/designAnimations";
 
 // Lazy-loaded pages — only downloaded when the user navigates to them
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -61,6 +62,9 @@ function AppContent() {
     document.documentElement.classList.add("dark");
     // Hide Emergent badge (CSS rule in App.css handles it; remove element once as fallback)
     document.getElementById('emergent-badge')?.remove();
+    // Custom cursor (design refonte) — global, pointer-fine devices only
+    const cleanup = mountCursor();
+    return cleanup;
   }, []);
 
   return (

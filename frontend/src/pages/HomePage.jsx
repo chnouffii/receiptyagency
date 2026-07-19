@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Brain, Zap, TrendingUp, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import SEOHead, { OrganizationSchema, ServiceSchema, FAQSchema } from '../components/SEOHead';
+import { mountPageFx } from '../lib/designAnimations';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -89,12 +90,17 @@ const RISE = (delay) => ({
 
 export default function HomePage() {
   const { t, lang } = useLanguage();
-  const featuresRef = useRef(null);
+  const pageRef = useRef(null);
   const faqRef = useRef(null);
-  const featuresInView = useInView(featuresRef, { once: true, margin: '-100px' });
   const faqInView = useInView(faqRef, { once: true, margin: '-80px' });
   const [trustedCompanies, setTrustedCompanies] = useState(['GlobalTech', 'BioPharm', 'NeoRetail', 'MedStaff', 'InvestCorp']);
   const [faqs, setFaqs] = useState([]);
+
+  useEffect(() => {
+    // Design interaction layer (particles, magnetic, tilt, reveal)
+    const cleanup = mountPageFx(pageRef.current);
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     axios.get(`${API}/site-content`)
@@ -128,7 +134,7 @@ export default function HomePage() {
   };
 
   return (
-    <div data-testid="home-page" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <div ref={pageRef} data-testid="home-page" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       <SEOHead page="home" />
       <OrganizationSchema />
       <ServiceSchema />
@@ -148,6 +154,8 @@ export default function HomePage() {
           <div style={{ position: 'absolute', top: '22%', right: '2%', width: 520, height: 520, borderRadius: '50%', filter: 'blur(140px)', opacity: 0.4, background: 'radial-gradient(circle,var(--cyan),transparent 62%)', animation: 'blobB 20s ease-in-out infinite' }} />
           <div style={{ position: 'absolute', bottom: '-6%', left: '6%', width: 560, height: 560, borderRadius: '50%', filter: 'blur(150px)', opacity: 0.35, background: 'radial-gradient(circle,var(--violet),transparent 62%)', animation: 'blobC 24s ease-in-out infinite' }} />
         </div>
+        {/* Particle field */}
+        <canvas data-particles style={{ position: 'absolute', inset: 0, zIndex: 1, width: '100%', height: '100%', pointerEvents: 'none' }} />
         {/* Grid overlay */}
         <div
           style={{
@@ -188,14 +196,15 @@ export default function HomePage() {
             <Link
               to="/contact"
               data-testid="hero-cta-button"
+              data-magnetic
               style={primaryBtn}
-              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 0 0 1px var(--accent), 0 16px 50px -6px var(--glow)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 0 0 1px var(--accent2), 0 12px 40px -8px var(--glow)'; e.currentTarget.style.transform = 'none'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 0 0 1px var(--accent), 0 16px 50px -6px var(--glow)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 0 0 1px var(--accent2), 0 12px 40px -8px var(--glow)'; }}
             >
               <span>{t.hero.cta}</span>
-              <span aria-hidden="true">→</span>
+              <span data-arrow aria-hidden="true" style={{ display: 'inline-block', transition: 'transform .25s' }}>→</span>
             </Link>
-            <Link to="/cases" data-testid="hero-secondary-btn" style={secondaryBtn}>
+            <Link to="/cases" data-testid="hero-secondary-btn" data-magnetic style={secondaryBtn}>
               <span>{t.nav.cases}</span>
             </Link>
           </div>
@@ -210,23 +219,24 @@ export default function HomePage() {
       </section>
 
       {/* ===== FEATURES ===== */}
-      <section ref={featuresRef} style={{ background: 'var(--bg)', padding: '88px 24px' }}>
+      <section style={{ background: 'var(--bg)', padding: '88px 24px' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 20 }}>
           {featureItems.map((feature, i) => (
-            <motion.div
+            <div
               key={i}
-              initial={{ opacity: 0, y: 26 }}
-              animate={featuresInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: i * 0.12, duration: 0.5 }}
+              data-reveal
+              data-reveal-delay={i * 110}
+              data-tilt
               data-testid={`feature-card-${i}`}
-              style={{ borderRadius: 20, border: '1px solid var(--border)', background: 'var(--surface)', padding: 32 }}
+              style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, border: '1px solid var(--border)', background: 'var(--surface)', padding: 32, transformStyle: 'preserve-3d' }}
             >
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(59,130,246,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 22 }}>
+              <div data-spot style={{ position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none', transition: 'opacity .3s', background: 'radial-gradient(320px circle at var(--mx) var(--my), rgba(59,130,246,.12), transparent 70%)' }} />
+              <div style={{ position: 'relative', width: 48, height: 48, borderRadius: 14, background: 'rgba(59,130,246,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 22 }}>
                 <feature.icon style={{ width: 24, height: 24, color: 'var(--accent)' }} />
               </div>
-              <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 19, fontWeight: 600, margin: '0 0 8px', color: 'var(--text)' }}>{feature.title}</h3>
-              <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'var(--text2)', margin: 0 }}>{feature.desc}</p>
-            </motion.div>
+              <h3 style={{ position: 'relative', fontFamily: "'Space Grotesk', sans-serif", fontSize: 19, fontWeight: 600, margin: '0 0 8px', color: 'var(--text)' }}>{feature.title}</h3>
+              <p style={{ position: 'relative', fontSize: 14.5, lineHeight: 1.6, color: 'var(--text2)', margin: 0 }}>{feature.desc}</p>
+            </div>
           ))}
         </div>
       </section>
