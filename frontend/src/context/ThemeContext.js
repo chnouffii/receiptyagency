@@ -34,6 +34,9 @@ export function ThemeProvider({ children }) {
       root.classList.add('light-theme');
       root.classList.remove('dark-theme');
     }
+    // Design system (refonte) reads [data-theme] for its CSS variables
+    root.dataset.theme = theme;
+    root.style.colorScheme = theme;
   }, [theme]);
 
   const toggleTheme = () => {
