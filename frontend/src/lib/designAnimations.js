@@ -17,7 +17,7 @@ export function mountCursor() {
   glow.setAttribute('data-cursor-glow', '');
   dot.setAttribute('data-cursor-dot', '');
   Object.assign(glow.style, {
-    position: 'fixed', top: '0', left: '0', width: '340px', height: '340px',
+    position: 'fixed', top: '0', left: '0', width: '200px', height: '200px',
     borderRadius: '50%', pointerEvents: 'none', zIndex: '9998', opacity: '0',
     background: 'radial-gradient(circle, var(--glow), transparent 60%)', transition: 'opacity .3s',
   });
