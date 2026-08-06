@@ -3,22 +3,26 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import {
   Building2,
+  Check,
   CircleDollarSign,
   Download,
   FileSignature,
   ListChecks,
+  Minus,
   NotebookPen,
+  PenLine,
   RotateCcw,
   Sparkles,
+  Star,
   Target,
   TrendingUp,
   Wand2,
 } from 'lucide-react';
 import { S, T, TAP, staggerContainer, staggerItem } from './demoTokens';
-import { DemoButton, EmptyState, Panel, SectionLabel, StatusBadge } from './DemoUI';
+import { ConfirmModal, DemoButton, EmptyState, Panel, SectionLabel, StatusBadge } from './DemoUI';
 import { ProcessingPipeline } from './ProcessingPipeline';
 import { useProcessingSequence } from './useProcessingSequence';
-import { PROPOSAL_PREFILL, PROPOSAL_SECTORS, buildProposal } from './data/proposalData';
+import { PROPOSAL_PREFILL, PROPOSAL_SECTORS, PROPOSAL_TONES, buildProposal } from './data/proposalData';
 
 /** Étapes affichées pendant la rédaction de la proposition. */
 const GENERATION_STEPS = [
@@ -60,6 +64,9 @@ const EMPTY_FORM = {
 export function ProposalGeneratorDemo() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [proposal, setProposal] = useState(null);
+  const [tone, setTone] = useState('direct');
+  const [signatureOpen, setSignatureOpen] = useState(false);
+  const [signatureSent, setSignatureSent] = useState(false);
   const { status, currentStep, progress, currentDuration, start, reset } = useProcessingSequence(GENERATION_STEPS);
 
   const canGenerate = form.companyName.trim().length > 1 && form.notes.trim().length > 20;
@@ -71,13 +78,24 @@ export function ProposalGeneratorDemo() {
     setProposal(null);
     // TODO: Remplacer par POST /api/proposals/generate → webhook n8n
     // `receipty-proposal-writer` (GPT-4o + template PDF de l'agence).
-    start(() => setProposal(buildProposal(form)));
+    setSignatureSent(false);
+    start(() => setProposal(buildProposal(form, tone)));
+  };
+
+  /**
+   * Changement de ton : la proposition est recomposée immédiatement, sans
+   * rejouer le pipeline — seule la rédaction change, pas les chiffres.
+   */
+  const handleToneChange = (nextTone) => {
+    setTone(nextTone);
+    if (proposal) setProposal(buildProposal(form, nextTone));
   };
 
   const handleReset = () => {
     reset();
     setForm(EMPTY_FORM);
     setProposal(null);
+    setSignatureSent(false);
   };
 
   /** Génère un document imprimable et ouvre la boîte d'impression du navigateur. */
@@ -253,6 +271,37 @@ export function ProposalGeneratorDemo() {
                   Écrivez comme vous le feriez sur un carnet : l’assistant se charge de la mise en forme.
                 </span>
               </label>
+
+              {/* Ton de rédaction : appliqué à la génération et modifiable après coup. */}
+              <div>
+                <span className={T.label}>Ton de rédaction</span>
+                <div className="mt-1.5 grid gap-1.5" data-testid="proposal-tones">
+                  {PROPOSAL_TONES.map((item) => {
+                    const isActive = item.id === tone;
+                    return (
+                      <motion.button
+                        key={item.id}
+                        whileTap={TAP}
+                        type="button"
+                        onClick={() => handleToneChange(item.id)}
+                        data-testid={`proposal-tone-${item.id}`}
+                        className={`rounded-lg border px-3 py-2 text-left transition-colors duration-200
+                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60
+                          ${isActive
+                            ? 'border-blue-500/50 bg-blue-500/10'
+                            : 'border-slate-800/80 bg-slate-800/30 hover:border-slate-700 hover:bg-slate-800/60'}`}
+                      >
+                        <span
+                          className={`block text-sm font-medium ${isActive ? 'text-blue-200' : 'text-slate-200'}`}
+                        >
+                          {item.label}
+                        </span>
+                        <span className="mt-0.5 block text-[11px] leading-snug text-slate-400">{item.hint}</span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
 
               <DemoButton
                 type="submit"
@@ -473,6 +522,75 @@ export function ProposalGeneratorDemo() {
                       </div>
                     </motion.section>
 
+                    {/* Grille tarifaire à trois niveaux */}
+                    <motion.section variants={staggerItem}>
+                      <div className="flex flex-wrap items-baseline justify-between gap-2">
+                        <SectionLabel>Trois options au choix</SectionLabel>
+                        <span className="text-[11px] text-slate-400">Montants hors taxes</span>
+                      </div>
+                      <div className="mt-2.5 grid gap-3 lg:grid-cols-3" data-testid="proposal-tiers">
+                        {proposal.tiers.map((tier) => (
+                          <div
+                            key={tier.id}
+                            className={`relative flex flex-col rounded-xl border p-4 ${
+                              tier.recommended
+                                ? 'border-blue-500/50 bg-blue-500/[0.06]'
+                                : 'border-slate-800/80 bg-slate-800/30'
+                            }`}
+                          >
+                            {tier.recommended && (
+                              <span className="absolute -top-2.5 left-4 inline-flex items-center gap-1 rounded-full border border-blue-500/40 bg-[#111827] px-2 py-0.5 text-[10px] font-semibold text-blue-300">
+                                <Star size={10} strokeWidth={2.5} />
+                                Recommandée
+                              </span>
+                            )}
+                            <h3 className="font-heading text-sm font-semibold text-slate-100">{tier.name}</h3>
+                            <p className="mt-1 min-h-[32px] text-[11px] leading-snug text-slate-400">
+                              {tier.tagline}
+                            </p>
+                            <p className="mt-3 flex items-baseline gap-1">
+                              <span className="font-data text-xl font-bold tabular-nums text-slate-100">
+                                {new Intl.NumberFormat('fr-FR', {
+                                  style: 'currency',
+                                  currency: 'EUR',
+                                  maximumFractionDigits: 0,
+                                }).format(tier.setup)}
+                              </span>
+                            </p>
+                            <p className="mt-0.5 font-data text-[11px] tabular-nums text-emerald-400">
+                              puis{' '}
+                              {new Intl.NumberFormat('fr-FR', {
+                                style: 'currency',
+                                currency: 'EUR',
+                                maximumFractionDigits: 0,
+                              }).format(tier.monthly)}{' '}
+                              / mois
+                            </p>
+                            <p className="mt-0.5 font-data text-[11px] tabular-nums text-slate-400">
+                              {tier.duration}
+                            </p>
+                            <ul className="mt-3 flex-1 space-y-1.5 border-t border-slate-800/80 pt-3">
+                              {tier.features.map((feature) => (
+                                <li
+                                  key={feature.label}
+                                  className={`flex items-start gap-2 text-[11px] leading-snug ${
+                                    feature.included ? 'text-slate-300' : 'text-slate-500'
+                                  }`}
+                                >
+                                  {feature.included ? (
+                                    <Check size={12} strokeWidth={2.5} className="mt-0.5 shrink-0 text-emerald-400" />
+                                  ) : (
+                                    <Minus size={12} strokeWidth={2.5} className="mt-0.5 shrink-0 text-slate-600" />
+                                  )}
+                                  {feature.label}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.section>
+
                     {/* Outils identifiés */}
                     {proposal.tools.length > 0 && (
                       <motion.section variants={staggerItem}>
@@ -504,6 +622,20 @@ export function ProposalGeneratorDemo() {
                       <DemoButton icon={Download} onClick={handleDownloadPdf}>
                         Télécharger la proposition au format PDF
                       </DemoButton>
+                      {signatureSent ? (
+                        <StatusBadge tone="success" live className="self-center">
+                          Envoyée — en attente de signature
+                        </StatusBadge>
+                      ) : (
+                        <DemoButton
+                          variant="ghost"
+                          icon={PenLine}
+                          onClick={() => setSignatureOpen(true)}
+                          data-testid="proposal-signature"
+                        >
+                          Envoyer pour signature électronique
+                        </DemoButton>
+                      )}
                     </motion.div>
                   </motion.article>
                 )}
@@ -512,6 +644,64 @@ export function ProposalGeneratorDemo() {
           </Panel>
         </motion.div>
       </div>
+
+      {/* ── Workflow de signature électronique ──────────────────────────── */}
+      <ConfirmModal
+        open={signatureOpen}
+        onClose={() => setSignatureOpen(false)}
+        title="Envoyer pour signature électronique"
+        icon={PenLine}
+        testId="proposal-signature-modal"
+        footer={
+          <>
+            <DemoButton variant="ghost" onClick={() => setSignatureOpen(false)}>
+              Annuler
+            </DemoButton>
+            <DemoButton
+              variant="success"
+              icon={PenLine}
+              data-testid="proposal-signature-confirm"
+              onClick={() => {
+                // TODO: Remplacer par l'appel réel à l'API Yousign (POST
+                // /signature_requests) via le webhook n8n `receipty-esign`.
+                setSignatureOpen(false);
+                setSignatureSent(true);
+                toast.success('Demande de signature envoyée (simulation)', {
+                  description: `${proposal?.reference} — relances automatiques à J+3 et J+7`,
+                });
+              }}
+            >
+              Confirmer l’envoi
+            </DemoButton>
+          </>
+        }
+      >
+        {proposal && (
+          <div className="space-y-4">
+            <p className="text-sm leading-relaxed text-slate-300">
+              La proposition <span className="font-data text-slate-100">{proposal.reference}</span> sera transmise
+              pour signature électronique à valeur légale.
+            </p>
+            <dl className={`${S.card} divide-y divide-slate-800/60`}>
+              {[
+                ['Destinataire', proposal.contactName || proposal.companyName],
+                ['Prestataire de signature', 'Yousign — conforme eIDAS'],
+                ['Montant engagé', `${proposal.pricing.setupLabel} HT`],
+                ['Validité de la demande', '30 jours'],
+              ].map(([label, value]) => (
+                <div key={label} className="flex items-baseline justify-between gap-4 px-3.5 py-2.5">
+                  <dt className="text-xs text-slate-400">{label}</dt>
+                  <dd className="text-right font-data text-xs text-slate-100">{value}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="text-xs leading-relaxed text-slate-400">
+              Des relances automatiques sont programmées à J+3 et J+7 en l’absence de signature. Vous êtes notifié
+              dès que le document est signé, et la proposition signée est archivée avec le dossier client.
+            </p>
+          </div>
+        )}
+      </ConfirmModal>
     </motion.div>
   );
 }
@@ -572,6 +762,13 @@ function buildPrintableDocument(proposal) {
   .kpi { flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center; }
   .kpi b { display: block; font-size: 13pt; color: #047857; font-variant-numeric: tabular-nums; }
   .kpi span { font-size: 8.5pt; color: #475569; }
+  .tier { text-align: left; page-break-inside: avoid; }
+  .tier b { color: #0f172a; font-size: 11pt; }
+  .tier-reco { border-color: #2563eb; border-width: 2px; }
+  .tier-price { display: block; font-weight: 700; color: #0f172a; font-variant-numeric: tabular-nums; margin: 2px 0; }
+  .tier-list { margin: 6px 0 0; padding-left: 14px; }
+  .tier-list li { font-size: 8pt; margin-bottom: 2px; }
+  .tier-list li.off { color: #94a3b8; list-style: none; margin-left: -14px; }
   footer { margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 10px;
            font-size: 8.5pt; color: #64748b; }
 </style>
@@ -636,7 +833,28 @@ function buildPrintableDocument(proposal) {
       .join('')}
   </div>
 
-  <h2>Chiffrage</h2>
+  <h2>Trois options au choix</h2>
+  <div class="kpis">
+    ${proposal.tiers
+      .map(
+        (tier) => `<div class="kpi tier${tier.recommended ? ' tier-reco' : ''}">
+          <b>${escapeHtml(tier.name)}</b>
+          <span class="tier-price">${escapeHtml(euro(tier.setup))} puis ${escapeHtml(euro(tier.monthly))} / mois</span>
+          <span>${escapeHtml(tier.duration)}</span>
+          <ul class="tier-list">${tier.features
+            .map(
+              (feature) =>
+                `<li${feature.included ? '' : ' class="off"'}>${feature.included ? '' : '— '}${escapeHtml(
+                  feature.label,
+                )}</li>`,
+            )
+            .join('')}</ul>
+        </div>`,
+      )
+      .join('')}
+  </div>
+
+  <h2>Chiffrage de l'option recommandée</h2>
   <table>
     ${proposal.pricing.breakdown
       .map(

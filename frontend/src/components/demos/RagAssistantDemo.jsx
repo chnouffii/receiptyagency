@@ -12,15 +12,17 @@ import {
   RefreshCw,
   Sparkles,
   User,
+  UserCog,
 } from 'lucide-react';
 import { S, T, TAP, staggerContainer, staggerItem } from './demoTokens';
-import { DemoButton, Panel, SectionLabel, StatusBadge } from './DemoUI';
+import { ConfidenceMeter, DemoButton, Panel, SectionLabel, SideDrawer, StatusBadge } from './DemoUI';
 import {
   KNOWLEDGE_BASE,
   KNOWLEDGE_STATS,
-  RAG_FALLBACK,
+  RAG_PERSONAS,
   RAG_SUGGESTIONS,
   RAG_THINKING_STEPS,
+  resolveRagAnswer,
 } from './data/ragData';
 
 /** Vitesse de la simulation de frappe : caractères révélés par tick de 12 ms. */
@@ -31,13 +33,16 @@ const TYPING_INTERVAL = 12;
  * Démo 2 — Assistant RAG interne sur la base documentaire de l'entreprise.
  *
  * Le point clé à démontrer n'est pas le chat, c'est la traçabilité : chaque
- * réponse cite le document, la page et la section dont elle est issue.
+ * réponse porte un score de confiance, cite ses sources, et le passage exact
+ * est consultable surligné dans sa page d'origine.
  */
 export function RagAssistantDemo() {
+  const [persona, setPersona] = useState('employee');
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [thinkingStep, setThinkingStep] = useState(-1);
-  const [streaming, setStreaming] = useState(null); // { full, revealed, sources }
+  const [streaming, setStreaming] = useState(null);
+  const [openSource, setOpenSource] = useState(null);
   const scrollRef = useRef(null);
   const timers = useRef([]);
 
@@ -63,12 +68,13 @@ export function RagAssistantDemo() {
     (question) => {
       if (isBusy || !question.trim()) return;
 
-      const match = RAG_SUGGESTIONS.find(
-        (item) => item.question.toLowerCase() === question.trim().toLowerCase(),
-      );
-      const result = match || RAG_FALLBACK;
+      const result = resolveRagAnswer(question, persona);
+      const personaLabel = RAG_PERSONAS.find((item) => item.id === persona)?.label ?? '';
 
-      setMessages((current) => [...current, { id: `u-${Date.now()}`, role: 'user', content: question.trim() }]);
+      setMessages((current) => [
+        ...current,
+        { id: `u-${Date.now()}`, role: 'user', content: question.trim(), persona: personaLabel },
+      ]);
       setInput('');
       clearTimers();
 
@@ -86,7 +92,7 @@ export function RagAssistantDemo() {
       timers.current.push(
         setTimeout(() => {
           setThinkingStep(-1);
-          setStreaming({ full: result.answer, revealed: '', sources: result.sources });
+          setStreaming({ revealed: '' });
 
           let cursor = 0;
           const interval = setInterval(() => {
@@ -101,19 +107,19 @@ export function RagAssistantDemo() {
                   role: 'assistant',
                   content: result.answer,
                   sources: result.sources,
+                  confidence: result.confidence,
+                  verdict: result.verdict,
                 },
               ]);
               return;
             }
-            setStreaming((current) =>
-              current ? { ...current, revealed: result.answer.slice(0, cursor) } : current,
-            );
+            setStreaming({ revealed: result.answer.slice(0, cursor) });
           }, TYPING_INTERVAL);
           timers.current.push(interval);
         }, RAG_THINKING_STEPS.length * 520),
       );
     },
-    [isBusy],
+    [isBusy, persona],
   );
 
   const handleReset = () => {
@@ -130,8 +136,8 @@ export function RagAssistantDemo() {
         <div className="max-w-2xl">
           <h1 className={T.h1}>Assistant interne &amp; base de connaissances</h1>
           <p className={`${T.body} mt-1.5`}>
-            Vos procédures internes deviennent interrogeables en langage naturel. Chaque réponse cite sa source :
-            document, page et section — impossible de valider une information sans savoir d’où elle vient.
+            Vos procédures internes deviennent interrogeables en langage naturel. Chaque réponse porte un score de
+            confiance et cite ses sources : document, page et section, consultables en un clic.
           </p>
         </div>
         <DemoButton
@@ -167,6 +173,35 @@ export function RagAssistantDemo() {
               )
             }
           >
+            {/* Perspective de lecture */}
+            <div className="border-b border-slate-800/80 p-5">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <label className="min-w-0 flex-1">
+                  <span className={`${T.label} flex items-center gap-1.5`}>
+                    <UserCog size={12} strokeWidth={2} />
+                    Perspective de lecture
+                  </span>
+                  <select
+                    value={persona}
+                    onChange={(event) => setPersona(event.target.value)}
+                    disabled={isBusy}
+                    data-testid="rag-persona"
+                    className="mt-1.5 w-full rounded-lg border border-slate-800/80 bg-[#080B12] px-3.5 py-2.5 text-sm text-slate-100 outline-none transition-colors duration-200 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
+                  >
+                    {RAG_PERSONAS.map((item) => (
+                      <option key={item.id} value={item.id} className="bg-[#111827]">
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <p className="mt-2 text-xs text-slate-400">
+                {RAG_PERSONAS.find((item) => item.id === persona)?.hint} — même base documentaire, angle de
+                restitution différent.
+              </p>
+            </div>
+
             {/* Questions suggérées */}
             <div className="border-b border-slate-800/80 p-5">
               <SectionLabel>Questions fréquentes — cliquez pour interroger la base</SectionLabel>
@@ -208,9 +243,16 @@ export function RagAssistantDemo() {
 
               {messages.map((message) =>
                 message.role === 'user' ? (
-                  <UserMessage key={message.id} content={message.content} />
+                  <UserMessage key={message.id} content={message.content} persona={message.persona} />
                 ) : (
-                  <AssistantMessage key={message.id} content={message.content} sources={message.sources} />
+                  <AssistantMessage
+                    key={message.id}
+                    content={message.content}
+                    sources={message.sources}
+                    confidence={message.confidence}
+                    verdict={message.verdict}
+                    onOpenSource={setOpenSource}
+                  />
                 ),
               )}
 
@@ -299,17 +341,30 @@ export function RagAssistantDemo() {
           </Panel>
         </motion.div>
       </div>
+
+      {/* ── Volet d'aperçu du document source ─────────────────────────────── */}
+      <SideDrawer
+        open={Boolean(openSource)}
+        onClose={() => setOpenSource(null)}
+        title={openSource?.document ?? ''}
+        subtitle={openSource ? `Page ${openSource.page} · ${openSource.section}` : ''}
+        icon={FileText}
+        testId="rag-source-drawer"
+      >
+        {openSource && <SourcePreview source={openSource} />}
+      </SideDrawer>
     </motion.div>
   );
 }
 
 /* ────────────────────────────── Sous-composants ────────────────────────── */
 
-function UserMessage({ content }) {
+function UserMessage({ content, persona }) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end gap-3">
       <div className="max-w-[85%] rounded-2xl rounded-tr-sm border border-blue-500/25 bg-blue-500/10 px-4 py-3">
         <p className="text-sm leading-relaxed text-slate-100">{content}</p>
+        {persona && <p className="mt-1.5 text-[11px] text-blue-300">{persona}</p>}
       </div>
       <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-800/80 bg-slate-800/50">
         <User size={15} strokeWidth={1.75} className="text-slate-300" />
@@ -318,7 +373,7 @@ function UserMessage({ content }) {
   );
 }
 
-function AssistantMessage({ content, sources, streaming = false }) {
+function AssistantMessage({ content, sources, confidence, verdict, streaming = false, onOpenSource }) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3">
       <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-800/80 bg-slate-800/50">
@@ -334,7 +389,14 @@ function AssistantMessage({ content, sources, streaming = false }) {
             />
           )}
         </div>
-        {sources && sources.length > 0 && <SourceList sources={sources} />}
+
+        {confidence !== undefined && (
+          <div className={`${S.card} mt-2.5 p-3`} data-testid="rag-confidence">
+            <ConfidenceMeter label="Pertinence de la source" value={confidence} verdict={verdict} />
+          </div>
+        )}
+
+        {sources && sources.length > 0 && <SourceList sources={sources} onOpenSource={onOpenSource} />}
       </div>
     </motion.div>
   );
@@ -361,8 +423,11 @@ function RichText({ text }) {
   );
 }
 
-/** Tags de sources : repliés par défaut, dépliables pour lire l'extrait cité. */
-function SourceList({ sources }) {
+/**
+ * Tags de sources. Le chevron déplie l'extrait cité ; le libellé ouvre le
+ * volet latéral avec la page entière, passage surligné.
+ */
+function SourceList({ sources, onOpenSource }) {
   const [openIndex, setOpenIndex] = useState(null);
 
   return (
@@ -376,25 +441,34 @@ function SourceList({ sources }) {
         const isOpen = openIndex === index;
         return (
           <motion.div key={`${source.document}-${source.page}`} variants={staggerItem}>
-            <button
-              type="button"
-              onClick={() => setOpenIndex(isOpen ? null : index)}
-              data-testid={`rag-source-${index}`}
-              className={`${S.cardInteractive} flex w-full items-center gap-2.5 px-3 py-2 text-left`}
-            >
-              <Quote size={13} strokeWidth={2} className="shrink-0 text-emerald-400" />
-              <span className="min-w-0 flex-1 truncate font-data text-[11px] text-slate-300">
-                {source.document} — Page {source.page}, {source.section}
-              </span>
-              <span className="hidden shrink-0 font-data text-[10px] tabular-nums text-emerald-400 sm:inline">
-                {source.relevance} %
-              </span>
-              <ChevronDown
-                size={14}
-                strokeWidth={2}
-                className={`shrink-0 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
+            <div className={`${S.cardInteractive} flex items-center gap-1`}>
+              <button
+                type="button"
+                onClick={() => onOpenSource?.(source)}
+                data-testid={`rag-source-${index}`}
+                className="flex min-w-0 flex-1 items-center gap-2.5 rounded-l-xl px-3 py-2 text-left focus-visible:outline-none"
+              >
+                <Quote size={13} strokeWidth={2} className="shrink-0 text-emerald-400" />
+                <span className="min-w-0 flex-1 truncate font-data text-[11px] text-slate-300">
+                  {source.document} — Page {source.page}, {source.section}
+                </span>
+                <span className="hidden shrink-0 font-data text-[10px] tabular-nums text-emerald-400 sm:inline">
+                  {source.relevance} %
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setOpenIndex(isOpen ? null : index)}
+                aria-label={isOpen ? 'Replier l’extrait' : 'Déplier l’extrait'}
+                className="shrink-0 rounded-md p-2 text-slate-400 transition-colors duration-200 hover:text-slate-200"
+              >
+                <ChevronDown
+                  size={14}
+                  strokeWidth={2}
+                  className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+            </div>
 
             <AnimatePresence initial={false}>
               {isOpen && (
@@ -415,6 +489,69 @@ function SourceList({ sources }) {
         );
       })}
     </motion.div>
+  );
+}
+
+/** Aperçu de la page source, passage cité surligné dans son contexte. */
+function SourcePreview({ source }) {
+  return (
+    <div className="space-y-5">
+      <div className={`${S.card} p-4`}>
+        <ConfidenceMeter label="Pertinence de ce passage" value={source.relevance} />
+        <dl className="mt-3 space-y-1.5 border-t border-slate-800/80 pt-3">
+          {[
+            ['Document', source.document],
+            ['Page', String(source.page)],
+            ['Section', source.section],
+            ['Dernière mise à jour', source.updatedAt],
+          ].map(([label, value]) => (
+            <div key={label} className="flex items-baseline justify-between gap-4">
+              <dt className="text-xs text-slate-400">{label}</dt>
+              <dd className="text-right font-data text-xs text-slate-200">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div>
+        <SectionLabel>Extrait du document — passage cité surligné</SectionLabel>
+        {/* Fond clair volontaire : on reproduit la page telle qu'elle serait lue. */}
+        <div className="mt-2.5 rounded-xl border border-slate-800/80 bg-[#F8FAFC] p-6 shadow-inner">
+          <div className="space-y-3">
+            {source.pageContent?.map((block, index) =>
+              block.highlight ? (
+                <motion.p
+                  key={index}
+                  initial={{ backgroundColor: 'rgba(250, 204, 21, 0)' }}
+                  animate={{ backgroundColor: 'rgba(250, 204, 21, 0.45)' }}
+                  transition={{ duration: 0.5, delay: 0.25 }}
+                  className="-mx-1.5 rounded px-1.5 py-1 text-sm font-medium leading-relaxed text-slate-900"
+                >
+                  {block.text}
+                </motion.p>
+              ) : block.heading ? (
+                <p key={index} className="pt-1 text-xs font-bold uppercase tracking-wide text-slate-500">
+                  {block.text}
+                </p>
+              ) : (
+                <p key={index} className="text-sm leading-relaxed text-slate-700">
+                  {block.text}
+                </p>
+              ),
+            )}
+          </div>
+          <p className="mt-6 border-t border-slate-200 pt-3 text-center font-data text-[10px] tabular-nums text-slate-400">
+            {source.document} — page {source.page}
+          </p>
+        </div>
+      </div>
+
+      <p className="text-xs leading-relaxed text-slate-400">
+        En production, ce volet ouvre le document réel à la bonne page depuis votre GED, SharePoint ou Drive, avec les
+        droits d’accès de l’utilisateur connecté : personne ne voit un extrait d’un document qu’il n’a pas le droit de
+        consulter.
+      </p>
+    </div>
   );
 }
 

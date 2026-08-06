@@ -2,20 +2,25 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Building2,
+  CalendarClock,
   Check,
   Globe,
   Layers3,
+  Linkedin,
   Mail,
   Radar,
   RotateCcw,
   Search,
   Sparkles,
   Target,
+  UploadCloud,
+  UserRound,
   X,
   Zap,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { S, T, TAP, staggerContainer, staggerItem } from './demoTokens';
-import { CopyButton, DemoButton, EmptyState, Panel, SectionLabel, StatusBadge } from './DemoUI';
+import { ConfirmModal, CopyButton, DemoButton, EmptyState, Panel, SectionLabel, StatusBadge } from './DemoUI';
 import { useProcessingSequence } from './useProcessingSequence';
 import { PROSPECT_SAMPLES, SCAN_STEPS } from './data/prospectsData';
 
@@ -28,11 +33,17 @@ import { PROSPECT_SAMPLES, SCAN_STEPS } from './data/prospectsData';
 export function ProspectScoringDemo() {
   const [url, setUrl] = useState('');
   const [prospect, setProspect] = useState(null);
+  const [crmOpen, setCrmOpen] = useState(false);
+  const [crmTarget, setCrmTarget] = useState('HubSpot');
+  const [pushedTo, setPushedTo] = useState(null);
+  const [activeStep, setActiveStep] = useState(0);
   const { status, currentStep, start, reset } = useProcessingSequence(SCAN_STEPS);
 
   const runScan = (sample, typedUrl) => {
     setUrl(typedUrl ?? sample.domain);
     setProspect(null);
+    setPushedTo(null);
+    setActiveStep(0);
     // TODO: Remplacer par POST /api/prospects/enrich → webhook n8n
     // `receipty-prospect-enrich` (crawl + Wappalyzer + Pappers + GPT-4o).
     start(() => setProspect(sample));
@@ -53,6 +64,8 @@ export function ProspectScoringDemo() {
     reset();
     setProspect(null);
     setUrl('');
+    setPushedTo(null);
+    setActiveStep(0);
   };
 
   return (
@@ -322,38 +335,151 @@ export function ProspectScoringDemo() {
                 </Panel>
               </motion.div>
 
+              {/* ── Décideurs à contacter ─────────────────────────────── */}
               <motion.div variants={staggerItem}>
                 <Panel
-                  title="Email de prospection généré"
-                  subtitle="Personnalisé à partir des signaux relevés"
-                  icon={Mail}
+                  title="Décideurs à contacter"
+                  subtitle="Trois profils, trois angles d’approche distincts"
+                  icon={UserRound}
+                >
+                  <ul className="divide-y divide-slate-800/80">
+                    {prospect.decisionMakers.map((person) => (
+                      <li key={person.role} className="p-5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-heading text-sm font-semibold text-slate-100">{person.role}</h3>
+                          <StatusBadge tone={person.priority.includes('final') || person.priority.includes('unique') ? 'success' : 'neutral'}>
+                            {person.priority}
+                          </StatusBadge>
+                        </div>
+                        <p className="mt-1 font-data text-xs text-slate-400">{person.name}</p>
+                        <p className="mt-2 text-xs leading-relaxed text-slate-400">
+                          <span className="font-semibold text-slate-300">Ce qui le concerne — </span>
+                          {person.lever}
+                        </p>
+                        <div className={`${S.well} mt-2.5 flex items-start gap-3 p-3.5`}>
+                          <p className="min-w-0 flex-1 text-xs leading-relaxed text-slate-300">« {person.pitch} »</p>
+                          <CopyButton text={person.pitch} label="Copier" copiedLabel="Copié" className="shrink-0 px-2.5 py-1.5 text-xs" />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              </motion.div>
+
+              {/* ── Séquence multicanale ──────────────────────────────── */}
+              <motion.div variants={staggerItem}>
+                <Panel
+                  title="Séquence de prospection multicanale"
+                  subtitle="3 étapes sur 7 jours — LinkedIn, email, relance à valeur ajoutée"
+                  icon={CalendarClock}
                   action={
                     <CopyButton
-                      text={`Objet : ${prospect.email.subject}\n\n${prospect.email.body}`}
-                      label="Copier l’email"
-                      copiedLabel="Copié"
-                      testId="prospect-copy-email"
+                      text={prospect.sequence
+                        .map((step) => `${step.day} — ${step.channel}\nObjet : ${step.subject}\n\n${step.body}`)
+                        .join('\n\n———\n\n')}
+                      label="Copier la séquence"
+                      copiedLabel="Copiée"
+                      testId="prospect-copy-sequence"
                     />
                   }
                 >
-                  <div className="space-y-3 p-5">
-                    <div className={`${S.well} p-4`}>
-                      <p className={T.label}>Objet</p>
-                      <p className="mt-1 text-sm font-medium text-slate-100">{prospect.email.subject}</p>
+                  <div className="p-5">
+                    {/* Frise des étapes */}
+                    <div className="flex gap-2" data-testid="prospect-sequence-steps">
+                      {prospect.sequence.map((step, index) => {
+                        const isActive = index === activeStep;
+                        const Icon = index === 0 ? Linkedin : index === 1 ? Mail : Sparkles;
+                        return (
+                          <motion.button
+                            key={step.day}
+                            whileTap={TAP}
+                            type="button"
+                            onClick={() => setActiveStep(index)}
+                            data-testid={`prospect-step-${index}`}
+                            className={`flex-1 rounded-lg border px-3 py-2.5 text-left transition-colors duration-200
+                              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60
+                              ${isActive
+                                ? 'border-blue-500/50 bg-blue-500/10'
+                                : 'border-slate-800/80 bg-slate-800/30 hover:border-slate-700'}`}
+                          >
+                            <span className="flex items-center gap-1.5">
+                              <Icon size={13} strokeWidth={2} className={isActive ? 'text-blue-400' : 'text-slate-400'} />
+                              <span
+                                className={`font-data text-[11px] font-semibold tabular-nums ${
+                                  isActive ? 'text-blue-200' : 'text-slate-300'
+                                }`}
+                              >
+                                {step.day}
+                              </span>
+                            </span>
+                            <span className="mt-1 block truncate text-[11px] text-slate-400">{step.channel}</span>
+                          </motion.button>
+                        );
+                      })}
                     </div>
-                    <div className={`${S.well} p-4`}>
-                      <p className={T.label}>Corps du message</p>
-                      <p
-                        className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-300"
-                        data-testid="prospect-email-body"
+
+                    {/* Contenu de l'étape sélectionnée */}
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={activeStep}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.2 }}
+                        className="mt-4 space-y-3"
                       >
-                        {prospect.email.body}
-                      </p>
-                    </div>
-                    <p className="text-xs text-slate-400">
-                      Chaque email reprend au moins deux éléments factuels observés sur le site : c’est ce qui fait la
-                      différence entre une approche personnalisée et un publipostage.
+                        <p className="text-xs text-slate-400">
+                          <span className="font-semibold text-slate-300">Objectif — </span>
+                          {prospect.sequence[activeStep].objective}
+                        </p>
+                        <div className={`${S.well} p-4`}>
+                          <p className={T.label}>Objet</p>
+                          <p className="mt-1 text-sm font-medium text-slate-100">
+                            {prospect.sequence[activeStep].subject}
+                          </p>
+                        </div>
+                        <div className={`${S.well} p-4`}>
+                          <div className="flex items-center justify-between gap-3">
+                            <p className={T.label}>Message</p>
+                            <CopyButton
+                              text={prospect.sequence[activeStep].body}
+                              label="Copier"
+                              copiedLabel="Copié"
+                              className="px-2.5 py-1.5 text-xs"
+                              testId="prospect-copy-step"
+                            />
+                          </div>
+                          <p
+                            className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-300"
+                            data-testid="prospect-step-body"
+                          >
+                            {prospect.sequence[activeStep].body}
+                          </p>
+                        </div>
+                      </motion.div>
+                    </AnimatePresence>
+
+                    <p className="mt-4 text-xs leading-relaxed text-slate-400">
+                      Chaque message reprend au moins deux éléments factuels observés sur le site : c’est ce qui fait
+                      la différence entre une approche personnalisée et un publipostage. La séquence s’interrompt
+                      automatiquement dès que le prospect répond.
                     </p>
+
+                    <div className="mt-5 flex flex-wrap gap-2.5 border-t border-slate-800/80 pt-5">
+                      {pushedTo ? (
+                        <StatusBadge tone="success" icon={Check} className="self-center">
+                          Séquence poussée vers {pushedTo}
+                        </StatusBadge>
+                      ) : (
+                        <DemoButton
+                          icon={UploadCloud}
+                          onClick={() => setCrmOpen(true)}
+                          data-testid="prospect-crm-push"
+                        >
+                          Pousser vers le CRM
+                        </DemoButton>
+                      )}
+                    </div>
                   </div>
                 </Panel>
               </motion.div>
@@ -361,6 +487,81 @@ export function ProspectScoringDemo() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Export CRM ──────────────────────────────────────────────────── */}
+      <ConfirmModal
+        open={crmOpen}
+        onClose={() => setCrmOpen(false)}
+        title="Pousser vers votre CRM"
+        icon={UploadCloud}
+        testId="prospect-crm-modal"
+        footer={
+          <>
+            <DemoButton variant="ghost" onClick={() => setCrmOpen(false)}>
+              Annuler
+            </DemoButton>
+            <DemoButton
+              variant="success"
+              icon={UploadCloud}
+              data-testid="prospect-crm-confirm"
+              onClick={() => {
+                // TODO: Remplacer par l'appel réel à l'API du CRM (HubSpot
+                // /crm/v3/objects/companies, Salesforce sObject) via le
+                // webhook n8n `receipty-crm-push`.
+                setCrmOpen(false);
+                setPushedTo(crmTarget);
+                toast.success(`Fiche créée dans ${crmTarget} (simulation)`, {
+                  description: `${prospect?.company.name} — 3 contacts et séquence 3 étapes programmée`,
+                });
+              }}
+            >
+              Confirmer l’envoi
+            </DemoButton>
+          </>
+        }
+      >
+        {prospect && (
+          <div className="space-y-4">
+            <div>
+              <span className={T.label}>Destination</span>
+              <div className="mt-1.5 grid grid-cols-2 gap-2">
+                {['HubSpot', 'Salesforce'].map((target) => (
+                  <motion.button
+                    key={target}
+                    whileTap={TAP}
+                    type="button"
+                    onClick={() => setCrmTarget(target)}
+                    className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors duration-200
+                      ${crmTarget === target
+                        ? 'border-blue-500/50 bg-blue-500/10 text-blue-200'
+                        : 'border-slate-800/80 bg-slate-800/30 text-slate-300 hover:border-slate-700'}`}
+                  >
+                    {target}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+            <dl className={`${S.card} divide-y divide-slate-800/60`}>
+              {[
+                ['Entreprise', prospect.company.name],
+                ['SIREN', prospect.company.siren],
+                ['Score de pertinence', `${prospect.score.global} / 100`],
+                ['Contacts créés', `${prospect.decisionMakers.length}`],
+                ['Séquence programmée', `${prospect.sequence.length} étapes sur 7 jours`],
+              ].map(([label, value]) => (
+                <div key={label} className="flex items-baseline justify-between gap-4 px-3.5 py-2.5">
+                  <dt className="text-xs text-slate-400">{label}</dt>
+                  <dd className="text-right font-data text-xs tabular-nums text-slate-100">{value}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="text-xs leading-relaxed text-slate-400">
+              La fiche entreprise, les contacts et la séquence sont créés en une seule opération. Aucun doublon
+              n’est créé si le SIREN existe déjà : la fiche existante est enrichie.
+            </p>
+          </div>
+        )}
+      </ConfirmModal>
     </motion.div>
   );
 }

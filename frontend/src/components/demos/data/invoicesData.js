@@ -50,7 +50,7 @@ export const INVOICE_SAMPLES = [
       dueDate: '04/02/2026',
       paymentTerms: '30 jours nets',
       paymentMethod: 'Prélèvement SEPA',
-      iban: 'FR76 3000 4008 2800 0112 3456 789',
+      iban: 'FR76 1741 8000 0100 9876 5432 101',
       purchaseOrder: 'BC-2026-014',
       currency: 'EUR',
       amountHT: '1 248,50',
@@ -73,6 +73,22 @@ export const INVOICE_SAMPLES = [
       { label: 'HT + TVA = TTC', status: 'ok', detail: '1 248,50 + 249,70 = 1 498,20' },
       { label: 'SIREN vérifié (base Sirene)', status: 'ok', detail: 'OVH SAS — actif' },
       { label: 'Doublon dans l’ERP', status: 'ok', detail: 'Aucune facture identique sur 24 mois' },
+    ],
+    anomalies: [
+      {
+        id: 'iban-change',
+        severity: 'critical',
+        title: 'Changement d’IBAN détecté',
+        detail:
+          'L’IBAN de cette facture diffère de celui utilisé pour les 14 derniers règlements à OVH SAS. C’est le mode opératoire le plus courant de la fraude au faux fournisseur.',
+        evidence: [
+          { label: 'IBAN habituel', value: 'FR76 3000 4008 2800 0112 3456 789' },
+          { label: 'IBAN de cette facture', value: 'FR76 1741 8000 0100 9876 5432 101' },
+        ],
+        recommendation:
+          'Confirmer par téléphone auprès d’un contact connu, en composant un numéro déjà enregistré — jamais celui indiqué sur la facture, ni par réponse à l’email reçu.',
+        blocking: true,
+      },
     ],
   },
   {
@@ -114,6 +130,22 @@ export const INVOICE_SAMPLES = [
       { label: 'HT + TVA = TTC', status: 'ok', detail: '2 350,00 + 470,00 = 2 820,00' },
       { label: 'SIREN vérifié (base Sirene)', status: 'ok', detail: 'Cabinet Delaunay & Associés — actif' },
       { label: 'Échéance rapprochée', status: 'warn', detail: 'Paiement à 15 jours — à prioriser dans le run hebdo' },
+    ],
+    anomalies: [
+      {
+        id: 'duplicate',
+        severity: 'warning',
+        title: 'Facture potentiellement en double',
+        detail:
+          'Une facture du même fournisseur, pour un montant identique, a déjà été enregistrée ce trimestre. Les deux documents couvrent des périodes qui se recouvrent partiellement.',
+        evidence: [
+          { label: 'Déjà enregistrée', value: 'FA-2026-0188 · 2 820,00 € TTC · 03/01/2026' },
+          { label: 'Document en cours', value: 'FA-2026-0219 · 2 820,00 € TTC · 31/01/2026' },
+        ],
+        recommendation:
+          'Comparer les périodes de prestation avant validation. Sur un portefeuille fournisseurs classique, les doublons représentent 0,8 à 1,3 % des montants réglés.',
+        blocking: false,
+      },
     ],
   },
   {
@@ -158,10 +190,30 @@ export const INVOICE_SAMPLES = [
       { label: 'Rapprochement bon de commande', status: 'ok', detail: 'CH-2026-STG-07 — 6/6 lignes rapprochées' },
       { label: 'Écart de prix unitaire', status: 'warn', detail: 'Ciment : +3,2 % vs dernière commande' },
     ],
+    anomalies: [
+      {
+        id: 'price-variance',
+        severity: 'info',
+        title: 'Écart de prix unitaire sur une ligne',
+        detail:
+          'Le ciment CEM II est facturé 8,45 € l’unité contre 8,19 € sur la commande précédente, soit +3,2 %. L’écart reste sous le seuil d’alerte fixé à 5 %.',
+        evidence: [
+          { label: 'Commande précédente', value: '8,19 € · 15/11/2025' },
+          { label: 'Facture en cours', value: '8,45 € · 12/01/2026' },
+        ],
+        recommendation:
+          'Signalé pour information : aucune action requise. L’écart est tracé pour alimenter la prochaine négociation annuelle.',
+        blocking: false,
+      },
+    ],
   },
 ];
 
-/** Champs affichés dans l'onglet « Formulaire », dans l'ordre de saisie métier. */
+/**
+ * Champs d'identité affichés dans l'onglet « Formulaire ».
+ * Les montants n'y figurent pas : ils sont recalculés à partir des lignes et
+ * du taux de TVA, jamais saisis en double (voir `computeTotals`).
+ */
 export const INVOICE_FORM_FIELDS = [
   { key: 'supplier', label: 'Nom du fournisseur' },
   { key: 'siren', label: 'Numéro SIREN', mono: true },
@@ -171,16 +223,185 @@ export const INVOICE_FORM_FIELDS = [
   { key: 'dueDate', label: 'Date d’échéance', mono: true },
   { key: 'paymentTerms', label: 'Conditions de règlement' },
   { key: 'purchaseOrder', label: 'Bon de commande', mono: true },
-  { key: 'amountHT', label: 'Montant HT', mono: true, suffix: 'EUR' },
-  { key: 'vatRate', label: 'Taux de TVA', mono: true, suffix: '%' },
-  { key: 'vatAmount', label: 'Montant TVA', mono: true, suffix: 'EUR' },
-  { key: 'amountTTC', label: 'Montant TTC', mono: true, suffix: 'EUR' },
 ];
 
-/** Construit la charge utile envoyée à l'ERP (onglet « JSON brut ERP »). */
-export function buildErpPayload(sample, extracted) {
-  const toNumber = (value) => Number(String(value).replace(/\s/g, '').replace(',', '.')) || 0;
+/* ──────────────── Recalcul en direct (correction humaine) ──────────────── */
 
+/** « 1 248,50 » → 1248.5 (gère l'espace fine insécable des formats français). */
+export function parseAmount(value) {
+  if (typeof value === 'number') return value;
+  const normalized = String(value ?? '').replace(/\s/g, '').replace(',', '.');
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/** 1248.5 → « 1 248,50 ». */
+export function formatAmount(value) {
+  return new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number.isFinite(value) ? value : 0);
+}
+
+/**
+ * Recalcule les totaux à partir des lignes et du taux de TVA.
+ * Utilisé à chaque correction manuelle : le HT découle des lignes, la TVA du
+ * taux, le TTC de la somme des deux. Aucune valeur n'est saisie deux fois.
+ */
+export function computeTotals(lines, vatRate) {
+  const amountHT = lines.reduce((sum, line) => sum + parseAmount(line.qty) * parseAmount(line.unitPrice), 0);
+  const rate = parseAmount(vatRate);
+  // Arrondi au centime à chaque étape, comme le fait un logiciel comptable.
+  const roundedHT = Math.round(amountHT * 100) / 100;
+  const vatAmount = Math.round(roundedHT * rate) / 100;
+  return {
+    amountHT: roundedHT,
+    vatAmount,
+    amountTTC: Math.round((roundedHT + vatAmount) * 100) / 100,
+  };
+}
+
+/* ───────────────────────── Exports multi-ERP ───────────────────────────── */
+
+/** Cibles proposées dans le sélecteur d'export. */
+export const ERP_TARGETS = [
+  { id: 'receipty', label: 'Format Standard Receipty' },
+  { id: 'pennylane', label: 'Pennylane' },
+  { id: 'quickbooks', label: 'QuickBooks' },
+  { id: 'sage100', label: 'Sage 100' },
+];
+
+/**
+ * Construit la charge utile pour la cible choisie.
+ *
+ * Les quatre structures diffèrent réellement — c'est tout l'intérêt de la
+ * démonstration : le connecteur absorbe les spécificités de chaque outil et le
+ * client n'a rien à remapper.
+ *
+ * TODO: Ces charges utiles sont posées côté client pour l'aperçu. En
+ * production, elles sont fabriquées par le webhook n8n `receipty-erp-push` qui
+ * appelle ensuite l'API du logiciel cible.
+ */
+export function buildErpPayload(target, sample, extracted, lines, totals) {
+  const siren = String(extracted.siren).replace(/\s/g, '');
+  const maskedIban = `${extracted.iban.slice(0, 9)} •••• •••• ${extracted.iban.slice(-4)}`;
+  const rate = parseAmount(extracted.vatRate);
+  const isoDate = (french) => {
+    const [day, month, year] = String(french).split('/');
+    return year && month && day ? `${year}-${month}-${day}` : french;
+  };
+
+  if (target === 'pennylane') {
+    return {
+      supplier_invoice: {
+        external_id: `receipty-${extracted.invoiceNumber}`,
+        invoice_number: extracted.invoiceNumber,
+        date: isoDate(extracted.invoiceDate),
+        deadline: isoDate(extracted.dueDate),
+        currency: extracted.currency,
+        currency_amount_before_tax: totals.amountHT,
+        currency_tax: totals.vatAmount,
+        currency_amount: totals.amountTTC,
+        journal_code: 'ACH',
+        supplier: { name: extracted.supplier, reg_no: siren, vat_number: extracted.vatNumber },
+        line_items: lines.map((line) => ({
+          label: line.designation,
+          quantity: parseAmount(line.qty),
+          unit_price: parseAmount(line.unitPrice),
+          amount: Math.round(parseAmount(line.qty) * parseAmount(line.unitPrice) * 100) / 100,
+          vat_rate: `${rate.toFixed(2)}`,
+          ledger_account_number: extracted.analyticAccount.split(' — ')[0],
+        })),
+        payment: { method: extracted.paymentMethod, iban: maskedIban },
+      },
+    };
+  }
+
+  if (target === 'quickbooks') {
+    return {
+      Bill: {
+        DocNumber: extracted.invoiceNumber,
+        TxnDate: isoDate(extracted.invoiceDate),
+        DueDate: isoDate(extracted.dueDate),
+        CurrencyRef: { value: extracted.currency },
+        VendorRef: { name: extracted.supplier, value: siren },
+        PrivateNote: `Importé par Receipty — BC ${extracted.purchaseOrder}`,
+        Line: lines.map((line, index) => ({
+          Id: String(index + 1),
+          DetailType: 'AccountBasedExpenseLineDetail',
+          Description: line.designation,
+          Amount: Math.round(parseAmount(line.qty) * parseAmount(line.unitPrice) * 100) / 100,
+          AccountBasedExpenseLineDetail: {
+            AccountRef: { name: extracted.category, value: extracted.analyticAccount.split(' — ')[0] },
+            TaxCodeRef: { value: `TVA${rate.toFixed(0)}` },
+            BillableStatus: 'NotBillable',
+          },
+        })),
+        TxnTaxDetail: {
+          TotalTax: totals.vatAmount,
+          TaxLine: [
+            {
+              Amount: totals.vatAmount,
+              DetailType: 'TaxLineDetail',
+              TaxLineDetail: { TaxPercent: rate, NetAmountTaxable: totals.amountHT },
+            },
+          ],
+        },
+        TotalAmt: totals.amountTTC,
+      },
+    };
+  }
+
+  if (target === 'sage100') {
+    const chargeAccount = extracted.analyticAccount.split(' — ')[0];
+    return {
+      ecriture: {
+        journal: 'ACH',
+        codeJournal: 'ACHATS',
+        dateEcriture: extracted.invoiceDate,
+        dateEcheance: extracted.dueDate,
+        piece: extracted.invoiceNumber,
+        libelle: `${extracted.supplier} — ${extracted.invoiceNumber}`,
+        devise: extracted.currency,
+        reference: extracted.purchaseOrder,
+      },
+      tiers: {
+        compteTiers: `401${siren.slice(0, 3)}`,
+        intitule: extracted.supplier,
+        numeroSiren: siren,
+        numeroTva: extracted.vatNumber,
+        modeReglement: extracted.paymentMethod,
+      },
+      // Écriture équilibrée : charge + TVA déductible au débit, fournisseur au crédit.
+      lignes: [
+        {
+          compteGeneral: chargeAccount,
+          libelle: extracted.category,
+          sens: 'D',
+          montant: totals.amountHT,
+        },
+        {
+          compteGeneral: '445660',
+          libelle: `TVA déductible ${rate.toFixed(2)} %`,
+          sens: 'D',
+          montant: totals.vatAmount,
+        },
+        {
+          compteGeneral: `401${siren.slice(0, 3)}`,
+          libelle: extracted.supplier,
+          sens: 'C',
+          montant: totals.amountTTC,
+        },
+      ],
+      controleEquilibre: {
+        totalDebit: Math.round((totals.amountHT + totals.vatAmount) * 100) / 100,
+        totalCredit: totals.amountTTC,
+        equilibre: Math.abs(totals.amountHT + totals.vatAmount - totals.amountTTC) < 0.01,
+      },
+    };
+  }
+
+  // Format standard Receipty — pivot neutre, indépendant de tout éditeur.
   return {
     schema: 'receipty.invoice.v2',
     source: {
@@ -191,10 +412,10 @@ export function buildErpPayload(sample, extracted) {
     },
     supplier: {
       name: extracted.supplier,
-      siren: extracted.siren.replace(/\s/g, ''),
+      siren,
       vat_number: extracted.vatNumber,
       address: extracted.supplierAddress,
-      iban_masked: `${extracted.iban.slice(0, 9)} •••• •••• ${extracted.iban.slice(-4)}`,
+      iban_masked: maskedIban,
     },
     document: {
       number: extracted.invoiceNumber,
@@ -208,19 +429,25 @@ export function buildErpPayload(sample, extracted) {
     accounting: {
       category: extracted.category,
       analytic_account: extracted.analyticAccount,
-      amount_excl_vat: toNumber(extracted.amountHT),
-      vat_rate: toNumber(extracted.vatRate),
-      vat_amount: toNumber(extracted.vatAmount),
-      amount_incl_vat: toNumber(extracted.amountTTC),
+      amount_excl_vat: totals.amountHT,
+      vat_rate: rate,
+      vat_amount: totals.vatAmount,
+      amount_incl_vat: totals.amountTTC,
     },
-    lines: sample.lines.map((line, index) => ({
+    lines: lines.map((line, index) => ({
       position: index + 1,
       designation: line.designation,
-      quantity: line.qty,
-      unit_price: toNumber(line.unitPrice),
-      total_excl_vat: toNumber(line.total),
+      quantity: parseAmount(line.qty),
+      unit_price: parseAmount(line.unitPrice),
+      total_excl_vat: Math.round(parseAmount(line.qty) * parseAmount(line.unitPrice) * 100) / 100,
     })),
     controls: sample.checks.map((check) => ({ rule: check.label, status: check.status, detail: check.detail })),
+    anomalies: (sample.anomalies ?? []).map((anomaly) => ({
+      code: anomaly.id,
+      severity: anomaly.severity,
+      label: anomaly.title,
+      blocking: anomaly.blocking,
+    })),
     confidence: sample.confidence,
   };
 }

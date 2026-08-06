@@ -99,12 +99,12 @@ const SEO_DATA = {
   demos: {
     fr: {
       title: "Espace Démos — Accès privé | Receipty",
-      description: "Espace de démonstration privé réservé aux prospects Receipty : extraction de factures, assistant interne, propositions commerciales et scoring de prospects.",
+      description: "Espace de démonstration privé réservé aux prospects Receipty : extraction de factures, assistant interne, propositions commerciales, scoring de prospects et support omnicanal.",
       keywords: "",
     },
     en: {
       title: "Demo Space — Private access | Receipty",
-      description: "Private demo space for Receipty prospects: invoice extraction, internal assistant, sales proposals and prospect scoring.",
+      description: "Private demo space for Receipty prospects: invoice extraction, internal assistant, sales proposals, prospect scoring and omnichannel support.",
       keywords: "",
     },
     path: '/demos',

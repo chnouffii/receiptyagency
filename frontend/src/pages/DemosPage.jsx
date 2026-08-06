@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Bot, FileSignature, Radar, ScanLine } from 'lucide-react';
+import { Bot, FileSignature, Headset, Radar, ScanLine } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 // Styles propres à l'espace démo (police de données, scrollbars) — confinés
 // sous `.demo-root`, aucun impact sur le design system du site.
@@ -13,12 +13,13 @@ import { OcrInvoiceDemo } from '../components/demos/OcrInvoiceDemo';
 import { RagAssistantDemo } from '../components/demos/RagAssistantDemo';
 import { ProposalGeneratorDemo } from '../components/demos/ProposalGeneratorDemo';
 import { ProspectScoringDemo } from '../components/demos/ProspectScoringDemo';
+import { SupportTriageDemo } from '../components/demos/SupportTriageDemo';
 import { panelSwap } from '../components/demos/demoTokens';
 
 /**
  * Espace démo prospect — /demos
  *
- * Quatre démonstrations interactives, protégées par un code d'accès et
+ * Cinq démonstrations interactives, protégées par un code d'accès et
  * présentées dans un dark mode B2B autonome (l'espace ne suit pas le thème
  * clair du site public : c'est une salle de démonstration, pas une page
  * marketing).
@@ -52,6 +53,13 @@ const DEMOS = [
     shortTitle: 'Scoring',
     icon: Radar,
     Component: ProspectScoringDemo,
+  },
+  {
+    id: 'support',
+    title: 'Support omnicanal',
+    shortTitle: 'Support',
+    icon: Headset,
+    Component: SupportTriageDemo,
   },
 ];
 
@@ -114,7 +122,7 @@ export default function DemosPage() {
       <SEOHead
         page="demos"
         customTitle="Espace Démos — Receipty"
-        customDescription="Quatre démonstrations interactives des automatisations Receipty."
+        customDescription="Cinq démonstrations interactives des automatisations Receipty."
         canonicalPath="/demos"
         noIndex
       />

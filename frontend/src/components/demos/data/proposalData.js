@@ -61,6 +61,29 @@ export const PROPOSAL_SECTORS = [
   },
 ];
 
+/**
+ * Tons de rédaction. Le fond ne change pas — les chiffres, les phases et les
+ * livrables sont identiques —, seule la manière de présenter les enjeux varie
+ * selon l'interlocuteur visé.
+ */
+export const PROPOSAL_TONES = [
+  {
+    id: 'direct',
+    label: 'Synthétique & Direct',
+    hint: 'Pour un dirigeant qui lit en diagonale : constat, chiffre, décision',
+  },
+  {
+    id: 'technical',
+    label: 'Technique & Détaillé',
+    hint: 'Pour un DSI ou un responsable process : flux, intégrations, contrôles',
+  },
+  {
+    id: 'closing',
+    label: 'Orienté Closing',
+    hint: 'Pour lever la dernière objection : coût de l’inaction et prochaine étape',
+  },
+];
+
 /** Exemple pré-rempli par le bouton « Remplir avec un exemple réel ». */
 export const PROPOSAL_PREFILL = {
   companyName: 'Alsace Négoce Distribution',
@@ -180,11 +203,138 @@ const NUM = new Intl.NumberFormat('fr-FR');
 const roundTo = (value, step) => Math.round(value / step) * step;
 
 /**
+ * Rédige la synthèse des enjeux selon le ton demandé.
+ * Les mêmes faits (volumétrie, délai de règlement, outils, gains) sont
+ * réutilisés — c'est l'angle et la longueur qui changent.
+ */
+function writeSynthesis(tone, facts) {
+  const { companyName, sector, monthlyVolume, hoursSavedPerMonth, paymentDelay, tools, annualSaving } = facts;
+  const toolList = tools.length > 0 ? tools.join(', ') : null;
+
+  if (tone === 'direct') {
+    return [
+      `${companyName} traite environ ${NUM.format(monthlyVolume)} documents par mois. Le temps consacré à des `
+        + `tâches sans valeur ajoutée représente ${NUM.format(hoursSavedPerMonth)} heures mensuelles.`,
+      paymentDelay
+        ? `Le délai de règlement observé est de ${paymentDelay} jours de retard moyen. Ce n'est pas un problème de `
+          + `recouvrement : les relances existent, elles ne partent pas de façon systématique.`
+        : `Les irritants remontés ont un point commun : ce ne sont pas des problèmes d'outils, mais des ruptures `
+          + `entre des outils qui ne se parlent pas.`,
+      `Objectif : ${EUR.format(annualSaving)} d'économie annualisée, sans changer vos outils`
+        + `${toolList ? ` (${toolList})` : ''}. Trois phases, ${'12 semaines'} au total.`,
+    ];
+  }
+
+  if (tone === 'technical') {
+    return [
+      `${companyName} évolue dans ${sector.label.toLowerCase()}, où ${sector.context} concentrent la charge `
+        + `administrative. L'analyse des processus met en évidence des ruptures de chaîne entre systèmes : chaque `
+        + `point de rupture est aujourd'hui comblé par une reprise manuelle de la donnée, avec le risque de `
+        + `divergence que cela implique entre les sources.`,
+      `Volumétrie de référence : ${NUM.format(monthlyVolume)} documents par mois`
+        + `${paymentDelay ? `, délai de règlement moyen de ${paymentDelay} jours au-delà de l'échéance` : ''}. `
+        + `L'architecture cible repose sur une couche d'orchestration branchée en lecture et en écriture sur `
+        + `${toolList ? `vos systèmes existants (${toolList})` : 'vos systèmes existants'}, via API lorsqu'elles `
+        + `sont disponibles et par connecteur fichier à défaut. Aucun remplacement d'outil n'est nécessaire.`,
+      `Les traitements sont journalisés ligne à ligne, rejouables et réversibles : chaque exécution est traçable, `
+        + `et un incident sur un flux n'interrompt pas les autres. Les règles métier restent éditables par vos `
+        + `équipes après la mise en production, sans intervention de notre part. ${sector.benchmark}`,
+    ];
+  }
+
+  // Ton orienté closing : on chiffre ce que coûte le statu quo.
+  const monthlyLoss = Math.round(annualSaving / 12);
+  return [
+    `${companyName} perd aujourd'hui l'équivalent de ${NUM.format(hoursSavedPerMonth)} heures par mois sur des `
+      + `tâches qu'aucune de vos équipes n'a choisi de faire. Rapporté à l'année, cela représente `
+      + `${EUR.format(annualSaving)} — soit environ ${EUR.format(monthlyLoss)} chaque mois où la situation reste `
+      + `en l'état.`,
+    paymentDelay
+      ? `Le délai de règlement de ${paymentDelay} jours au-delà de l'échéance a un effet direct sur votre `
+        + `trésorerie. Ce n'est pas un problème de recouvrement : les relances existent, elles ne partent pas de `
+        + `manière systématique. C'est exactement le type d'écart qu'une automatisation supprime en quelques `
+        + `semaines, sans recruter et sans changer d'outil.`
+      : `Chaque mois qui passe reproduit le même volume de tâches manuelles, avec le même risque d'erreur. `
+        + `L'automatisation ne demande ni recrutement ni changement d'outil : elle relie ce que vous avez déjà.`,
+    `${sector.benchmark} La première phase dure deux semaines et produit un livrable exploitable même si vous `
+      + `décidez de vous arrêter là : la cartographie de vos flux et la mesure de départ vous appartiennent. `
+      + `C'est le point d'entrée le moins engageant pour vérifier les chiffres avancés ici.`,
+  ];
+}
+
+/**
+ * Construit la grille tarifaire à trois niveaux.
+ * Le niveau recommandé correspond au budget évoqué par le client ; les deux
+ * autres l'encadrent, pour donner un point de comparaison sans dévaloriser
+ * l'option centrale.
+ */
+function buildTiers(setupTotal, monthly, issues, tools) {
+  const levers = issues.map((issue) => issue.lever);
+  const integrationLabel =
+    tools.length > 0 ? `Connexion à ${tools.slice(0, 2).join(' et ')}` : 'Connexion à vos outils en place';
+
+  return [
+    {
+      id: 'starter',
+      name: 'Starter',
+      tagline: 'Le périmètre le plus court qui produit un résultat mesurable',
+      setup: roundTo(setupTotal * 0.6, 50),
+      monthly: roundTo(Math.max(monthly * 0.6, 99), 10),
+      duration: '4 semaines',
+      recommended: false,
+      features: [
+        { label: 'Cadrage et cartographie des flux', included: true },
+        { label: levers[0] ?? 'Automatisation du processus principal', included: true },
+        { label: integrationLabel, included: true },
+        { label: 'Tableau de bord de suivi', included: false },
+        { label: 'Formation des équipes', included: false },
+        { label: 'Comité de suivi mensuel', included: false },
+      ],
+    },
+    {
+      id: 'recommended',
+      name: 'Recommandée',
+      tagline: 'Le périmètre qui couvre l’ensemble des irritants relevés en rendez-vous',
+      setup: setupTotal,
+      monthly,
+      duration: '8 à 9 semaines',
+      recommended: true,
+      features: [
+        { label: 'Cadrage et cartographie des flux', included: true },
+        { label: `Automatisations retenues (${levers.length})`, included: true },
+        { label: integrationLabel, included: true },
+        { label: 'Tableau de bord de suivi', included: true },
+        { label: 'Formation des équipes (2 sessions)', included: true },
+        { label: 'Comité de suivi mensuel', included: true },
+      ],
+    },
+    {
+      id: 'premium',
+      name: 'Premium',
+      tagline: 'Pour industrialiser au-delà du périmètre initial',
+      setup: roundTo(setupTotal * 1.55, 50),
+      monthly: roundTo(Math.min(monthly * 1.6, 499), 10),
+      duration: '12 semaines',
+      recommended: false,
+      features: [
+        { label: 'Tout le contenu de l’option Recommandée', included: true },
+        { label: 'Automatisations complémentaires à la demande', included: true },
+        { label: 'Supervision renforcée et alertes temps réel', included: true },
+        { label: 'Support prioritaire sous 4 heures ouvrées', included: true },
+        { label: 'Comité de suivi bimensuel', included: true },
+        { label: 'Reprise de l’historique sur 24 mois', included: true },
+      ],
+    },
+  ];
+}
+
+/**
  * Compose la proposition commerciale.
  * @param {{companyName:string, sector:string, budget:string|number, notes:string,
  *          contactName?:string, contactRole?:string}} input
+ * @param {'direct'|'technical'|'closing'} tone
  */
-export function buildProposal(input) {
+export function buildProposal(input, tone = 'direct') {
   const sector = PROPOSAL_SECTORS.find((s) => s.id === input.sector) || PROPOSAL_SECTORS[PROPOSAL_SECTORS.length - 1];
   const notes = input.notes || '';
   const companyName = (input.companyName || '').trim() || 'Votre entreprise';
@@ -231,23 +381,15 @@ export function buildProposal(input) {
 
   const reference = `PROP-2026-${String(Math.abs(hashCode(companyName)) % 900 + 100)}`;
 
-  const synthesis = [
-    `${companyName} évolue dans ${sector.label.toLowerCase()}, un secteur où ${sector.context} concentrent l'essentiel `
-      + `de la charge administrative. Nos échanges ont mis en évidence un point commun à l'ensemble des irritants `
-      + `remontés : ce ne sont pas des problèmes d'outils, mais des ruptures de chaîne entre des outils qui ne se `
-      + `parlent pas. Chaque rupture est aujourd'hui comblée par une intervention humaine répétitive.`,
-    paymentDelay
-      ? `Le chiffre le plus parlant reste le délai de règlement observé : ${paymentDelay} jours de retard moyen. `
-        + `Sur un volume de ${NUM.format(monthlyVolume)} documents par mois, cet écart n'est pas un problème de `
-        + `recouvrement mais un problème de systématicité : les relances existent, elles ne sont simplement pas `
-        + `déclenchées de manière fiable et datée.`
-      : `Sur un volume estimé à ${NUM.format(monthlyVolume)} documents traités chaque mois, le temps consacré aux `
-        + `tâches sans valeur ajoutée représente l'équivalent de ${NUM.format(hoursSavedPerMonth)} heures mensuelles, `
-        + `soit près de ${NUM.format(Math.max(1, Math.round(hoursSavedPerMonth / 7)))} journées de travail par mois.`,
-    `${sector.benchmark} L'objectif de cette proposition n'est pas de remplacer vos outils existants`
-      + `${tools.length > 0 ? ` (${tools.join(', ')})` : ''}, mais de les relier par une couche d'automatisation `
-      + `pilotée, mesurable et réversible.`,
-  ];
+  const synthesis = writeSynthesis(tone, {
+    companyName,
+    sector,
+    monthlyVolume,
+    hoursSavedPerMonth,
+    paymentDelay,
+    tools,
+    annualSaving,
+  });
 
   const phases = [
     {
@@ -304,6 +446,9 @@ export function buildProposal(input) {
 
   return {
     reference,
+    tone,
+    toneLabel: PROPOSAL_TONES.find((item) => item.id === tone)?.label ?? '',
+    tiers: buildTiers(setupTotal, monthly, issues, tools),
     issuedAt: '06/08/2026',
     validUntil: '05/09/2026',
     companyName,
