@@ -1,0 +1,45 @@
+/* ============================================================
+   Espace démos (/demos) — styles propres à cet espace.
+
+   Ce fichier est importé par DemosPage.jsx uniquement : aucun style
+   du site public n'est modifié, et rien n'est ajouté à index.css ni à
+   tailwind.config.js. Tout est confiné sous `.demo-root`.
+
+   La typographie s'appuie sur le design system existant (design.css) :
+   Manrope pour le texte, Space Grotesk pour les titres via .font-heading.
+   Seule addition : une police de données pour les montants, SIREN,
+   dates et scores — pile système, aucune police à télécharger.
+   ============================================================ */
+
+/* Titres de l'espace démo.
+   Trois règles se disputent `.font-heading` dans le projet : Tailwind
+   (Montserrat), design.css (Space Grotesk) et App.css (Syne, chargé en
+   dernier et donc gagnant). On tranche ici pour l'espace démo seulement, en
+   reprenant la police du design system — la sélecteur imbriqué l'emporte par
+   spécificité sans rien changer au site public. */
+.demo-root .font-heading,
+.demo-root h1,
+.demo-root h2,
+.demo-root h3 {
+  font-family: 'Space Grotesk', 'Manrope', system-ui, sans-serif;
+}
+
+.demo-root .font-data {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+/* Chiffres de largeur constante : les colonnes de montants restent
+   alignées et une valeur qui change n'entraîne aucun décalage. */
+.demo-root .tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Barre d'onglets : défilement horizontal sans barre visible. */
+.demo-root .scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.demo-root .scrollbar-none::-webkit-scrollbar {
+  display: none;
+}

@@ -96,6 +96,19 @@ const SEO_DATA = {
     },
     path: '/faq',
   },
+  demos: {
+    fr: {
+      title: "Espace Démos — Accès privé | Receipty",
+      description: "Espace de démonstration privé réservé aux prospects Receipty : extraction de factures, assistant interne, propositions commerciales et scoring de prospects.",
+      keywords: "",
+    },
+    en: {
+      title: "Demo Space — Private access | Receipty",
+      description: "Private demo space for Receipty prospects: invoice extraction, internal assistant, sales proposals and prospect scoring.",
+      keywords: "",
+    },
+    path: '/demos',
+  },
   privacy: {
     fr: {
       title: "Politique de Confidentialité | Receipty",

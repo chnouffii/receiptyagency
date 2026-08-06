@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "sonner";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -27,6 +27,7 @@ const InstantQuotePage = lazy(() => import("./pages/InstantQuotePage"));
 const FAQPage = lazy(() => import("./pages/FAQPage"));
 const ClientLoginPage = lazy(() => import("./pages/ClientLoginPage"));
 const ClientDashboardPage = lazy(() => import("./pages/ClientDashboardPage"));
+const DemosPage = lazy(() => import("./pages/DemosPage"));
 
 function AppLayout({ children }) {
   return (
@@ -53,6 +54,16 @@ function ClientLayout({ children }) {
       <main>{children}</main>
     </>
   );
+}
+
+/**
+ * Le chat commercial est un outil du site public : on le masque dans l'espace
+ * démo prospect, qui a son propre parcours et son propre CTA.
+ */
+function GlobalChatWidget() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith('/demos')) return null;
+  return <ChatWidget />;
 }
 
 function AppContent() {
@@ -89,11 +100,13 @@ function AppContent() {
             <Route path="/faq" element={<AppLayout><FAQPage /></AppLayout>} />
             <Route path="/client" element={<ClientLayout><ClientLoginPage /></ClientLayout>} />
             <Route path="/client/dashboard" element={<ClientLayout><ClientDashboardPage /></ClientLayout>} />
+            {/* Espace démos prospect : mise en page autonome (en-tête et pied de page propres) */}
+            <Route path="/demos" element={<DemosPage />} />
             {/* Fallback: toute URL inconnue renvoie à l'accueil (évite l'écran blanc) */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
-        <ChatWidget />
+        <GlobalChatWidget />
       </BrowserRouter>
     </div>
   );
