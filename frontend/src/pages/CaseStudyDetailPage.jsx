@@ -3,8 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Target, Lightbulb, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { useTheme } from '../context/ThemeContext';
-import { Badge } from '../components/ui/badge';
 import SEOHead, { CaseStudySchema, BreadcrumbSchema } from '../components/SEOHead';
 import axios from 'axios';
 
@@ -13,23 +11,18 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 export default function CaseStudyDetailPage() {
   const { id } = useParams();
   const { lang } = useLanguage();
-  const { isDark } = useTheme();
   const [cs, setCs] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axios.get(`${API}/case-studies/${id}`)
-      .then(res => { setCs(res.data); setLoading(false); })
+      .then((res) => { setCs(res.data); setLoading(false); })
       .catch(() => setLoading(false));
   }, [id]);
 
-  if (loading) {
-    return <div className={`pt-24 min-h-screen flex items-center justify-center ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}><p className="text-gray-500">{lang === 'fr' ? 'Chargement...' : 'Loading...'}</p></div>;
-  }
-
-  if (!cs) {
-    return <div className={`pt-24 min-h-screen flex items-center justify-center ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}><p className="text-gray-400">{lang === 'fr' ? 'Étude de cas introuvable.' : 'Case study not found.'}</p></div>;
-  }
+  const center = { paddingTop: 96, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', color: 'var(--text3)' };
+  if (loading) return <div style={center}><p>{lang === 'fr' ? 'Chargement...' : 'Loading...'}</p></div>;
+  if (!cs) return <div style={center}><p>{lang === 'fr' ? 'Étude de cas introuvable.' : 'Case study not found.'}</p></div>;
 
   const title = lang === 'fr' ? cs.title_fr : (cs.title_en || cs.title_fr);
   const desc = lang === 'fr' ? cs.desc_fr : (cs.desc_en || cs.desc_fr);
@@ -39,7 +32,7 @@ export default function CaseStudyDetailPage() {
   const duration = lang === 'fr' ? (cs.duration_fr || '') : (cs.duration_en || cs.duration_fr || '');
   const team = lang === 'fr' ? (cs.team_fr || '') : (cs.team_en || cs.team_fr || '');
 
-  const sectionLabel = {
+  const L = {
     challenge: lang === 'fr' ? 'Le Défi' : 'The Challenge',
     solution: lang === 'fr' ? 'Notre Solution' : 'Our Solution',
     results: lang === 'fr' ? 'Résultats' : 'Results',
@@ -48,124 +41,93 @@ export default function CaseStudyDetailPage() {
     tech: lang === 'fr' ? 'Technologies' : 'Technologies',
     cta: lang === 'fr' ? 'Démarrer un projet similaire' : 'Start a similar project',
   };
-
   const caseTitle = lang === 'fr' ? (cs.title_fr || cs.title) : (cs.title_en || cs.title);
   const caseDesc = lang === 'fr' ? (cs.summary_fr || cs.summary || '') : (cs.summary_en || cs.summary || '');
 
+  const statCard = { borderRadius: 14, border: '1px solid var(--border)', background: 'var(--surface)', padding: 20 };
+  const statLabel = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--text3)', margin: 0 };
+  const statVal = { marginTop: 4, fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 700, color: 'var(--text)' };
+  const h2 = { fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, color: 'var(--text)', margin: 0 };
+  const body = { lineHeight: 1.7, color: 'var(--text2)', paddingLeft: 32, margin: 0 };
+
   return (
-    <div data-testid="case-detail-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
-      <SEOHead
-        page="cases"
-        customTitle={`${caseTitle} — Étude de Cas | Receipty`}
-        customDescription={caseDesc.slice(0, 160)}
-        canonicalPath={`/cases/${id}`}
-      />
-      <CaseStudySchema
-        title={caseTitle}
-        description={caseDesc}
-        url={`https://receipty.fr/cases/${id}`}
-      />
+    <div data-testid="case-detail-page" style={{ paddingTop: 96, minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)' }}>
+      <SEOHead page="cases" customTitle={`${caseTitle} — Étude de Cas | Receipty`} customDescription={caseDesc.slice(0, 160)} canonicalPath={`/cases/${id}`} />
+      <CaseStudySchema title={caseTitle} description={caseDesc} url={`https://receipty.fr/cases/${id}`} />
       <BreadcrumbSchema items={[
         { name: 'Accueil', url: 'https://receipty.fr/' },
         { name: 'Études de Cas', url: 'https://receipty.fr/cases' },
-        { name: caseTitle, url: `https://receipty.fr/cases/${id}` }
+        { name: caseTitle, url: `https://receipty.fr/cases/${id}` },
       ]} />
       <div className="max-w-4xl mx-auto px-6 py-16">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <Link to="/cases" className={`inline-flex items-center gap-2 text-sm transition-colors duration-200 mb-10 ${isDark ? 'text-gray-500 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`} data-testid="back-to-cases">
-            <ArrowLeft className="w-4 h-4" /> {lang === 'fr' ? 'Retour aux études de cas' : 'Back to case studies'}
-          </Link>
-        </motion.div>
+        <Link to="/cases" data-testid="back-to-cases" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text2)', marginBottom: 40, textDecoration: 'none' }}>
+          <ArrowLeft style={{ width: 16, height: 16 }} /> {lang === 'fr' ? 'Retour aux études de cas' : 'Back to case studies'}
+        </Link>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex items-center gap-3 mb-4">
-            <Badge className="bg-blue-600/90 text-white border-0 font-mono text-xs px-3 py-1">{cs.roi}</Badge>
-            <Badge variant="outline" className="text-blue-400 border-blue-500/30 text-xs">{cs.category}</Badge>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff', background: 'var(--accent2)', borderRadius: 100, padding: '3px 11px' }}>{cs.roi}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent)', border: '1px solid var(--border2)', borderRadius: 100, padding: '3px 10px' }}>{cs.category}</span>
           </div>
-          <h1 className={`font-heading text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>{title}</h1>
-          <p className={`mt-4 text-base leading-relaxed max-w-2xl ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{desc}</p>
+          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2rem,5vw,3.4rem)', fontWeight: 700, letterSpacing: '-.02em', lineHeight: 1.1, margin: 0, color: 'var(--text)' }}>{title}</h1>
+          <p style={{ marginTop: 16, fontSize: 16, lineHeight: 1.6, maxWidth: 640, color: 'var(--text2)' }}>{desc}</p>
         </motion.div>
 
         {cs.image_url && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }} className={`mt-10 rounded-2xl overflow-hidden border ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
-            <img src={cs.image_url} alt={title} className="w-full h-64 md:h-80 object-cover" loading="lazy" />
-          </motion.div>
+          <div style={{ marginTop: 40, borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <img src={cs.image_url} alt={title} className="w-full object-cover" style={{ height: 320 }} loading="lazy" />
+          </div>
         )}
 
         {(duration || team) && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="mt-8 grid grid-cols-3 gap-4">
-            {duration && (
-              <div className={`rounded-xl border p-5 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white'}`}>
-                <p className={`text-xs uppercase tracking-wider ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>{sectionLabel.duration}</p>
-                <p className={`mt-1 font-mono text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{duration}</p>
-              </div>
-            )}
-            {team && (
-              <div className={`rounded-xl border p-5 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white'}`}>
-                <p className={`text-xs uppercase tracking-wider ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>{sectionLabel.team}</p>
-                <p className={`mt-1 font-mono text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{team}</p>
-              </div>
-            )}
-            <div className={`rounded-xl border p-5 ${isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white'}`}>
-              <p className={`text-xs uppercase tracking-wider ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>ROI</p>
-              <p className="mt-1 font-mono text-lg font-bold text-blue-400">{cs.roi}</p>
-            </div>
-          </motion.div>
+          <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
+            {duration && (<div style={statCard}><p style={statLabel}>{L.duration}</p><p style={statVal}>{duration}</p></div>)}
+            {team && (<div style={statCard}><p style={statLabel}>{L.team}</p><p style={statVal}>{team}</p></div>)}
+            <div style={statCard}><p style={statLabel}>ROI</p><p style={{ ...statVal, color: 'var(--accent)' }}>{cs.roi}</p></div>
+          </div>
         )}
 
         {challenge && (
-          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.5 }} className="mt-12">
-            <div className="flex items-center gap-3 mb-4">
-              <Target className="w-5 h-5 text-red-400" />
-              <h2 className={`font-heading text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{sectionLabel.challenge}</h2>
-            </div>
-            <p className={`leading-relaxed pl-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{challenge}</p>
-          </motion.section>
+          <section style={{ marginTop: 48 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}><Target style={{ width: 20, height: 20, color: '#f87171' }} /><h2 style={h2}>{L.challenge}</h2></div>
+            <p style={body}>{challenge}</p>
+          </section>
         )}
-
         {solution && (
-          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }} className="mt-10">
-            <div className="flex items-center gap-3 mb-4">
-              <Lightbulb className="w-5 h-5 text-amber-400" />
-              <h2 className={`font-heading text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{sectionLabel.solution}</h2>
-            </div>
-            <p className={`leading-relaxed pl-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{solution}</p>
-          </motion.section>
+          <section style={{ marginTop: 40 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}><Lightbulb style={{ width: 20, height: 20, color: '#e0a153' }} /><h2 style={h2}>{L.solution}</h2></div>
+            <p style={body}>{solution}</p>
+          </section>
         )}
-
         {results.length > 0 && (
-          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.5 }} className="mt-10">
-            <div className="flex items-center gap-3 mb-4">
-              <TrendingUp className="w-5 h-5 text-emerald-400" />
-              <h2 className={`font-heading text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{sectionLabel.results}</h2>
-            </div>
-            <div className="space-y-3 pl-8">
+          <section style={{ marginTop: 40 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}><TrendingUp style={{ width: 20, height: 20, color: '#34d399' }} /><h2 style={h2}>{L.results}</h2></div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingLeft: 32 }}>
               {results.map((r, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                  <span className={`text-sm leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{r}</span>
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <CheckCircle2 style={{ width: 16, height: 16, color: '#34d399', marginTop: 3, flexShrink: 0 }} />
+                  <span style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text)' }}>{r}</span>
                 </div>
               ))}
             </div>
-          </motion.section>
+          </section>
         )}
-
         {cs.tech?.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.5 }} className="mt-10">
-            <p className={`text-xs uppercase tracking-wider mb-3 pl-8 ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>{sectionLabel.tech}</p>
-            <div className="flex flex-wrap gap-2 pl-8">
-              {cs.tech.map((t) => (
-                <span key={t} className="text-xs text-blue-400 bg-blue-600/10 border border-blue-500/20 rounded-full px-3 py-1">{t}</span>
+          <div style={{ marginTop: 40 }}>
+            <p style={{ ...statLabel, paddingLeft: 32, marginBottom: 12 }}>{L.tech}</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, paddingLeft: 32 }}>
+              {cs.tech.map((tech) => (
+                <span key={tech} style={{ fontSize: 12, color: 'var(--accent)', background: 'rgba(59,130,246,.1)', border: '1px solid var(--border2)', borderRadius: 100, padding: '3px 11px' }}>{tech}</span>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.5 }} className={`mt-16 pt-10 border-t ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
-          <Link to="/contact" data-testid="case-detail-cta" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full px-8 py-4 font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:scale-105">
-            {sectionLabel.cta} <ArrowRight className="w-4 h-4" />
+        <div style={{ marginTop: 64, paddingTop: 40, borderTop: '1px solid var(--border)' }}>
+          <Link to="/contact" data-testid="case-detail-cta" data-magnetic style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: 'var(--accent2)', color: '#fff', borderRadius: 100, padding: '16px 30px', fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 0 0 1px var(--accent2), 0 12px 40px -8px var(--glow)' }}>
+            {L.cta} <ArrowRight style={{ width: 16, height: 16 }} />
           </Link>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

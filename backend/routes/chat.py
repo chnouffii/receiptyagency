@@ -7,7 +7,7 @@ import logging
 from collections import defaultdict
 
 from models.schemas import ChatMessageInput
-from utils.helpers import verify_token
+from utils.helpers import require_admin
 from utils.llm import LlmChat, UserMessage
 
 router = APIRouter()
@@ -127,7 +127,7 @@ async def get_chat_history(session_id: str):
 
 
 @router.get("/admin/chat-analytics")
-async def get_chat_analytics(admin=Depends(verify_token)):
+async def get_chat_analytics(admin=Depends(require_admin)):
     db = get_db()
     total_messages = await db.chat_messages.count_documents({})
     sessions = await db.chat_messages.aggregate([

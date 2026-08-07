@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
     <loc>https://receipty.fr/</loc>
     <lastmod>2026-03-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/"/>
   </url>
 
   <url>
@@ -17,9 +13,6 @@
     <lastmod>2026-03-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/adn"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/adn"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/adn"/>
   </url>
 
   <url>
@@ -27,9 +20,6 @@
     <lastmod>2026-03-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/solutions"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/solutions"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/solutions"/>
   </url>
 
   <url>
@@ -37,9 +27,6 @@
     <lastmod>2026-03-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/cases"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/cases"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/cases"/>
   </url>
 
   <url>
@@ -47,9 +34,6 @@
     <lastmod>2026-03-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/contact"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/contact"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/contact"/>
   </url>
 
   <url>
@@ -57,9 +41,6 @@
     <lastmod>2026-03-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/roi"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/roi"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/roi"/>
   </url>
 
   <url>
@@ -67,9 +48,6 @@
     <lastmod>2026-07-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/faq"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/faq"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/faq"/>
   </url>
 
   <url>
@@ -77,9 +55,6 @@
     <lastmod>2026-07-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/quote"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/quote"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/quote"/>
   </url>
 
   <url>
@@ -87,9 +62,6 @@
     <lastmod>2026-03-12</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/privacy"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/privacy"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/privacy"/>
   </url>
 
   <url>
@@ -97,9 +69,6 @@
     <lastmod>2026-03-12</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/terms"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/terms"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/terms"/>
   </url>
 
 </urlset>

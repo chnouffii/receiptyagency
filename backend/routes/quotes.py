@@ -7,7 +7,7 @@ import os
 import logging
 
 from models.schemas import QuoteCreate
-from utils.helpers import verify_token, log_audit, sanitize_text, get_default_site_content, get_next_sequence
+from utils.helpers import require_admin, log_audit, sanitize_text, get_default_site_content, get_next_sequence
 
 try:
     from fpdf import FPDF
@@ -61,7 +61,7 @@ class QuotePDF(FPDF):
 
 
 @router.post("/admin/quotes/generate")
-async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends(verify_token)):
+async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends(require_admin)):
     """Generate a professional PDF quote"""
     db = get_db()
     if not FPDF_AVAILABLE:
@@ -223,14 +223,14 @@ async def generate_quote_pdf(input: QuoteCreate, request: Request, admin=Depends
 
 
 @router.get("/admin/quotes")
-async def list_quotes(admin=Depends(verify_token)):
+async def list_quotes(admin=Depends(require_admin)):
     db = get_db()
     quotes = await db.quotes.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
     return quotes
 
 
 @router.get("/admin/quotes/{quote_id}")
-async def get_quote(quote_id: str, admin=Depends(verify_token)):
+async def get_quote(quote_id: str, admin=Depends(require_admin)):
     db = get_db()
     quote = await db.quotes.find_one({"id": quote_id}, {"_id": 0})
     if not quote:
@@ -239,7 +239,7 @@ async def get_quote(quote_id: str, admin=Depends(verify_token)):
 
 
 @router.delete("/admin/quotes/{quote_id}")
-async def delete_quote(quote_id: str, request: Request, admin=Depends(verify_token)):
+async def delete_quote(quote_id: str, request: Request, admin=Depends(require_admin)):
     db = get_db()
     quote = await db.quotes.find_one({"id": quote_id}, {"_id": 0})
     if not quote:

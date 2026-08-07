@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import uuid
 
 from models.schemas import CaseStudyCreate, CaseStudyUpdate, SolutionCreate, SolutionUpdate
-from utils.helpers import verify_token, cache_get, cache_set, cache_invalidate
+from utils.helpers import require_admin, cache_get, cache_set, cache_invalidate
 
 router = APIRouter()
 
@@ -39,7 +39,7 @@ async def get_case_study(case_id: str):
 
 
 @router.post("/admin/case-studies")
-async def create_case_study(input: CaseStudyCreate, admin=Depends(verify_token)):
+async def create_case_study(input: CaseStudyCreate, admin=Depends(require_admin)):
     db = get_db()
     existing = await db.case_studies.count_documents({})
     doc = input.model_dump()
@@ -54,7 +54,7 @@ async def create_case_study(input: CaseStudyCreate, admin=Depends(verify_token))
 
 
 @router.put("/admin/case-studies/{case_id}")
-async def update_case_study(case_id: str, input: CaseStudyUpdate, admin=Depends(verify_token)):
+async def update_case_study(case_id: str, input: CaseStudyUpdate, admin=Depends(require_admin)):
     db = get_db()
     updates = {k: v for k, v in input.model_dump().items() if v is not None}
     if not updates:
@@ -69,7 +69,7 @@ async def update_case_study(case_id: str, input: CaseStudyUpdate, admin=Depends(
 
 
 @router.delete("/admin/case-studies/{case_id}")
-async def delete_case_study(case_id: str, admin=Depends(verify_token)):
+async def delete_case_study(case_id: str, admin=Depends(require_admin)):
     db = get_db()
     result = await db.case_studies.delete_one({"id": case_id})
     if result.deleted_count == 0:
@@ -104,7 +104,7 @@ async def get_solution(sol_id: str):
 
 
 @router.post("/admin/solutions")
-async def create_solution(input: SolutionCreate, admin=Depends(verify_token)):
+async def create_solution(input: SolutionCreate, admin=Depends(require_admin)):
     db = get_db()
     existing = await db.solutions.count_documents({})
     doc = input.model_dump()
@@ -119,7 +119,7 @@ async def create_solution(input: SolutionCreate, admin=Depends(verify_token)):
 
 
 @router.put("/admin/solutions/{sol_id}")
-async def update_solution(sol_id: str, input: SolutionUpdate, admin=Depends(verify_token)):
+async def update_solution(sol_id: str, input: SolutionUpdate, admin=Depends(require_admin)):
     db = get_db()
     updates = {k: v for k, v in input.model_dump().items() if v is not None}
     if not updates:
@@ -134,7 +134,7 @@ async def update_solution(sol_id: str, input: SolutionUpdate, admin=Depends(veri
 
 
 @router.delete("/admin/solutions/{sol_id}")
-async def delete_solution(sol_id: str, admin=Depends(verify_token)):
+async def delete_solution(sol_id: str, admin=Depends(require_admin)):
     db = get_db()
     result = await db.solutions.delete_one({"id": sol_id})
     if result.deleted_count == 0:

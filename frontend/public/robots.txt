@@ -18,6 +18,8 @@ Disallow: /admin/
 Disallow: /closer
 Disallow: /client
 Disallow: /client/
+Disallow: /demos
+Disallow: /demos/
 
 # ── Moteurs génératifs / IA : explicitement autorisés (GEO) ──────────────
 User-agent: GPTBot
@@ -25,6 +27,7 @@ Allow: /
 Disallow: /admin/
 Disallow: /closer
 Disallow: /client/
+Disallow: /demos/
 
 User-agent: OAI-SearchBot
 Allow: /

@@ -21,120 +21,77 @@ export const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  const pill = {
+    display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px',
+    borderRadius: 100, fontSize: 13.5, fontWeight: 500, textDecoration: 'none',
+    border: '1px solid var(--border)', color: 'var(--text2)', background: 'transparent',
+    cursor: 'pointer', transition: 'color .2s, border-color .2s, background .2s',
+  };
+  const pillActive = { ...pill, color: 'var(--accent)', borderColor: 'var(--accent)', background: 'color-mix(in srgb, var(--accent) 12%, transparent)' };
+
   return (
-    <nav 
-      data-testid="navbar" 
-      className={`fixed top-0 left-0 right-0 z-50 px-6 py-4 backdrop-blur-xl border-b transition-colors duration-300 ${
-        isDark 
-          ? 'bg-[#050505]/80 border-white/5' 
-          : 'bg-white/80 border-gray-200/50'
-      }`}
+    <nav
+      data-testid="navbar"
+      className="fixed top-0 left-0 right-0 z-50 px-6 py-4"
+      style={{ background: 'var(--navbg)', borderBottom: '1px solid var(--border)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link 
-          to="/" 
-          className={`font-heading text-xl font-bold tracking-tight transition-colors duration-300 ${
-            isDark ? 'text-white' : 'text-gray-900'
-          }`} 
+        <Link
+          to="/"
           data-testid="nav-logo"
+          style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 21, fontWeight: 700, letterSpacing: '-.02em', color: 'var(--text)' }}
         >
-          Receipty<span className="text-blue-500">.</span>
+          Receipty<span style={{ color: 'var(--accent)' }}>.</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-7">
           {links.map((link) => (
             <Link
               key={link.to}
               to={link.to}
               data-testid={`nav-link-${link.to.replace('/', '') || 'home'}`}
-              className={`text-sm font-medium transition-colors duration-200 ${
-                isActive(link.to) 
-                  ? 'text-blue-500' 
-                  : isDark 
-                    ? 'text-gray-400 hover:text-white' 
-                    : 'text-gray-500 hover:text-gray-900'
-              }`}
+              style={{ fontSize: 14, fontWeight: 500, color: isActive(link.to) ? 'var(--accent)' : 'var(--text2)', transition: 'color .2s' }}
+              onMouseEnter={(e) => { if (!isActive(link.to)) e.currentTarget.style.color = 'var(--text)'; }}
+              onMouseLeave={(e) => { if (!isActive(link.to)) e.currentTarget.style.color = 'var(--text2)'; }}
             >
               {link.label}
             </Link>
           ))}
         </div>
 
-        <div className="hidden md:flex items-center gap-3">
-          {/* Theme Toggle */}
+        <div className="hidden md:flex items-center gap-2.5">
           <button
             onClick={toggleTheme}
             data-testid="theme-toggle"
-            className={`theme-toggle-btn flex items-center justify-center w-9 h-9 rounded-full transition-all duration-200 ${
-              isDark 
-                ? 'bg-white/5 hover:bg-white/10 text-yellow-400' 
-                : 'bg-gray-100 hover:bg-gray-200 text-blue-600'
-            }`}
             title={isDark ? 'Mode clair' : 'Mode sombre'}
+            style={{ width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text2)', cursor: 'pointer' }}
           >
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
 
-          {/* Language Toggle */}
-          <button
-            onClick={toggleLang}
-            data-testid="lang-switcher"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all duration-200 ${
-              isDark 
-                ? 'text-gray-400 hover:text-white border border-white/10 hover:border-white/20' 
-                : 'text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-300'
-            }`}
-          >
+          <button onClick={toggleLang} data-testid="lang-switcher" style={pill}>
             <Globe className="w-3.5 h-3.5" />
             {lang.toUpperCase()}
           </button>
 
-          {/* ROI Calculator */}
-          <Link
-            to="/roi"
-            data-testid="nav-roi-link"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border ${
-              isActive('/roi')
-                ? 'text-blue-500 border-blue-500/30 bg-blue-500/10'
-                : isDark
-                  ? 'text-gray-400 hover:text-white border-white/10 hover:border-white/20'
-                  : 'text-gray-500 hover:text-gray-900 border-gray-200 hover:border-gray-300'
-            }`}
-          >
+          <Link to="/roi" data-testid="nav-roi-link" style={isActive('/roi') ? pillActive : pill}>
             <Calculator className="w-3.5 h-3.5" />
             ROI
           </Link>
 
-          {/* Client Portal */}
-          <Link
-            to="/client"
-            data-testid="nav-client-link"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border ${
-              isActive('/client') || isActive('/client/dashboard')
-                ? 'text-blue-500 border-blue-500/30 bg-blue-500/10'
-                : isDark
-                  ? 'text-gray-400 hover:text-white border-white/10 hover:border-white/20'
-                  : 'text-gray-500 hover:text-gray-900 border-gray-200 hover:border-gray-300'
-            }`}
-          >
+          <Link to="/client" data-testid="nav-client-link" style={(isActive('/client') || isActive('/client/dashboard')) ? pillActive : pill}>
             <Building className="w-3.5 h-3.5" />
             {lang === 'fr' ? 'Espace Client' : 'Client Portal'}
           </Link>
 
-          {/* Admin Link */}
-          <Link
-            to="/admin"
-            data-testid="nav-admin-link"
-            className={`flex items-center gap-1.5 text-sm transition-colors duration-200 ${
-              isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'
-            }`}
-          >
+          <Link to="/admin" data-testid="nav-admin-link" style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text3)', padding: 6 }} title="Admin">
             <Shield className="w-3.5 h-3.5" />
           </Link>
         </div>
 
         <button
-          className={`md:hidden ${isDark ? 'text-white' : 'text-gray-900'}`}
+          className="md:hidden"
+          style={{ color: 'var(--text)', background: 'transparent', border: 'none', cursor: 'pointer' }}
           onClick={() => setIsOpen(!isOpen)}
           data-testid="mobile-menu-toggle"
         >
@@ -148,7 +105,8 @@ export const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className={`md:hidden mt-4 pb-4 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}`}
+            className="md:hidden mt-4 pb-4"
+            style={{ borderTop: '1px solid var(--border)' }}
           >
             <div className="flex flex-col gap-4 pt-4">
               {links.map((link) => (
@@ -156,51 +114,26 @@ export const Navbar = () => {
                   key={link.to}
                   to={link.to}
                   onClick={() => setIsOpen(false)}
-                  className={`text-sm ${
-                    isActive(link.to) 
-                      ? 'text-blue-500' 
-                      : isDark ? 'text-gray-400' : 'text-gray-600'
-                  }`}
+                  style={{ fontSize: 14, color: isActive(link.to) ? 'var(--accent)' : 'var(--text2)' }}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className={`flex items-center gap-4 pt-2 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-                {/* Mobile Theme Toggle */}
-                <button
-                  onClick={toggleTheme}
-                  className={`flex items-center gap-1.5 text-sm ${
-                    isDark ? 'text-yellow-400' : 'text-blue-600'
-                  }`}
-                >
+              <div className="flex items-center flex-wrap gap-4 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
+                <button onClick={toggleTheme} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'var(--text2)', background: 'transparent', border: 'none', cursor: 'pointer' }}>
                   {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                   {isDark ? 'Clair' : 'Sombre'}
                 </button>
-                <button
-                  onClick={toggleLang}
-                  className={`flex items-center gap-1.5 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
-                >
+                <button onClick={toggleLang} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'var(--text2)', background: 'transparent', border: 'none', cursor: 'pointer' }}>
                   <Globe className="w-4 h-4" /> {lang.toUpperCase()}
                 </button>
-                <Link
-                  to="/roi"
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-1.5 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
-                >
+                <Link to="/roi" onClick={() => setIsOpen(false)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'var(--text2)' }}>
                   <Calculator className="w-4 h-4" /> ROI
                 </Link>
-                <Link
-                  to="/client"
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-1.5 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
-                >
+                <Link to="/client" onClick={() => setIsOpen(false)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'var(--text2)' }}>
                   <Building className="w-4 h-4" /> {lang === 'fr' ? 'Client' : 'Client'}
                 </Link>
-                <Link
-                  to="/admin"
-                  onClick={() => setIsOpen(false)}
-                  className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
-                >
+                <Link to="/admin" onClick={() => setIsOpen(false)} style={{ color: 'var(--text3)' }}>
                   <Shield className="w-4 h-4" />
                 </Link>
               </div>

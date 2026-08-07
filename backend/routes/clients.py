@@ -13,7 +13,7 @@ from collections import defaultdict
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List
 
-from utils.helpers import verify_token
+from utils.helpers import require_admin
 
 router = APIRouter()
 
@@ -459,7 +459,7 @@ async def submit_satisfaction(body: SatisfactionCreate, authorization: Optional[
 # ==================== ADMIN — CLIENTS MANAGEMENT ====================
 
 @router.get("/admin/clients")
-async def list_clients(admin=Depends(verify_token)):
+async def list_clients(admin=Depends(require_admin)):
     db = get_db()
     clients = await db.client_accounts.find({}, {"_id": 0, "password": 0}).sort("created_at", -1).to_list(500)
 
@@ -479,7 +479,7 @@ async def list_clients(admin=Depends(verify_token)):
 
 
 @router.post("/admin/clients")
-async def create_client(body: AdminClientCreate, admin=Depends(verify_token)):
+async def create_client(body: AdminClientCreate, admin=Depends(require_admin)):
     db = get_db()
     existing = await db.client_accounts.find_one({"email": body.email})
     if existing:
@@ -534,7 +534,7 @@ async def create_client(body: AdminClientCreate, admin=Depends(verify_token)):
 
 
 @router.get("/admin/clients/{client_id}")
-async def get_client(client_id: str, admin=Depends(verify_token)):
+async def get_client(client_id: str, admin=Depends(require_admin)):
     db = get_db()
     client = await db.client_accounts.find_one({"id": client_id}, {"_id": 0, "password": 0})
     if not client:
@@ -543,7 +543,7 @@ async def get_client(client_id: str, admin=Depends(verify_token)):
 
 
 @router.patch("/admin/clients/{client_id}")
-async def update_client(client_id: str, body: AdminClientUpdate, admin=Depends(verify_token)):
+async def update_client(client_id: str, body: AdminClientUpdate, admin=Depends(require_admin)):
     db = get_db()
     updates = {k: v for k, v in body.model_dump(exclude_none=True).items()}
     if not updates:
@@ -556,7 +556,7 @@ async def update_client(client_id: str, body: AdminClientUpdate, admin=Depends(v
 
 
 @router.get("/admin/clients/{client_id}/project")
-async def get_client_project_admin(client_id: str, admin=Depends(verify_token)):
+async def get_client_project_admin(client_id: str, admin=Depends(require_admin)):
     db = get_db()
     client = await db.client_accounts.find_one({"id": client_id}, {"_id": 0, "password": 0})
     if not client:
@@ -571,7 +571,7 @@ async def get_client_project_admin(client_id: str, admin=Depends(verify_token)):
 
 
 @router.patch("/admin/clients/{client_id}/project")
-async def update_project_status(client_id: str, body: ProjectStatusUpdate, admin=Depends(verify_token)):
+async def update_project_status(client_id: str, body: ProjectStatusUpdate, admin=Depends(require_admin)):
     db = get_db()
     updates = {
         "project_status": body.status,
@@ -612,7 +612,7 @@ async def update_project_status(client_id: str, body: ProjectStatusUpdate, admin
 
 
 @router.get("/admin/clients/{client_id}/messages")
-async def get_client_messages_admin(client_id: str, admin=Depends(verify_token)):
+async def get_client_messages_admin(client_id: str, admin=Depends(require_admin)):
     db = get_db()
     # Mark client messages as read by admin
     await db.client_messages.update_many(
@@ -626,7 +626,7 @@ async def get_client_messages_admin(client_id: str, admin=Depends(verify_token))
 
 
 @router.post("/admin/clients/{client_id}/messages")
-async def send_admin_message(client_id: str, body: AdminMessageCreate, admin=Depends(verify_token)):
+async def send_admin_message(client_id: str, body: AdminMessageCreate, admin=Depends(require_admin)):
     db = get_db()
     client = await db.client_accounts.find_one({"id": client_id}, {"_id": 0})
     if not client:
@@ -655,7 +655,7 @@ async def send_admin_message(client_id: str, body: AdminMessageCreate, admin=Dep
 
 
 @router.get("/admin/clients/{client_id}/documents")
-async def get_client_documents_admin(client_id: str, admin=Depends(verify_token)):
+async def get_client_documents_admin(client_id: str, admin=Depends(require_admin)):
     db = get_db()
     docs = await db.client_documents.find(
         {"client_id": client_id}, {"_id": 0}
@@ -664,7 +664,7 @@ async def get_client_documents_admin(client_id: str, admin=Depends(verify_token)
 
 
 @router.post("/admin/clients/{client_id}/documents")
-async def share_document(client_id: str, body: AdminDocumentCreate, admin=Depends(verify_token)):
+async def share_document(client_id: str, body: AdminDocumentCreate, admin=Depends(require_admin)):
     db = get_db()
     client = await db.client_accounts.find_one({"id": client_id}, {"_id": 0})
     if not client:
@@ -712,7 +712,7 @@ async def share_document(client_id: str, body: AdminDocumentCreate, admin=Depend
 
 
 @router.delete("/admin/clients/{client_id}/documents/{doc_id}")
-async def delete_document(client_id: str, doc_id: str, admin=Depends(verify_token)):
+async def delete_document(client_id: str, doc_id: str, admin=Depends(require_admin)):
     db = get_db()
     result = await db.client_documents.delete_one({"id": doc_id, "client_id": client_id})
     if result.deleted_count == 0:
@@ -723,7 +723,7 @@ async def delete_document(client_id: str, doc_id: str, admin=Depends(verify_toke
 # ==================== ADMIN — PROJECT UPDATES (JOURNAL) ====================
 
 @router.get("/admin/clients/{client_id}/updates")
-async def get_client_updates_admin(client_id: str, admin=Depends(verify_token)):
+async def get_client_updates_admin(client_id: str, admin=Depends(require_admin)):
     db = get_db()
     updates = await db.client_updates.find(
         {"client_id": client_id}, {"_id": 0}
@@ -732,7 +732,7 @@ async def get_client_updates_admin(client_id: str, admin=Depends(verify_token)):
 
 
 @router.post("/admin/clients/{client_id}/updates")
-async def create_client_update(client_id: str, body: ClientUpdateCreate, admin=Depends(verify_token)):
+async def create_client_update(client_id: str, body: ClientUpdateCreate, admin=Depends(require_admin)):
     db = get_db()
     client = await db.client_accounts.find_one({"id": client_id}, {"_id": 0})
     if not client:
@@ -761,7 +761,7 @@ async def create_client_update(client_id: str, body: ClientUpdateCreate, admin=D
 
 
 @router.delete("/admin/clients/{client_id}/updates/{update_id}")
-async def delete_client_update(client_id: str, update_id: str, admin=Depends(verify_token)):
+async def delete_client_update(client_id: str, update_id: str, admin=Depends(require_admin)):
     db = get_db()
     result = await db.client_updates.delete_one({"id": update_id, "client_id": client_id})
     if result.deleted_count == 0:
@@ -772,7 +772,7 @@ async def delete_client_update(client_id: str, update_id: str, admin=Depends(ver
 # ==================== ADMIN — ÉVOLUTIONS ====================
 
 @router.get("/admin/clients/{client_id}/evolutions")
-async def get_client_evolutions_admin(client_id: str, admin=Depends(verify_token)):
+async def get_client_evolutions_admin(client_id: str, admin=Depends(require_admin)):
     db = get_db()
     evolutions = await db.client_evolutions.find(
         {"client_id": client_id}, {"_id": 0}
@@ -781,7 +781,7 @@ async def get_client_evolutions_admin(client_id: str, admin=Depends(verify_token
 
 
 @router.patch("/admin/clients/{client_id}/evolutions/{evo_id}")
-async def update_evolution(client_id: str, evo_id: str, body: EvolutionUpdate, admin=Depends(verify_token)):
+async def update_evolution(client_id: str, evo_id: str, body: EvolutionUpdate, admin=Depends(require_admin)):
     db = get_db()
     updates = {
         "status": body.status,
@@ -799,7 +799,7 @@ async def update_evolution(client_id: str, evo_id: str, body: EvolutionUpdate, a
 # ==================== ADMIN — SATISFACTION ====================
 
 @router.get("/admin/clients/{client_id}/satisfaction")
-async def get_client_satisfaction_admin(client_id: str, admin=Depends(verify_token)):
+async def get_client_satisfaction_admin(client_id: str, admin=Depends(require_admin)):
     db = get_db()
     satisfaction = await db.client_satisfaction.find_one(
         {"client_id": client_id}, {"_id": 0}
@@ -810,7 +810,7 @@ async def get_client_satisfaction_admin(client_id: str, admin=Depends(verify_tok
 # ==================== RENDEZ-VOUS — DISPONIBILITÉS (ADMIN) ====================
 
 @router.get("/admin/appointments/availability")
-async def get_availability(admin=Depends(verify_token)):
+async def get_availability(admin=Depends(require_admin)):
     db = get_db()
     config = await db.availability.find_one({"type": "availability"}, {"_id": 0})
     return config or {
@@ -824,7 +824,7 @@ async def get_availability(admin=Depends(verify_token)):
 
 
 @router.put("/admin/appointments/availability")
-async def update_availability(body: AvailabilityUpdate, admin=Depends(verify_token)):
+async def update_availability(body: AvailabilityUpdate, admin=Depends(require_admin)):
     db = get_db()
     if not (1 <= body.slot_duration <= 240):
         raise HTTPException(status_code=400, detail="Durée de créneau invalide (1-240 min)")
@@ -843,14 +843,14 @@ async def update_availability(body: AvailabilityUpdate, admin=Depends(verify_tok
 
 
 @router.get("/admin/appointments")
-async def list_appointments(admin=Depends(verify_token)):
+async def list_appointments(admin=Depends(require_admin)):
     db = get_db()
     appointments = await db.appointments.find({}, {"_id": 0}).sort("slot_date", 1).to_list(500)
     return appointments
 
 
 @router.patch("/admin/appointments/{apt_id}")
-async def update_appointment_admin(apt_id: str, body: AppointmentAdminUpdate, admin=Depends(verify_token)):
+async def update_appointment_admin(apt_id: str, body: AppointmentAdminUpdate, admin=Depends(require_admin)):
     db = get_db()
     if body.status not in ["confirmed", "cancelled"]:
         raise HTTPException(status_code=400, detail="Statut invalide")
@@ -889,7 +889,7 @@ async def update_appointment_admin(apt_id: str, body: AppointmentAdminUpdate, ad
 
 
 @router.delete("/admin/appointments/{apt_id}")
-async def delete_appointment_admin(apt_id: str, admin=Depends(verify_token)):
+async def delete_appointment_admin(apt_id: str, admin=Depends(require_admin)):
     db = get_db()
     result = await db.appointments.delete_one({"id": apt_id})
     if result.deleted_count == 0:

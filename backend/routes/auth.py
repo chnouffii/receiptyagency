@@ -9,7 +9,7 @@ import time
 from collections import defaultdict
 
 from models.schemas import AdminLogin, AdminCreate, AdminUpdate
-from utils.helpers import verify_token, log_audit
+from utils.helpers import require_admin, log_audit
 
 router = APIRouter()
 
@@ -79,14 +79,14 @@ async def admin_login(input: AdminLogin, request: Request):
 
 
 @router.get("/admin/admins")
-async def list_admins(admin=Depends(verify_token)):
+async def list_admins(admin=Depends(require_admin)):
     db = get_db()
     admins = await db.admins.find({}, {"_id": 0, "password": 0}).sort("created_at", -1).to_list(100)
     return admins
 
 
 @router.post("/admin/admins")
-async def create_admin(input: AdminCreate, request: Request, admin=Depends(verify_token)):
+async def create_admin(input: AdminCreate, request: Request, admin=Depends(require_admin)):
     db = get_db()
     existing = await db.admins.find_one({"email": input.email})
     if existing:
@@ -114,7 +114,7 @@ async def create_admin(input: AdminCreate, request: Request, admin=Depends(verif
 
 
 @router.put("/admin/admins/{admin_id}")
-async def update_admin(admin_id: str, input: AdminUpdate, request: Request, admin=Depends(verify_token)):
+async def update_admin(admin_id: str, input: AdminUpdate, request: Request, admin=Depends(require_admin)):
     db = get_db()
     updates = {}
     if input.email is not None:
@@ -148,7 +148,7 @@ async def update_admin(admin_id: str, input: AdminUpdate, request: Request, admi
 
 
 @router.delete("/admin/admins/{admin_id}")
-async def delete_admin(admin_id: str, request: Request, admin=Depends(verify_token)):
+async def delete_admin(admin_id: str, request: Request, admin=Depends(require_admin)):
     db = get_db()
     target = await db.admins.find_one({"id": admin_id}, {"_id": 0})
     if target and target.get("email") == admin["sub"]:
@@ -166,7 +166,7 @@ async def delete_admin(admin_id: str, request: Request, admin=Depends(verify_tok
 
 @router.get("/admin/audit-logs")
 async def get_audit_logs(
-    admin=Depends(verify_token),
+    admin=Depends(require_admin),
     limit: int = 100,
     admin_email: str = "",
     action: str = ""
@@ -183,7 +183,7 @@ async def get_audit_logs(
 
 
 @router.get("/admin/stats")
-async def get_admin_stats(admin=Depends(verify_token)):
+async def get_admin_stats(admin=Depends(require_admin)):
     db = get_db()
     total = await db.leads.count_documents({})
     new_count = await db.leads.count_documents({"status": "new"})

@@ -52,7 +52,7 @@ app = FastAPI(
 api_router = APIRouter(prefix="/api")
 
 # Import route modules and helpers
-from utils.helpers import verify_token
+from utils.helpers import require_admin
 from routes.leads import router as leads_router
 from routes.auth import router as auth_router
 from routes.chat import router as chat_router
@@ -91,7 +91,7 @@ async def health():
 
 # CSV Export endpoint — protected, bounded
 @api_router.get("/leads/export")
-async def export_leads_csv(admin=Depends(verify_token)):
+async def export_leads_csv(admin=Depends(require_admin)):
     leads = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     output = io.StringIO()
     writer = csv.writer(output)
@@ -116,79 +116,66 @@ app.include_router(api_router)
 
 # Sitemap served directly by the backend to avoid static-file/Cloudflare issues
 _SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://receipty.fr/</loc>
     <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/"/>
   </url>
   <url>
     <loc>https://receipty.fr/adn</loc>
     <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/adn"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/adn"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/adn"/>
   </url>
   <url>
     <loc>https://receipty.fr/solutions</loc>
     <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/solutions"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/solutions"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/solutions"/>
   </url>
   <url>
     <loc>https://receipty.fr/cases</loc>
     <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/cases"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/cases"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/cases"/>
   </url>
   <url>
     <loc>https://receipty.fr/contact</loc>
     <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/contact"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/contact"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/contact"/>
   </url>
   <url>
     <loc>https://receipty.fr/roi</loc>
     <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/roi"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/roi"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/roi"/>
+  </url>
+  <url>
+    <loc>https://receipty.fr/quote</loc>
+    <lastmod>LASTMOD_PLACEHOLDER</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://receipty.fr/faq</loc>
+    <lastmod>LASTMOD_PLACEHOLDER</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://receipty.fr/privacy</loc>
     <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/privacy"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/privacy"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/privacy"/>
   </url>
   <url>
     <loc>https://receipty.fr/terms</loc>
     <lastmod>LASTMOD_PLACEHOLDER</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://receipty.fr/terms"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://receipty.fr/terms"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://receipty.fr/terms"/>
   </url>
 </urlset>"""
 
@@ -219,14 +206,19 @@ if _cors_env.strip():
     # Explicit origins are safe to combine with credentials.
     _allow_credentials = True
 else:
-    _cors_origins = ["*"]
-    # A wildcard origin combined with allow_credentials=True is invalid and
-    # rejected by browsers. The app authenticates via Bearer tokens (not cookies),
-    # so credentials aren't needed with the wildcard fallback.
-    _allow_credentials = False
+    # Repli STRICT : un .env incomplet ne doit jamais ouvrir l'API à toutes les
+    # origines. On retombe sur les domaines de production et le serveur de
+    # développement local, jamais sur "*".
+    _cors_origins = [
+        "https://receipty.fr",
+        "https://www.receipty.fr",
+        "http://localhost:3000",
+    ]
+    _allow_credentials = True
     logger.warning(
-        "CORS_ORIGINS not set — allowing all origins. "
-        "Set CORS_ORIGINS=https://receipty.fr,https://www.receipty.fr in production."
+        "CORS_ORIGINS not set — falling back to %s. "
+        "Set CORS_ORIGINS explicitly in production.",
+        ", ".join(_cors_origins),
     )
 
 app.add_middleware(

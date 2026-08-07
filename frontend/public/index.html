@@ -29,6 +29,35 @@
         <script>
             // Defer PostHog initialization until after page load to avoid blocking LCP
             window.addEventListener('load', function() {
+                // ── Garde-fous RGPD / CNIL ──────────────────────────────────
+                // 1. Espaces privés : jamais de mesure d'audience ni surtout
+                //    d'enregistrement de session sur les tableaux de bord —
+                //    ils affichent des données de prospects et de clients.
+                var PRIVATE_AREAS = ['/admin', '/client', '/closer', '/demos'];
+                var path = window.location.pathname;
+                var isPrivate = PRIVATE_AREAS.some(function (p) {
+                    return path === p || path.indexOf(p + '/') === 0;
+                });
+                if (isPrivate) return;
+
+                // 2. Consentement explicite requis avant tout dépôt de traceur.
+                //    La bannière (CookieConsent.jsx) écrit cette clé puis appelle
+                //    window.__receiptyInitAnalytics().
+                var consent = null;
+                try { consent = window.localStorage.getItem('receipty-analytics-consent'); } catch (e) {}
+                if (consent !== 'granted') {
+                    window.__receiptyPendingAnalytics = true;
+                    return;
+                }
+                window.__receiptyInitAnalytics();
+            });
+
+            // Chargement effectif de PostHog — appelé soit au load si le
+            // consentement existe déjà, soit par la bannière au moment du clic.
+            window.__receiptyInitAnalytics = function () {
+                if (window.__receiptyAnalyticsLoaded) return;
+                window.__receiptyAnalyticsLoaded = true;
+                (function () {
                 !(function (t, e) {
                     var o, n, p, r;
                     e.__SV ||
@@ -93,12 +122,16 @@
                 posthog.init("phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs", {
                     api_host: "https://us.i.posthog.com",
                     person_profiles: "identified_only",
-                    session_recording: {
-                        recordCrossOriginIframes: true,
-                        capturePerformance: false,
-                    },
+                    // Enregistrement de session désactivé : il capturait le
+                    // contenu saisi dans les formulaires publics. À réactiver
+                    // seulement avec un masquage strict et une mention explicite
+                    // dans la politique de confidentialité.
+                    disable_session_recording: true,
+                    capture_pageview: true,
+                    persistence: "localStorage+cookie",
                 });
-            });
+                })();
+            };
         </script>
     </body>
 </html>

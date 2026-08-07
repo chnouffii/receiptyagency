@@ -1,102 +1,91 @@
 import { useRef, useState, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { useTheme } from '../context/ThemeContext';
-import { Badge } from '../components/ui/badge';
 import SEOHead from '../components/SEOHead';
+import { mountPageFx } from '../lib/designAnimations';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-function CaseCard({ item, index, lang, isDark }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
+function CaseCard({ item, index, lang }) {
   const title = lang === 'fr' ? item.title_fr : (item.title_en || item.title_fr);
   const desc = lang === 'fr' ? item.desc_fr : (item.desc_en || item.desc_fr);
 
   return (
-    <Link to={`/cases/${item.id}`} data-testid={`case-card-${index}`}>
-      <motion.div
-        ref={ref}
-        initial={{ opacity: 0, y: 20 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ delay: index * 0.1, duration: 0.5 }}
-        className={`group break-inside-avoid mb-6 overflow-hidden rounded-2xl border transition-all duration-300 hover:border-blue-500/20 ${
-          isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'
-        }`}
+    <Link to={`/cases/${item.id}`} data-testid={`case-card-${index}`} style={{ display: 'block', textDecoration: 'none' }}>
+      <div
+        data-case
+        data-reveal
+        data-reveal-delay={index * 80}
+        className="group break-inside-avoid mb-6"
+        style={{ overflow: 'hidden', borderRadius: 20, border: '1px solid var(--border)', background: 'var(--surface)' }}
       >
         {item.image_url && (
-          <div className="relative overflow-hidden aspect-[16/10]">
+          <div className="relative overflow-hidden" style={{ aspectRatio: '16 / 10' }}>
             <img src={item.image_url} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
-            <div className={`absolute inset-0 bg-gradient-to-t via-transparent to-transparent opacity-60 ${isDark ? 'from-[#0F0F10]' : 'from-white'}`} />
-            <div className="absolute top-4 right-4">
-              <Badge className="bg-blue-600/90 text-white border-0 backdrop-blur-sm font-mono text-xs px-3 py-1">{item.roi}</Badge>
+            <div style={{ position: 'absolute', top: 14, right: 14 }}>
+              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff', background: 'var(--accent2)', borderRadius: 100, padding: '4px 11px' }}>{item.roi}</span>
             </div>
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-              <span className="flex items-center gap-2 text-white text-sm font-medium">
-                {lang === 'fr' ? 'Voir le cas' : 'View case'} <ArrowUpRight className="w-4 h-4" />
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(0,0,0,.5)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 14, fontWeight: 500 }}>
+                {lang === 'fr' ? 'Voir le cas' : 'View case'} <ArrowUpRight style={{ width: 16, height: 16 }} />
               </span>
             </div>
           </div>
         )}
-        <div className="p-6">
-          <p className="text-xs text-blue-400 font-medium mb-2">{item.category}</p>
-          <h3 className={`font-heading text-lg font-semibold leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
-          <p className={`mt-2 text-sm leading-relaxed ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>{desc}</p>
+        <div style={{ padding: 24 }}>
+          <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, margin: '0 0 8px' }}>{item.category}</p>
+          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 600, lineHeight: 1.25, margin: 0, color: 'var(--text)' }}>{title}</h3>
+          <p style={{ marginTop: 8, fontSize: 14, lineHeight: 1.6, color: 'var(--text2)' }}>{desc}</p>
           {item.tags?.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {item.tags.map((tag) => (
-                <span key={tag} className={`text-xs rounded-full px-3 py-1 ${isDark ? 'text-gray-600 bg-white/5' : 'text-gray-500 bg-gray-100'}`}>{tag}</span>
+                <span key={tag} style={{ fontSize: 12, borderRadius: 100, padding: '3px 10px', color: 'var(--text3)', background: 'var(--surface2)' }}>{tag}</span>
               ))}
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
     </Link>
   );
 }
 
 export default function CaseStudiesPage() {
   const { t, lang } = useLanguage();
-  const { isDark } = useTheme();
+  const pageRef = useRef(null);
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`${API}/case-studies`).then(res => {
-      setCases(res.data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    axios.get(`${API}/case-studies`)
+      .then((res) => { setCases(res.data); setLoading(false); })
+      .catch(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (loading) return;
+    const cleanup = mountPageFx(pageRef.current);
+    return cleanup;
+  }, [loading]);
+
   return (
-    <div data-testid="cases-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+    <div ref={pageRef} data-testid="cases-page" style={{ paddingTop: 96, minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)' }}>
       <SEOHead page="cases" />
-      <section className="max-w-6xl mx-auto px-6 py-16 md:py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-16"
-        >
-          <h1 className={`font-heading text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {t.cases.title}
-          </h1>
-          <p className={`mt-6 text-base md:text-lg max-w-2xl ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            {t.cases.subtitle}
-          </p>
-        </motion.div>
+      <section className="max-w-6xl mx-auto px-6" style={{ padding: '64px 24px 96px' }}>
+        <div style={{ marginBottom: 56, opacity: 0, animation: 'riseIn .8s cubic-bezier(.2,.7,.2,1) .05s forwards' }}>
+          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2.4rem,6vw,4rem)', fontWeight: 700, letterSpacing: '-.03em', margin: 0, color: 'var(--text)' }}>{t.cases.title}</h1>
+          <p style={{ marginTop: 20, fontSize: 17, maxWidth: 620, color: 'var(--text2)' }}>{t.cases.subtitle}</p>
+        </div>
 
         {loading ? (
-          <div className="text-center text-gray-500 py-20">{lang === 'fr' ? 'Chargement...' : 'Loading...'}</div>
+          <div style={{ textAlign: 'center', color: 'var(--text3)', padding: '80px 0' }}>{lang === 'fr' ? 'Chargement...' : 'Loading...'}</div>
         ) : cases.length === 0 ? (
-          <div className="text-center text-gray-500 py-20">{lang === 'fr' ? 'Aucune étude de cas pour le moment.' : 'No case studies yet.'}</div>
+          <div style={{ textAlign: 'center', color: 'var(--text3)', padding: '80px 0' }}>{lang === 'fr' ? 'Aucune étude de cas pour le moment.' : 'No case studies yet.'}</div>
         ) : (
           <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
             {cases.map((item, i) => (
-              <CaseCard key={item.id} item={item} index={i} lang={lang} isDark={isDark} />
+              <CaseCard key={item.id} item={item} index={i} lang={lang} />
             ))}
           </div>
         )}

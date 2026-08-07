@@ -1,188 +1,108 @@
-import { useRef, useState, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useRef, useEffect } from 'react';
 import { ShieldCheck, Landmark, GraduationCap } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { useTheme } from '../context/ThemeContext';
-import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import SEOHead from '../components/SEOHead';
+import { mountPageFx } from '../lib/designAnimations';
 
 const SOV_ICONS = { shield: ShieldCheck, landmark: Landmark, graduation: GraduationCap };
 
-function AnimatedCounter({ target, suffix = '', inView }) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const end = parseInt(target);
-    const duration = 2000;
-    const step = end / (duration / 16);
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= end) {
-        setCount(end);
-        clearInterval(timer);
-      } else {
-        setCount(Math.ceil(start));
-      }
-    }, 16);
-    return () => clearInterval(timer);
-  }, [inView, target]);
-
-  return (
-    <span className="font-mono text-4xl sm:text-5xl font-bold text-blue-400">
-      {count.toLocaleString()}{suffix}
-    </span>
-  );
-}
-
 export default function AdnVisionPage() {
   const { t } = useLanguage();
-  const { isDark } = useTheme();
-  const statsRef = useRef(null);
-  const statsInView = useInView(statsRef, { once: true, margin: '-80px' });
-  const teamRef = useRef(null);
-  const teamInView = useInView(teamRef, { once: true, margin: '-80px' });
-  const sovRef = useRef(null);
-  const sovInView = useInView(sovRef, { once: true, margin: '-80px' });
+  const pageRef = useRef(null);
+
+  useEffect(() => {
+    const cleanup = mountPageFx(pageRef.current);
+    return cleanup;
+  }, []);
 
   const stats = [
     { value: 10, suffix: '+', label: t.adn.stats.projects },
     { value: 2000, suffix: '+', label: t.adn.stats.hours },
     { value: 90, suffix: '%', label: t.adn.stats.automation },
   ];
+  const colors = ['#2563eb', '#0891b2', '#6d5cf0'];
 
-  const colors = ['bg-blue-600', 'bg-cyan-500', 'bg-indigo-500', 'bg-sky-500'];
+  const card = { position: 'relative', overflow: 'hidden', borderRadius: 22, border: '1px solid var(--border)', background: 'var(--surface)', padding: 30 };
+  const spot = { position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none', transition: 'opacity .3s', background: 'radial-gradient(320px circle at var(--mx) var(--my), rgba(59,130,246,.12), transparent 70%)' };
 
   return (
-    <div data-testid="adn-page" className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+    <div ref={pageRef} data-testid="adn-page" style={{ paddingTop: 96, minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)' }}>
       <SEOHead page="adn" />
-      {/* Manifesto */}
-      <section className="max-w-5xl mx-auto px-6 py-16 md:py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h1 className={`font-heading text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {t.adn.title}
-          </h1>
-          <p className={`mt-6 text-base md:text-lg max-w-3xl leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            {t.adn.subtitle}
-          </p>
-        </motion.div>
 
-        <motion.blockquote
-          className="mt-16 pl-6 border-l-2 border-blue-500/50"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-        >
-          <p className={`text-lg md:text-xl leading-relaxed italic font-light ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+      {/* Manifesto */}
+      <section className="max-w-5xl mx-auto px-6" style={{ padding: '64px 24px 40px' }}>
+        <div style={{ opacity: 0, animation: 'riseIn .8s cubic-bezier(.2,.7,.2,1) .05s forwards' }}>
+          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2.6rem,7vw,4.6rem)', fontWeight: 700, letterSpacing: '-.03em', margin: 0, color: 'var(--text)' }}>{t.adn.title}</h1>
+          <p style={{ marginTop: 22, fontSize: 18, maxWidth: 720, lineHeight: 1.6, color: 'var(--text2)' }}>{t.adn.subtitle}</p>
+        </div>
+        <blockquote data-reveal style={{ margin: '56px 0 0', paddingLeft: 24, borderLeft: '2px solid var(--accent)' }}>
+          <p style={{ fontSize: 'clamp(1.15rem,2vw,1.5rem)', lineHeight: 1.55, fontStyle: 'italic', fontWeight: 300, color: 'var(--text)', margin: 0 }}>
             "{t.adn.manifesto}"
           </p>
-        </motion.blockquote>
+        </blockquote>
       </section>
 
       {/* Stats */}
-      <section ref={statsRef} className="max-w-6xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="max-w-6xl mx-auto px-6" style={{ padding: '48px 24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 20 }}>
           {stats.map((stat, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={statsInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: i * 0.15, duration: 0.5 }}
-              className={`flex flex-col items-start rounded-2xl border p-8 ${
-                isDark ? 'border-white/5 bg-white/[0.02]' : 'border-gray-200 bg-white shadow-sm'
-              }`}
-              data-testid={`stat-card-${i}`}
-            >
-              <AnimatedCounter target={stat.value} suffix={stat.suffix} inView={statsInView} />
-              <span className={`mt-3 text-sm font-medium ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>{stat.label}</span>
-            </motion.div>
+            <div key={i} data-reveal data-reveal-delay={i * 120} data-testid={`stat-card-${i}`} style={card}>
+              <span
+                data-counter
+                data-target={stat.value}
+                data-suffix={stat.suffix}
+                style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2.4rem,5vw,3.2rem)', fontWeight: 700, color: colors[i], letterSpacing: '-.02em', display: 'block' }}
+              >
+                {stat.value.toLocaleString('fr-FR')}{stat.suffix}
+              </span>
+              <span style={{ marginTop: 10, fontSize: 14, fontWeight: 500, color: 'var(--text2)', display: 'block' }}>{stat.label}</span>
+            </div>
           ))}
         </div>
       </section>
 
       {/* Souveraineté & accompagnement */}
-      <section ref={sovRef} className="max-w-6xl mx-auto px-6 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={sovInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5 }}
-        >
-          <h2 className={`font-heading text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {t.adn.sovereignty.title}
-          </h2>
-          <p className={`mt-3 text-base max-w-2xl ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            {t.adn.sovereignty.subtitle}
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+      <section className="max-w-6xl mx-auto px-6" style={{ padding: '48px 24px' }}>
+        <div data-reveal style={{ marginBottom: 36 }}>
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(1.8rem,4vw,2.6rem)', fontWeight: 700, letterSpacing: '-.02em', margin: 0, color: 'var(--text)' }}>{t.adn.sovereignty.title}</h2>
+          <p style={{ marginTop: 14, fontSize: 16, maxWidth: 620, color: 'var(--text2)' }}>{t.adn.sovereignty.subtitle}</p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
           {t.adn.sovereignty.items.map((item, i) => {
             const Icon = SOV_ICONS[item.icon] || ShieldCheck;
             return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={sovInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: i * 0.15, duration: 0.5 }}
-                className={`rounded-2xl border p-8 ${isDark ? 'border-white/5 bg-white/[0.02]' : 'border-gray-200 bg-white shadow-sm'}`}
-                data-testid={`sovereignty-card-${i}`}
-              >
-                <div className="w-12 h-12 rounded-xl bg-blue-600/10 flex items-center justify-center mb-5">
-                  <Icon className="w-6 h-6 text-blue-400" />
+              <div key={i} data-reveal data-reveal-delay={i * 110} data-tilt data-testid={`sovereignty-card-${i}`} style={card}>
+                <div data-spot style={spot} />
+                <div style={{ position: 'relative', width: 48, height: 48, borderRadius: 14, background: 'rgba(59,130,246,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                  <Icon style={{ width: 24, height: 24, color: 'var(--accent)' }} />
                 </div>
-                <h3 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{item.title}</h3>
-                <p className={`text-sm mt-2 leading-relaxed ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>{item.desc}</p>
-              </motion.div>
+                <h3 style={{ position: 'relative', fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 600, margin: '0 0 8px', color: 'var(--text)' }}>{item.title}</h3>
+                <p style={{ position: 'relative', fontSize: 14, lineHeight: 1.6, color: 'var(--text2)', margin: 0 }}>{item.desc}</p>
+              </div>
             );
           })}
         </div>
       </section>
 
-      {/* Team Grid - Bento Style */}
-      <section ref={teamRef} className="max-w-6xl mx-auto px-6 py-16 md:py-24">
-        <motion.h2
-          className={`font-heading text-2xl sm:text-3xl font-bold mb-12 ${isDark ? 'text-white' : 'text-gray-900'}`}
-          initial={{ opacity: 0 }}
-          animate={teamInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5 }}
-        >
-          {t.adn.team}
-        </motion.h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {t.adn.members.map((member, i) => {
-            const spans = ['', ''];
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={teamInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: i * 0.15, duration: 0.5 }}
-                className={`${spans[i]} group relative overflow-hidden rounded-2xl border p-8 transition-all duration-300 hover:border-blue-500/20 ${
-                  isDark ? 'border-white/5 bg-[#0F0F10]' : 'border-gray-200 bg-white shadow-sm'
-                }`}
-                data-testid={`team-member-${i}`}
-              >
-                <div className="flex items-start gap-5">
-                  <Avatar className={`w-14 h-14 border ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-                    <AvatarFallback className={`${colors[i]} text-white font-heading font-bold text-lg`}>
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className={`font-heading text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{member.name}</h3>
-                    <p className="text-sm text-blue-400 font-medium mt-0.5">{member.role}</p>
-                    <p className={`text-sm mt-2 leading-relaxed ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>{member.desc}</p>
-                  </div>
+      {/* Équipe */}
+      <section className="max-w-6xl mx-auto px-6" style={{ padding: '48px 24px 96px' }}>
+        <h2 data-reveal style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(1.7rem,3.5vw,2.4rem)', fontWeight: 700, marginBottom: 32, color: 'var(--text)' }}>{t.adn.team}</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 20 }}>
+          {t.adn.members.map((member, i) => (
+            <div key={i} data-reveal data-reveal-delay={i * 120} data-tilt data-testid={`team-member-${i}`} style={card}>
+              <div data-spot style={spot} />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: 18 }}>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: `linear-gradient(135deg, ${colors[i % colors.length]}, var(--cyan))`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#fff', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 17 }}>
+                  {member.name.split(' ').map((n) => n[0]).join('')}
                 </div>
-              </motion.div>
-            );
-          })}
+                <div>
+                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 600, margin: 0, color: 'var(--text)' }}>{member.name}</h3>
+                  <p style={{ fontSize: 14, color: 'var(--accent)', fontWeight: 500, margin: '2px 0 0' }}>{member.role}</p>
+                  <p style={{ fontSize: 14, lineHeight: 1.6, marginTop: 10, color: 'var(--text2)' }}>{member.desc}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>

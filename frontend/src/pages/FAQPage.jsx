@@ -4,32 +4,25 @@ import { Link } from 'react-router-dom';
 import { ChevronDown, HelpCircle, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
-import { useTheme } from '../context/ThemeContext';
 import SEOHead, { FAQSchema, BreadcrumbSchema } from '../components/SEOHead';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const SITE_URL = 'https://receipty.fr';
 
-function FAQItem({ question, answer, isDark, isOpen, onToggle }) {
+function FAQItem({ question, answer, isOpen, onToggle }) {
   return (
-    <div className={`rounded-xl border transition-colors ${isDark ? 'border-white/10 bg-white/[0.02]' : 'border-gray-200 bg-white'}`}>
+    <div style={{ borderRadius: 16, border: `1px solid ${isOpen ? 'var(--border2)' : 'var(--border)'}`, background: 'var(--surface)', overflow: 'hidden', transition: 'border-color .2s' }}>
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between gap-4 text-left px-5 py-4"
         aria-expanded={isOpen}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '18px 20px', textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text)' }}
       >
-        <span className={`font-medium text-sm sm:text-base ${isDark ? 'text-white' : 'text-gray-900'}`}>{question}</span>
-        <ChevronDown className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+        <span style={{ fontWeight: 600, fontSize: 15.5 }}>{question}</span>
+        <ChevronDown style={{ width: 20, height: 20, flexShrink: 0, color: 'var(--text3)', transition: 'transform .3s', transform: isOpen ? 'rotate(180deg)' : 'none' }} />
       </button>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="overflow-hidden"
-        >
-          <p className={`px-5 pb-5 text-sm leading-relaxed whitespace-pre-line ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            {answer}
-          </p>
+        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} style={{ overflow: 'hidden' }}>
+          <p style={{ padding: '2px 20px 20px', margin: 0, fontSize: 14.5, lineHeight: 1.65, color: 'var(--text2)', whiteSpace: 'pre-line' }}>{answer}</p>
         </motion.div>
       )}
     </div>
@@ -38,15 +31,14 @@ function FAQItem({ question, answer, isDark, isOpen, onToggle }) {
 
 export default function FAQPage() {
   const { t, lang } = useLanguage();
-  const { isDark } = useTheme();
   const [faqs, setFaqs] = useState([]);
   const [openId, setOpenId] = useState(null);
 
   useEffect(() => {
-    axios.get(`${API}/faq`).then(res => setFaqs(res.data || [])).catch(() => {});
+    axios.get(`${API}/faq`).then((res) => setFaqs(res.data || [])).catch(() => {});
   }, []);
 
-  const localized = faqs.map(f => ({
+  const localized = faqs.map((f) => ({
     id: f.id,
     question: lang === 'fr' ? f.question_fr : (f.question_en || f.question_fr),
     answer: lang === 'fr' ? f.answer_fr : (f.answer_en || f.answer_fr),
@@ -57,66 +49,37 @@ export default function FAQPage() {
     : "Answers to the most common questions about Receipty, our AI automation solutions, our method and our pricing. Can't find your answer? Contact us — we reply within 24h.";
 
   return (
-    <div className={`pt-24 min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#050505]' : 'bg-gray-50'}`}>
+    <div data-testid="faq-page" style={{ paddingTop: 96, minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)' }}>
       <SEOHead page="faq" />
       <FAQSchema faqs={localized} />
-      <BreadcrumbSchema items={[
-        { name: 'Receipty', url: `${SITE_URL}/` },
-        { name: lang === 'fr' ? 'FAQ' : 'FAQ', url: `${SITE_URL}/faq` },
-      ]} />
+      <BreadcrumbSchema items={[{ name: 'Receipty', url: `${SITE_URL}/` }, { name: 'FAQ', url: `${SITE_URL}/faq` }]} />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 md:py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-400 text-sm mb-6">
-            <HelpCircle className="w-4 h-4" />
-            FAQ
+      <div className="max-w-3xl mx-auto px-4 sm:px-6" style={{ padding: '64px 24px 96px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 48, opacity: 0, animation: 'riseIn .8s cubic-bezier(.2,.7,.2,1) .05s forwards' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 13px', borderRadius: 100, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--accent)', fontSize: 13, fontWeight: 600, marginBottom: 22 }}>
+            <HelpCircle style={{ width: 15, height: 15 }} /> FAQ
           </div>
-          <h1 className={`font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2.2rem,5vw,3.4rem)', fontWeight: 700, letterSpacing: '-.02em', margin: 0, color: 'var(--text)' }}>
             {t.faq?.title || (lang === 'fr' ? 'Questions fréquentes' : 'Frequently asked questions')}
           </h1>
-          <p className={`mt-5 text-base max-w-2xl mx-auto leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            {intro}
-          </p>
-        </motion.div>
+          <p style={{ marginTop: 18, fontSize: 16, maxWidth: 620, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6, color: 'var(--text2)' }}>{intro}</p>
+        </div>
 
         {localized.length > 0 ? (
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {localized.map((faq) => (
-              <FAQItem
-                key={faq.id}
-                question={faq.question}
-                answer={faq.answer}
-                isDark={isDark}
-                isOpen={openId === faq.id}
-                onToggle={() => setOpenId(openId === faq.id ? null : faq.id)}
-              />
+              <FAQItem key={faq.id} question={faq.question} answer={faq.answer} isOpen={openId === faq.id} onToggle={() => setOpenId(openId === faq.id ? null : faq.id)} />
             ))}
           </div>
         ) : (
-          <p className={`text-center text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-            {lang === 'fr' ? 'Les questions fréquentes arrivent bientôt.' : 'Frequently asked questions are coming soon.'}
-          </p>
+          <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--text3)' }}>{lang === 'fr' ? 'Les questions fréquentes arrivent bientôt.' : 'Frequently asked questions are coming soon.'}</p>
         )}
 
-        {/* CTA */}
-        <div className={`mt-14 rounded-2xl border p-8 text-center ${isDark ? 'border-white/10 bg-white/[0.02]' : 'border-gray-200 bg-white shadow-sm'}`}>
-          <h2 className={`font-heading text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {lang === 'fr' ? 'Une autre question ?' : 'Another question?'}
-          </h2>
-          <p className={`mt-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            {lang === 'fr' ? "Parlons de votre projet d'automatisation." : "Let's talk about your automation project."}
-          </p>
-          <Link
-            to="/contact"
-            className="mt-5 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-200"
-          >
-            {lang === 'fr' ? 'Contactez-nous' : 'Contact us'}
-            <ArrowRight className="w-4 h-4" />
+        <div style={{ marginTop: 56, borderRadius: 22, border: '1px solid var(--border)', background: 'var(--surface)', padding: 32, textAlign: 'center' }}>
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, margin: 0, color: 'var(--text)' }}>{lang === 'fr' ? 'Une autre question ?' : 'Another question?'}</h2>
+          <p style={{ marginTop: 8, fontSize: 14.5, color: 'var(--text2)' }}>{lang === 'fr' ? "Parlons de votre projet d'automatisation." : "Let's talk about your automation project."}</p>
+          <Link to="/contact" data-magnetic style={{ marginTop: 20, display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--accent2)', color: '#fff', borderRadius: 100, padding: '14px 26px', fontSize: 14.5, fontWeight: 700, textDecoration: 'none', boxShadow: '0 0 0 1px var(--accent2), 0 12px 40px -8px var(--glow)' }}>
+            {lang === 'fr' ? 'Contactez-nous' : 'Contact us'} <ArrowRight style={{ width: 16, height: 16 }} />
           </Link>
         </div>
       </div>
