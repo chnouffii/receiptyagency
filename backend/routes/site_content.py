@@ -3,7 +3,7 @@ import re
 from fastapi import APIRouter, Depends
 from datetime import datetime, timezone
 
-from utils.helpers import verify_token, get_default_site_content
+from utils.helpers import require_admin, get_default_site_content
 
 router = APIRouter()
 
@@ -24,7 +24,7 @@ async def get_public_site_content():
 
 
 @router.get("/admin/site-content")
-async def get_site_content(admin=Depends(verify_token)):
+async def get_site_content(admin=Depends(require_admin)):
     """Admin endpoint to get all site content"""
     db = get_db()
     content = await db.site_content.find_one({"type": "main"}, {"_id": 0})
@@ -47,7 +47,7 @@ def _sanitize_content(obj, depth=0):
 
 
 @router.put("/admin/site-content")
-async def update_site_content(content: dict, admin=Depends(verify_token)):
+async def update_site_content(content: dict, admin=Depends(require_admin)):
     """Admin endpoint to update site content"""
     db = get_db()
     safe_content = _sanitize_content(content)

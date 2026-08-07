@@ -6,7 +6,13 @@ RUN npm install ajv@8.17.1 ajv-keywords@5.1.0 --legacy-peer-deps
 COPY . .
 ARG REACT_APP_BACKEND_URL
 ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
+# Les source maps exposent l'intégralité du code source (commentaires compris)
+# à quiconque ouvre /static/js/*.map. Jamais en production.
+ENV GENERATE_SOURCEMAP=false
 RUN npm run build
+# Ceinture et bretelles : aucun .map ne doit atteindre l'image nginx, même si
+# une dépendance en émet en dehors du contrôle de CRA.
+RUN find build -name "*.map" -type f -delete
 
 # --- Prérendu statique (SEO/GEO) — NON-FATAL ---------------------------------
 # Génère un HTML complet par page vitrine pour les robots qui n'exécutent pas

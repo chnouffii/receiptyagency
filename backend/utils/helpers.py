@@ -25,7 +25,7 @@ def cache_set(key: str, value, ttl: int = 300):
 def cache_invalidate(key: str):
     _cache.pop(key, None)
 from jose import jwt, JWTError
-from fastapi import Header, HTTPException
+from fastapi import Depends, Header, HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -48,16 +48,54 @@ except ImportError:
     RESEND_AVAILABLE = False
 
 
+# Les jetons du portail client sont signés avec le MÊME JWT_SECRET que ceux du
+# personnel : seul le préfixe du `sub` les distingue. Sans ce contrôle, un jeton
+# client passe toutes les gardes de l'espace d'administration.
+CLIENT_TOKEN_PREFIX = "client:"
+ADMIN_ROLES = ("admin", "super_admin")
+
+
 def verify_token(authorization: str = Header(None)):
-    """Verify JWT token from Authorization header"""
+    """Authentifie un membre du personnel (admin, super_admin ou closer).
+
+    Rejette explicitement les jetons émis par /api/client/login : ils sont signés
+    avec la même clé, donc `jwt.decode` seul les accepterait.
+
+    Ne garantit AUCUN rôle particulier — les routes réservées aux administrateurs
+    doivent dépendre de `require_admin`, pas de cette fonction.
+    """
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing token")
     token = authorization.split(" ")[1]
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        return payload
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+    sub = payload.get("sub") or ""
+    if not sub or sub.startswith(CLIENT_TOKEN_PREFIX):
+        raise HTTPException(status_code=403, detail="Staff access required")
+    return payload
+
+
+async def require_admin(payload: dict = Depends(verify_token)):
+    """Réserve une route aux rôles `admin` et `super_admin`.
+
+    Le rôle est relu en base à chaque requête plutôt que lu dans le jeton : une
+    rétrogradation ou une désactivation prend effet immédiatement, sans attendre
+    l'expiration du JWT (24 h).
+
+    Retourne le payload du jeton pour rester compatible avec les appelants, qui
+    utilisent `admin["sub"]`.
+    """
+    from server import db
+
+    user = await db.admins.find_one(
+        {"email": payload["sub"]}, {"_id": 0, "password": 0}
+    )
+    if not user or user.get("is_active") is False or user.get("role") not in ADMIN_ROLES:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return payload
 
 
 async def log_audit(db, admin_email: str, action: str, target_type: str, target_id: str = None, details: str = None, ip: str = None, user_agent: str = None, extra_data: dict = None):

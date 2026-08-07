@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timezone
 
 from models.schemas import FAQCreate, FAQUpdate
-from utils.helpers import verify_token, cache_get, cache_set, cache_invalidate
+from utils.helpers import require_admin, cache_get, cache_set, cache_invalidate
 
 router = APIRouter()
 
@@ -26,14 +26,14 @@ async def get_faq_public():
 
 
 @router.get("/admin/faq")
-async def get_faq_admin(admin=Depends(verify_token)):
+async def get_faq_admin(admin=Depends(require_admin)):
     db = get_db()
     faqs = await db.faqs.find({}, {"_id": 0}).sort("order", 1).to_list(100)
     return faqs
 
 
 @router.post("/admin/faq")
-async def create_faq(data: FAQCreate, admin=Depends(verify_token)):
+async def create_faq(data: FAQCreate, admin=Depends(require_admin)):
     db = get_db()
     existing_count = await db.faqs.count_documents({})
     faq = {
@@ -49,7 +49,7 @@ async def create_faq(data: FAQCreate, admin=Depends(verify_token)):
 
 
 @router.put("/admin/faq/{faq_id}")
-async def update_faq(faq_id: str, data: FAQUpdate, admin=Depends(verify_token)):
+async def update_faq(faq_id: str, data: FAQUpdate, admin=Depends(require_admin)):
     db = get_db()
     existing = await db.faqs.find_one({"id": faq_id})
     if not existing:
@@ -64,7 +64,7 @@ async def update_faq(faq_id: str, data: FAQUpdate, admin=Depends(verify_token)):
 
 
 @router.delete("/admin/faq/{faq_id}")
-async def delete_faq(faq_id: str, admin=Depends(verify_token)):
+async def delete_faq(faq_id: str, admin=Depends(require_admin)):
     db = get_db()
     result = await db.faqs.delete_one({"id": faq_id})
     if result.deleted_count == 0:

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useAnimationControls } from 'framer-motion';
-import { AlertCircle, ArrowRight, Eye, EyeOff, KeyRound, Lock, ShieldCheck } from 'lucide-react';
+import { AlertCircle, ArrowRight, Eye, EyeOff, Info, KeyRound, Lock } from 'lucide-react';
 import { BTN, INPUT, T } from './demoTokens';
 
 /**
@@ -117,13 +117,13 @@ export function PasswordGate({ onUnlock }) {
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-400">Receipty</p>
               <h1 className="font-heading text-xl font-bold tracking-tight text-slate-100">
-                Espace Prospect Privé
+                Accès Démo Prospect Receipty
               </h1>
             </div>
           </div>
 
           <p className={`${T.body} mt-4`}>
-            Cet espace regroupe quatre démonstrations interactives préparées pour votre entreprise.
+            Cet espace regroupe cinq démonstrations interactives préparées pour votre entreprise.
             Saisissez le code d’accès qui vous a été transmis pour y accéder.
           </p>
 
@@ -227,10 +227,11 @@ export function PasswordGate({ onUnlock }) {
           </form>
 
           <div className="mt-6 flex items-start gap-2 border-t border-slate-800/80 pt-5">
-            <ShieldCheck size={16} strokeWidth={1.75} className="mt-0.5 shrink-0 text-emerald-400" />
+            <Info size={16} strokeWidth={1.75} className="mt-0.5 shrink-0 text-slate-400" />
             <p className="text-xs text-slate-400">
-              Espace privé, non référencé. Les démonstrations fonctionnent sur des données fictives :
-              aucune donnée de votre entreprise n’y est stockée.
+              Espace non référencé par les moteurs de recherche. Les démonstrations tournent sur des
+              données fictives, dans votre navigateur : aucune donnée de votre entreprise n’y est
+              envoyée ni stockée. Ce code d’accès limite le partage, il ne protège pas de secret.
             </p>
           </div>
         </motion.div>

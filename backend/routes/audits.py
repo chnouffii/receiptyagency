@@ -8,7 +8,7 @@ import os
 import logging
 
 from models.schemas import AuditCreate, QuoteCreate
-from utils.helpers import verify_token, log_audit, sanitize_text, get_default_site_content
+from utils.helpers import require_admin, log_audit, sanitize_text, get_default_site_content
 from utils.llm import LlmChat, UserMessage
 
 try:
@@ -160,7 +160,7 @@ Reponds uniquement avec les 3 arguments, sans introduction."""
 
 
 @router.post("/admin/audits")
-async def create_audit(input: AuditCreate, request: Request, admin=Depends(verify_token)):
+async def create_audit(input: AuditCreate, request: Request, admin=Depends(require_admin)):
     """Create a new audit and calculate ROI"""
     db = get_db()
     
@@ -246,14 +246,14 @@ async def create_audit(input: AuditCreate, request: Request, admin=Depends(verif
 
 
 @router.get("/admin/audits")
-async def list_audits(admin=Depends(verify_token)):
+async def list_audits(admin=Depends(require_admin)):
     db = get_db()
     audits = await db.audits.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
     return audits
 
 
 @router.get("/admin/audits/{audit_id}")
-async def get_audit(audit_id: str, admin=Depends(verify_token)):
+async def get_audit(audit_id: str, admin=Depends(require_admin)):
     db = get_db()
     audit = await db.audits.find_one({"id": audit_id}, {"_id": 0})
     if not audit:
@@ -262,7 +262,7 @@ async def get_audit(audit_id: str, admin=Depends(verify_token)):
 
 
 @router.delete("/admin/audits/{audit_id}")
-async def delete_audit(audit_id: str, request: Request, admin=Depends(verify_token)):
+async def delete_audit(audit_id: str, request: Request, admin=Depends(require_admin)):
     db = get_db()
     audit = await db.audits.find_one({"id": audit_id}, {"_id": 0})
     if not audit:
@@ -277,7 +277,7 @@ async def delete_audit(audit_id: str, request: Request, admin=Depends(verify_tok
 
 
 @router.get("/admin/audits/{audit_id}/pdf")
-async def generate_audit_pdf(audit_id: str, admin=Depends(verify_token)):
+async def generate_audit_pdf(audit_id: str, admin=Depends(require_admin)):
     """Generate PDF report for an audit (public version - no prices)"""
     db = get_db()
     
@@ -402,7 +402,7 @@ async def generate_audit_pdf(audit_id: str, admin=Depends(verify_token)):
 
 
 @router.post("/admin/audits/{audit_id}/to-quote")
-async def convert_audit_to_quote(audit_id: str, price_tier: str, request: Request, admin=Depends(verify_token)):
+async def convert_audit_to_quote(audit_id: str, price_tier: str, request: Request, admin=Depends(require_admin)):
     """Convert an audit to a quote using the selected price tier"""
     db = get_db()
     

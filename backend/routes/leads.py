@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pydantic import BaseModel
 
 from models.schemas import Lead, LeadCreate, LeadStatusUpdate, ContactMessage
-from utils.helpers import verify_token, send_notification_email
+from utils.helpers import require_admin, send_notification_email
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class AdminLeadCreate(BaseModel):
 
 
 @router.post("/admin/leads")
-async def create_lead_admin(input: AdminLeadCreate, admin=Depends(verify_token)):
+async def create_lead_admin(input: AdminLeadCreate, admin=Depends(require_admin)):
     """Create a new lead from admin panel"""
     db = get_db()
     lead_doc = {
@@ -111,7 +111,7 @@ async def create_contact(input: ContactMessage, request: Request):
 
 @router.get("/leads", response_model=List[Lead])
 async def get_leads(
-    admin=Depends(verify_token),
+    admin=Depends(require_admin),
     search: str = Query("", description="Search by name/email/company"),
     status_filter: str = Query("", description="Filter by status")
 ):
@@ -131,7 +131,7 @@ async def get_leads(
 
 
 @router.patch("/leads/{lead_id}/status")
-async def update_lead_status(lead_id: str, update: LeadStatusUpdate, admin=Depends(verify_token)):
+async def update_lead_status(lead_id: str, update: LeadStatusUpdate, admin=Depends(require_admin)):
     db = get_db()
     result = await db.leads.update_one({"id": lead_id}, {"$set": {"status": update.status}})
     if result.modified_count == 0:
@@ -140,7 +140,7 @@ async def update_lead_status(lead_id: str, update: LeadStatusUpdate, admin=Depen
 
 
 @router.delete("/leads/{lead_id}")
-async def delete_lead(lead_id: str, admin=Depends(verify_token)):
+async def delete_lead(lead_id: str, admin=Depends(require_admin)):
     db = get_db()
     result = await db.leads.delete_one({"id": lead_id})
     if result.deleted_count == 0:
@@ -156,7 +156,7 @@ class CallNotesUpdate(BaseModel):
 
 
 @router.put("/admin/leads/{lead_id}/call-notes")
-async def save_call_notes(lead_id: str, body: CallNotesUpdate, admin=Depends(verify_token)):
+async def save_call_notes(lead_id: str, body: CallNotesUpdate, admin=Depends(require_admin)):
     """Save call notes for a lead and optionally generate an AI summary."""
     db = get_db()
     lead = await db.leads.find_one({"id": lead_id}, {"_id": 0})
@@ -220,7 +220,7 @@ async def save_call_notes(lead_id: str, body: CallNotesUpdate, admin=Depends(ver
 
 
 @router.get("/admin/leads/{lead_id}/call-notes")
-async def get_call_notes(lead_id: str, admin=Depends(verify_token)):
+async def get_call_notes(lead_id: str, admin=Depends(require_admin)):
     """Get call notes and summary for a lead."""
     db = get_db()
     lead = await db.leads.find_one({"id": lead_id}, {"_id": 0, "call_notes": 1, "call_summary": 1, "call_notes_updated_at": 1})

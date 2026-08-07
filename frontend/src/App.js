@@ -8,6 +8,7 @@ import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { ChatWidget } from "./components/ChatWidget";
+import { CookieConsent } from "./components/CookieConsent";
 import { mountCursor } from "./lib/designAnimations";
 
 // Lazy-loaded pages — only downloaded when the user navigates to them
@@ -107,6 +108,7 @@ function AppContent() {
           </Routes>
         </Suspense>
         <GlobalChatWidget />
+        <CookieConsent />
       </BrowserRouter>
     </div>
   );
