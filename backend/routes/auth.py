@@ -5,41 +5,18 @@ import bcrypt
 from jose import jwt
 import uuid
 import os
-import time
-from collections import defaultdict
 
 from models.schemas import AdminLogin, AdminCreate, AdminUpdate
 from utils.helpers import require_admin, log_audit
+from utils import ratelimit
 
 router = APIRouter()
 
 JWT_SECRET = os.environ.get('JWT_SECRET')
 
-# Simple in-memory rate limiter for login endpoint
-# Max 5 failed attempts per 15 minutes per IP
-_login_attempts: dict = defaultdict(list)
-_RATE_LIMIT_MAX = 5
-_RATE_LIMIT_WINDOW = 900  # 15 minutes in seconds
-
-
-def _check_rate_limit(ip: str) -> None:
-    now = time.time()
-    attempts = _login_attempts[ip]
-    # Remove expired attempts
-    _login_attempts[ip] = [t for t in attempts if now - t < _RATE_LIMIT_WINDOW]
-    if len(_login_attempts[ip]) >= _RATE_LIMIT_MAX:
-        raise HTTPException(
-            status_code=429,
-            detail="Too many failed login attempts. Try again in 15 minutes."
-        )
-
-
-def _record_failed_attempt(ip: str) -> None:
-    _login_attempts[ip].append(time.time())
-
-
-def _clear_attempts(ip: str) -> None:
-    _login_attempts.pop(ip, None)
+# Plafond de connexion : 5 échecs par quart d'heure et par IP.
+_LOGIN_LIMIT = 5
+_LOGIN_WINDOW = 900
 
 
 def get_db():
@@ -52,20 +29,21 @@ async def admin_login(input: AdminLogin, request: Request):
     db = get_db()
     client_ip = request.client.host if request.client else "unknown"
 
-    # Rate limit check before hitting the database
-    _check_rate_limit(client_ip)
+    # Plafond vérifié avant toute requête en base.
+    await ratelimit.enforce(
+        f"admin_login:{client_ip}", _LOGIN_LIMIT, _LOGIN_WINDOW,
+        "Trop de tentatives de connexion. Réessayez dans 15 minutes.",
+    )
 
     admin = await db.admins.find_one({"email": input.email}, {"_id": 0})
     if not admin or not bcrypt.checkpw(input.password.encode(), admin["password"].encode()):
-        _record_failed_attempt(client_ip)
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     if admin.get("is_active") == False:
-        _record_failed_attempt(client_ip)
         raise HTTPException(status_code=401, detail="Account disabled")
 
-    # Clear failed attempts on successful login
-    _clear_attempts(client_ip)
+    # Une connexion réussie efface le compteur.
+    await ratelimit.reset(f"admin_login:{client_ip}")
 
     token = jwt.encode(
         {"sub": admin["email"], "exp": datetime.now(timezone.utc).timestamp() + 86400},

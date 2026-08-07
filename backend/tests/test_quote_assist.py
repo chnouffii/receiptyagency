@@ -21,6 +21,7 @@ if "litellm" not in sys.modules:
     sys.modules["litellm"] = _stub
 
 from routes import quote_assist as qa  # noqa: E402
+from utils import ratelimit as rl  # noqa: E402
 from routes.quote_assist import AnalyseRequest, _extraire_json, _indisponible  # noqa: E402
 
 
@@ -71,27 +72,71 @@ def test_espaces_ignores_dans_la_longueur():
         AnalyseRequest(description="   court   ")
 
 
-# ── Quotas ───────────────────────────────────────────────────────────────────
+# ── Quotas (module partagé utils/ratelimit) ─────────────────────────────────
+#
+# Sans MongoDB joignable, `hit` retombe sur le compteur mémoire : c'est
+# précisément ce repli qu'on éprouve ici, puisqu'il est la dernière ligne de
+# défense quand la base est indisponible.
 
-def test_quota_par_ip(monkeypatch):
-    monkeypatch.setattr(qa, "_ip_calls", qa.defaultdict(list))
-    for _ in range(qa._IP_LIMIT):
-        qa._check_ip("10.0.0.1")
+def test_repli_memoire_plafonne(monkeypatch):
+    monkeypatch.setattr(rl, "_fallback", rl.defaultdict(list))
+    assert [rl._fallback_hit("k", 3, 60) for _ in range(3)] == [True, True, True]
+    assert rl._fallback_hit("k", 3, 60) is False
+
+
+def test_repli_memoire_isole_les_cles(monkeypatch):
+    monkeypatch.setattr(rl, "_fallback", rl.defaultdict(list))
+    for _ in range(3):
+        rl._fallback_hit("ip-a", 3, 60)
+    assert rl._fallback_hit("ip-b", 3, 60) is True
+
+
+def test_repli_memoire_oublie_apres_la_fenetre(monkeypatch):
+    monkeypatch.setattr(rl, "_fallback", rl.defaultdict(list))
+    faux_temps = [1000.0]
+    monkeypatch.setattr(rl.time, "time", lambda: faux_temps[0])
+    for _ in range(3):
+        rl._fallback_hit("k", 3, 60)
+    assert rl._fallback_hit("k", 3, 60) is False
+    faux_temps[0] += 61
+    assert rl._fallback_hit("k", 3, 60) is True
+
+
+@pytest.mark.asyncio
+async def test_base_injoignable_ne_laisse_pas_passer(monkeypatch):
+    """Une panne MongoDB ne doit jamais désactiver la limitation."""
+    monkeypatch.setattr(rl, "_fallback", rl.defaultdict(list))
+    monkeypatch.setattr(rl, "_db", lambda: (_ for _ in ()).throw(RuntimeError("mongo down")))
+    assert [await rl.hit("k", 2, 60) for _ in range(2)] == [True, True]
+    assert await rl.hit("k", 2, 60) is False
+
+
+@pytest.mark.asyncio
+async def test_enforce_leve_429(monkeypatch):
+    monkeypatch.setattr(rl, "_fallback", rl.defaultdict(list))
+    monkeypatch.setattr(rl, "_db", lambda: (_ for _ in ()).throw(RuntimeError("mongo down")))
+    await rl.enforce("k", 1, 60, "stop")
     with pytest.raises(HTTPException) as exc:
-        qa._check_ip("10.0.0.1")
+        await rl.enforce("k", 1, 60, "stop")
     assert exc.value.status_code == 429
 
 
-def test_quota_par_ip_isole_les_adresses(monkeypatch):
-    monkeypatch.setattr(qa, "_ip_calls", qa.defaultdict(list))
-    for _ in range(qa._IP_LIMIT):
-        qa._check_ip("10.0.0.1")
-    qa._check_ip("10.0.0.2")  # ne doit pas lever
+# ── Champ piège anti-robot ───────────────────────────────────────────────────
+
+def test_piege_vide_est_un_humain():
+    from models.schemas import ContactMessage
+    m = ContactMessage(name="Jean", email="jean@ex.fr", message="Bonjour")
+    assert m.est_robot() is False
 
 
-def test_quota_global_journalier(monkeypatch):
-    monkeypatch.setattr(qa, "_daily", {"jour": None, "compte": 0})
-    monkeypatch.setattr(qa, "_DAILY_LIMIT", 3)
-    assert [qa._check_daily() for _ in range(3)] == [True, True, True]
-    # Dépassement : False, et surtout PAS d'exception — on dégrade, on ne casse pas.
-    assert qa._check_daily() is False
+def test_piege_rempli_est_un_robot():
+    from models.schemas import ContactMessage
+    m = ContactMessage(name="Bot", email="bot@ex.fr", message="spam", website="http://spam.tld")
+    assert m.est_robot() is True
+
+
+def test_piege_avec_espaces_seuls_reste_humain():
+    """Un navigateur peut envoyer un champ vide contenant des espaces."""
+    from models.schemas import ContactMessage
+    m = ContactMessage(name="Jean", email="jean@ex.fr", message="Bonjour", website="   ")
+    assert m.est_robot() is False

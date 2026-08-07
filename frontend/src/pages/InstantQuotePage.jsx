@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
 import SEOHead from '../components/SEOHead';
 import { calculerFourchette, formaterFourchette, LIBELLES_PALIERS } from '../lib/pricing';
+import { schemaDevis, valider, estEmailPersonnel } from '../lib/formSchemas';
+import { Honeypot } from '../components/Honeypot';
 import axios from 'axios';
 
 /**
@@ -83,6 +85,8 @@ export default function InstantQuotePage() {
   const [description, setDescription] = useState('');
   const [analysing, setAnalysing] = useState(false);
   const [analyse, setAnalyse] = useState(null);
+  const [erreurs, setErreurs] = useState({});
+  const [piege, setPiege] = useState('');
 
   useEffect(() => {
     axios.get(`${API}/solutions`)
@@ -149,12 +153,19 @@ export default function InstantQuotePage() {
 
   const canNext = () => {
     if (step === 0) return !!selectedSolutionId;
-    if (step === 3) return form.name && form.email && form.company;
+    if (step === 3) return true;  // la validation Zod se fait à l'envoi
     return true;
   };
 
   const handleSubmit = async () => {
-    if (!canNext()) return;
+    const { ok, errors } = valider(schemaDevis(lang), form);
+    setErreurs(errors);
+    if (!ok) {
+      // Ramène le focus sur le premier champ fautif : sans ça, l'erreur peut
+      // rester hors écran sur mobile.
+      document.getElementById(`quote-${Object.keys(errors)[0]}`)?.focus();
+      return;
+    }
     setSubmitting(true);
     const catName = selectedSolution
       ? (lang === 'fr' ? selectedSolution.name_fr : (selectedSolution.name_en || selectedSolution.name_fr))
@@ -175,6 +186,7 @@ export default function InstantQuotePage() {
         estimated_setup_max: fourchette.surMesure ? 0 : fourchette.setup[1],
         estimated_monthly_max: fourchette.surMesure ? 0 : fourchette.monthly[1],
         budget_tier: LIBELLES_PALIERS[fourchette.palier]?.fr || fourchette.palier,
+        website: piege,
         language: lang,
       });
       setSubmitted(true);
@@ -515,7 +527,8 @@ export default function InstantQuotePage() {
                     <h2 className="font-heading" style={{ fontSize: 19, fontWeight: 600, marginBottom: 18 }}>
                       {t.quote.contact}
                     </h2>
-                    <div style={{ display: 'grid', gap: 12 }}>
+                    <div style={{ display: 'grid', gap: 12, position: 'relative' }}>
+                      <Honeypot value={piege} onChange={setPiege} />
                       {[
                         { k: 'name', label: t.quote.name, type: 'text', autoComplete: 'name', req: true },
                         { k: 'email', label: t.quote.email, type: 'email', autoComplete: 'email', req: true },
@@ -538,12 +551,30 @@ export default function InstantQuotePage() {
                             autoComplete={f.autoComplete}
                             required={f.req}
                             value={form[f.k]}
-                            onChange={(e) => setForm({ ...form, [f.k]: e.target.value })}
+                            onChange={(e) => {
+                              setForm({ ...form, [f.k]: e.target.value });
+                              if (erreurs[f.k]) setErreurs((p) => ({ ...p, [f.k]: undefined }));
+                            }}
                             onFocus={onFocus}
                             onBlur={onBlur}
-                            style={champ}
+                            aria-invalid={!!erreurs[f.k]}
+                            aria-describedby={erreurs[f.k] ? `quote-${f.k}-err` : undefined}
+                            style={{ ...champ, borderColor: erreurs[f.k] ? 'var(--danger)' : 'var(--border)' }}
                             data-testid={`quote-input-${f.k}`}
                           />
+                          {erreurs[f.k] && (
+                            <p id={`quote-${f.k}-err`} role="alert" data-testid={`quote-err-${f.k}`}
+                               style={{ margin: '6px 0 0', fontSize: 12.5, color: 'var(--danger)' }}>
+                              {erreurs[f.k]}
+                            </p>
+                          )}
+                          {f.k === 'email' && !erreurs.email && estEmailPersonnel(form.email) && (
+                            <p style={{ margin: '6px 0 0', fontSize: 12.5, color: 'var(--text2)' }}>
+                              {lang === 'fr'
+                                ? 'Une adresse professionnelle nous aide à préparer votre dossier.'
+                                : 'A work email helps us prepare your file.'}
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>

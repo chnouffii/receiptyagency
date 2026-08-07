@@ -12,23 +12,15 @@ from pydantic import BaseModel
 
 from models.schemas import Lead, LeadCreate, LeadStatusUpdate, ContactMessage
 from utils.helpers import require_admin, send_notification_email
+from utils import ratelimit
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# #12: simple in-memory rate limiter for public endpoints (10 req/min per IP)
-_public_rate: dict = defaultdict(list)
+# Formulaires publics : 10 envois par minute et par IP.
 _PUBLIC_LIMIT = 10
-_PUBLIC_WINDOW = 60  # seconds
-
-
-def _check_public_rate(ip: str):
-    now = time.time()
-    _public_rate[ip] = [t for t in _public_rate[ip] if now - t < _PUBLIC_WINDOW]
-    if len(_public_rate[ip]) >= _PUBLIC_LIMIT:
-        raise HTTPException(status_code=429, detail="Trop de requêtes. Réessayez dans une minute.")
-    _public_rate[ip].append(now)
+_PUBLIC_WINDOW = 60
 
 
 def get_db():
@@ -76,9 +68,18 @@ async def create_lead_admin(input: AdminLeadCreate, admin=Depends(require_admin)
 async def create_lead(input: LeadCreate, request: Request):
     # #12: rate limit public lead creation
     client_ip = request.client.host if request.client else "unknown"
-    _check_public_rate(client_ip)
+    await ratelimit.enforce(
+        f"public_form:{client_ip}", _PUBLIC_LIMIT, _PUBLIC_WINDOW,
+        "Trop de requêtes. Réessayez dans une minute.",
+    )
+    # Champ piège rempli : on répond comme si tout allait bien plutôt que de
+    # renvoyer une erreur, pour ne pas indiquer au robot ce qui l'a trahi.
+    if input.est_robot():
+        logger.info("Soumission piégée ignorée (%s) depuis %s", "devis", client_ip)
+        return Lead(**input.model_dump(exclude={'website'}))
+
     db = get_db()
-    lead = Lead(**input.model_dump())
+    lead = Lead(**input.model_dump(exclude={'website'}))
     doc = lead.model_dump()
     await db.leads.insert_one(doc)
     # Alert the team by email — quote configurator submissions were previously silent
@@ -90,7 +91,16 @@ async def create_lead(input: LeadCreate, request: Request):
 async def create_contact(input: ContactMessage, request: Request):
     # #12: rate limit public contact form
     client_ip = request.client.host if request.client else "unknown"
-    _check_public_rate(client_ip)
+    await ratelimit.enforce(
+        f"public_form:{client_ip}", _PUBLIC_LIMIT, _PUBLIC_WINDOW,
+        "Trop de requêtes. Réessayez dans une minute.",
+    )
+    # Champ piège rempli : on répond comme si tout allait bien plutôt que de
+    # renvoyer une erreur, pour ne pas indiquer au robot ce qui l'a trahi.
+    if input.est_robot():
+        logger.info("Soumission piégée ignorée (%s) depuis %s", "contact", client_ip)
+        return {"message": "Contact message received", "id": str(uuid.uuid4())}
+
     db = get_db()
     doc = {
         "id": str(uuid.uuid4()),

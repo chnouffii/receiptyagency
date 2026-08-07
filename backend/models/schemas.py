@@ -36,7 +36,17 @@ class Lead(BaseModel):
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
-class LeadCreate(BaseModel):
+# Champ piège : invisible pour un humain, rempli par la plupart des robots qui
+# soumettent aveuglément tous les champs d'un formulaire. Nommé « website »
+# plutôt que « honeypot » pour ne pas être reconnu.
+class HoneypotMixin(BaseModel):
+    website: str = ""
+
+    def est_robot(self) -> bool:
+        return bool((self.website or "").strip())
+
+
+class LeadCreate(HoneypotMixin):
     name: str
     email: EmailStr
     company: str
@@ -60,7 +70,7 @@ class LeadStatusUpdate(BaseModel):
     status: str
 
 
-class ContactMessage(BaseModel):
+class ContactMessage(HoneypotMixin):
     name: str
     email: EmailStr
     phone: str = ""

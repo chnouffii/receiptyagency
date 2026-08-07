@@ -4,6 +4,8 @@ import { Send, Phone, Mail, MapPin, Clock, Zap, PhoneCall } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
 import SEOHead from '../components/SEOHead';
+import { schemaContact, valider, estEmailPersonnel } from '../lib/formSchemas';
+import { Honeypot } from '../components/Honeypot';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -22,6 +24,8 @@ export default function ContactPage() {
   const { t, lang } = useLanguage();
   const [siteContent, setSiteContent] = useState(null);
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [erreurs, setErreurs] = useState({});
+  const [piege, setPiege] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -35,16 +39,26 @@ export default function ContactPage() {
     hours_fr: 'Lundi au samedi : 9h - 19h', hours_en: 'Monday to Saturday: 9am - 7pm',
   };
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
+    // L'erreur disparaît dès que le champ est retouché, plutôt qu'à la
+    // prochaine soumission.
+    if (erreurs[name]) setErreurs((p) => ({ ...p, [name]: undefined }));
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message) {
-      toast.error(lang === 'fr' ? 'Veuillez remplir les champs obligatoires' : 'Please fill in required fields');
+    const { ok, errors } = valider(schemaContact(lang), form);
+    setErreurs(errors);
+    if (!ok) {
+      // Focus sur le premier champ fautif : sur mobile, un message
+      // d'erreur plus haut dans la page passerait inaperçu.
+      document.querySelector(`[name="${Object.keys(errors)[0]}"]`)?.focus();
       return;
     }
     setSubmitting(true);
     try {
-      await axios.post(`${API}/contact`, { ...form, language: lang });
+      await axios.post(`${API}/contact`, { ...form, website: piege, language: lang });
       setSubmitted(true);
       toast.success(t.contact.success);
     } catch {
@@ -91,28 +105,44 @@ export default function ContactPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Form */}
-          <form onSubmit={handleSubmit} data-testid="contact-form" style={card}>
+          <form onSubmit={handleSubmit} data-testid="contact-form" noValidate style={{ ...card, position: 'relative' }}>
+            <Honeypot value={piege} onChange={setPiege} />
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 600, marginBottom: 22, color: 'var(--text)' }}>{t.contact.form_title}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               <div>
                 <label style={label}>{t.contact.name} <span style={{ color: 'var(--danger)' }}>*</span></label>
-                <input type="text" name="name" value={form.name} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} placeholder={t.contact.name_placeholder} data-testid="contact-input-name" style={fieldStyle} required />
+                <input type="text" name="name" value={form.name} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} aria-invalid={!!erreurs.name} placeholder={t.contact.name_placeholder} data-testid="contact-input-name" style={fieldStyle} required />
+                {erreurs.name && (
+                  <p role="alert" data-testid="contact-err-name" style={{ margin: '6px 0 0', fontSize: 12.5, color: 'var(--danger)' }}>{erreurs.name}</p>
+                )}
               </div>
               <div>
                 <label style={label}>{t.contact.email} <span style={{ color: 'var(--danger)' }}>*</span></label>
-                <input type="email" name="email" value={form.email} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} placeholder={t.contact.email_placeholder} data-testid="contact-input-email" style={fieldStyle} required />
+                <input type="email" name="email" value={form.email} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} aria-invalid={!!erreurs.email} placeholder={t.contact.email_placeholder} data-testid="contact-input-email" style={fieldStyle} required />
+                {erreurs.email && (
+                  <p role="alert" data-testid="contact-err-email" style={{ margin: '6px 0 0', fontSize: 12.5, color: 'var(--danger)' }}>{erreurs.email}</p>
+                )}
               </div>
               <div>
                 <label style={label}>{t.contact.phone}</label>
-                <input type="tel" name="phone" value={form.phone} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} placeholder="+33 6 12 34 56 78" data-testid="contact-input-phone" style={fieldStyle} />
+                <input type="tel" name="phone" value={form.phone} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} aria-invalid={!!erreurs.phone} placeholder="+33 6 12 34 56 78" data-testid="contact-input-phone" style={fieldStyle} />
+                {erreurs.phone && (
+                  <p role="alert" data-testid="contact-err-phone" style={{ margin: '6px 0 0', fontSize: 12.5, color: 'var(--danger)' }}>{erreurs.phone}</p>
+                )}
               </div>
               <div>
                 <label style={label}>{t.contact.subject}</label>
-                <input type="text" name="subject" value={form.subject} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} placeholder={t.contact.subject_placeholder} data-testid="contact-input-subject" style={fieldStyle} />
+                <input type="text" name="subject" value={form.subject} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} aria-invalid={!!erreurs.subject} placeholder={t.contact.subject_placeholder} data-testid="contact-input-subject" style={fieldStyle} />
+                {erreurs.subject && (
+                  <p role="alert" data-testid="contact-err-subject" style={{ margin: '6px 0 0', fontSize: 12.5, color: 'var(--danger)' }}>{erreurs.subject}</p>
+                )}
               </div>
               <div>
                 <label style={label}>{t.contact.message} <span style={{ color: 'var(--danger)' }}>*</span></label>
-                <textarea name="message" value={form.message} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} placeholder={t.contact.message_placeholder} rows={5} data-testid="contact-input-message" style={{ ...fieldStyle, height: 'auto', padding: '12px 16px', resize: 'none' }} required />
+                <textarea name="message" value={form.message} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} aria-invalid={!!erreurs.message} placeholder={t.contact.message_placeholder} rows={5} data-testid="contact-input-message" style={{ ...fieldStyle, height: 'auto', padding: '12px 16px', resize: 'none' }} required />
+                {erreurs.message && (
+                  <p role="alert" data-testid="contact-err-message" style={{ margin: '6px 0 0', fontSize: 12.5, color: 'var(--danger)' }}>{erreurs.message}</p>
+                )}
               </div>
               <button type="submit" disabled={submitting} data-testid="contact-submit-btn"
                 style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'var(--accent2)', color: '#fff', borderRadius: 12, height: 48, fontWeight: 700, fontSize: 15, border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.6 : 1, boxShadow: '0 0 0 1px var(--accent2), 0 12px 40px -8px var(--glow)' }}>

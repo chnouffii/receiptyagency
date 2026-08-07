@@ -270,6 +270,9 @@ async def startup():
     await db.appointments.create_index("client_id")
     await db.appointments.create_index("status")
     await db.client_documents.create_index([("client_id", 1), ("requires_approval", 1)])
+    # Compteurs de limitation de débit : purgés automatiquement par MongoDB.
+    from utils.ratelimit import ensure_indexes as _rl_indexes
+    await _rl_indexes(db)
     logger.info("MongoDB indexes ensured")
 
     # Create default admin if none exists — password is auto-generated and logged ONCE

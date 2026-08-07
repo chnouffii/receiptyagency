@@ -1,8 +1,11 @@
 FROM node:20-slim AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
-RUN npm install ajv@8.17.1 ajv-keywords@5.1.0 --legacy-peer-deps
+# `npm ci` installe exactement l'arbre du package-lock.json et échoue si le
+# lockfile et le package.json divergent. Le pin ajv@8.17.1 qui vivait dans une
+# ligne isolée ici est désormais déclaré en devDependencies : plus de correctif
+# invisible, et un `npm install` local produit le même résultat que le build.
+RUN npm ci --legacy-peer-deps
 COPY . .
 ARG REACT_APP_BACKEND_URL
 ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL

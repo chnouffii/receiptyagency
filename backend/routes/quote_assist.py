@@ -27,14 +27,13 @@ import json
 import logging
 import os
 import re
-import time
-from collections import defaultdict
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, field_validator
 
 from utils.helpers import cache_get, cache_set
+from utils import ratelimit
 from utils.llm import LlmChat, UserMessage
 
 router = APIRouter()
@@ -43,16 +42,9 @@ logger = logging.getLogger(__name__)
 MAX_DESCRIPTION = 1200
 MIN_DESCRIPTION = 15
 
-# Quota par IP : une analyse par prospect suffit, 5 laisse la place aux
-# corrections. Fenêtre longue pour décourager le balayage.
-_ip_calls: dict = defaultdict(list)
+# Une analyse par prospect suffit ; 5 laisse la place aux corrections.
 _IP_LIMIT = 5
-_IP_WINDOW = 600  # 10 minutes
-
-# Quota global : protège d'un abus distribué, que le quota par IP ne voit pas.
-# Remis à zéro chaque jour UTC. En mémoire, donc réinitialisé au redéploiement
-# (cf. dette #20 : à porter sur Redis le jour où l'on passe à plusieurs workers).
-_daily = {"jour": None, "compte": 0}
+_IP_WINDOW = 600
 _DAILY_LIMIT = int(os.environ.get("QUOTE_AI_DAILY_LIMIT", "300"))
 
 
@@ -72,28 +64,6 @@ class AnalyseRequest(BaseModel):
         if len(v) < MIN_DESCRIPTION:
             raise ValueError(f"Description trop courte (minimum {MIN_DESCRIPTION} caractères)")
         return v[:MAX_DESCRIPTION]
-
-
-def _check_ip(ip: str) -> None:
-    now = time.time()
-    _ip_calls[ip] = [t for t in _ip_calls[ip] if now - t < _IP_WINDOW]
-    if len(_ip_calls[ip]) >= _IP_LIMIT:
-        raise HTTPException(
-            status_code=429,
-            detail="Trop d'analyses demandées. Réessayez dans quelques minutes.",
-        )
-    _ip_calls[ip].append(now)
-
-
-def _check_daily() -> bool:
-    """False quand le quota global du jour est atteint (dégradation, pas erreur)."""
-    jour = datetime.now(timezone.utc).date().isoformat()
-    if _daily["jour"] != jour:
-        _daily["jour"], _daily["compte"] = jour, 0
-    if _daily["compte"] >= _DAILY_LIMIT:
-        return False
-    _daily["compte"] += 1
-    return True
 
 
 def _extraire_json(texte: str) -> dict | None:
@@ -119,7 +89,10 @@ def _indisponible(raison: str) -> dict:
 @router.post("/quote/analyze")
 async def analyser_besoin(input: AnalyseRequest, request: Request):
     client_ip = request.client.host if request.client else "unknown"
-    _check_ip(client_ip)
+    await ratelimit.enforce(
+        f"quote_analyze:{client_ip}", _IP_LIMIT, _IP_WINDOW,
+        "Trop d'analyses demandées. Réessayez dans quelques minutes.",
+    )
 
     # Le même besoin décrit deux fois ne doit pas coûter deux appels.
     empreinte = hashlib.sha256(
@@ -131,7 +104,7 @@ async def analyser_besoin(input: AnalyseRequest, request: Request):
 
     if not os.environ.get("ANTHROPIC_API_KEY"):
         return _indisponible("ANTHROPIC_API_KEY absente")
-    if not _check_daily():
+    if not await ratelimit.daily_quota("quote_analyze", _DAILY_LIMIT):
         return _indisponible(f"quota global journalier atteint ({_DAILY_LIMIT})")
 
     db = get_db()

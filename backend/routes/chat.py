@@ -8,6 +8,7 @@ from collections import defaultdict
 
 from models.schemas import ChatMessageInput
 from utils.helpers import require_admin
+from utils import ratelimit
 from utils.llm import LlmChat, UserMessage
 
 router = APIRouter()
@@ -15,19 +16,12 @@ logger = logging.getLogger(__name__)
 
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
-# Rate limiter for the public /chat endpoint — each call hits the LLM (billable),
-# so limit abuse: max 15 messages / minute per IP.
-_chat_rate: dict = defaultdict(list)
+# Chaque message déclenche un appel LLM facturé. Deux plafonds : un par IP
+# contre l'usage intensif, un global journalier contre l'abus distribué que
+# le plafond par IP ne voit pas.
 _CHAT_LIMIT = 15
-_CHAT_WINDOW = 60  # seconds
-
-
-def _check_chat_rate(ip: str):
-    now = time.time()
-    _chat_rate[ip] = [t for t in _chat_rate[ip] if now - t < _CHAT_WINDOW]
-    if len(_chat_rate[ip]) >= _CHAT_LIMIT:
-        raise HTTPException(status_code=429, detail="Trop de messages. Réessayez dans une minute.")
-    _chat_rate[ip].append(now)
+_CHAT_WINDOW = 60
+_CHAT_DAILY_LIMIT = int(os.environ.get("CHAT_DAILY_LIMIT", "1000"))
 
 SYSTEM_PROMPT_FR = """Tu es l'assistant IA de Receipty Agency, une agence specialisee en integration d'intelligence artificielle pour les entreprises. Ton role est de pre-qualifier les prospects de maniere professionnelle et amicale.
 
@@ -66,7 +60,10 @@ def get_db():
 @router.post("/chat")
 async def chat_endpoint(input: ChatMessageInput, request: Request):
     client_ip = request.client.host if request.client else "unknown"
-    _check_chat_rate(client_ip)
+    await ratelimit.enforce(
+        f"chat:{client_ip}", _CHAT_LIMIT, _CHAT_WINDOW,
+        "Trop de messages. Réessayez dans une minute.",
+    )
 
     message = input.message.strip()
     if not message:
@@ -96,16 +93,29 @@ async def chat_endpoint(input: ChatMessageInput, request: Request):
         "created_at": datetime.now(timezone.utc).isoformat()
     })
 
-    try:
-        chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=input.session_id,
-            system_message=system_prompt
+    # Plafond global journalier : au-delà, on répond sans appeler le modèle.
+    # Le visiteur est invité à passer par le formulaire plutôt que de voir une
+    # erreur — sa demande arrive quand même jusqu'à l'équipe.
+    if not await ratelimit.daily_quota("chat", _CHAT_DAILY_LIMIT):
+        logger.warning("Plafond journalier du chat atteint (%s)", _CHAT_DAILY_LIMIT)
+        response = (
+            "Notre assistant est très sollicité aujourd'hui. Écrivez-nous via la page "
+            "Contact, nous répondons sous 24 h."
+            if input.language == "fr" else
+            "Our assistant is heavily loaded today. Reach us through the Contact page, "
+            "we reply within 24h."
         )
-        response = await chat.send_message(UserMessage(text=input.message))
-    except Exception as e:
-        logger.error(f"Chat error: {e}")
-        response = "Desolee, une erreur est survenue. Veuillez reessayer." if input.language == "fr" else "Sorry, an error occurred. Please try again."
+    else:
+        try:
+            chat = LlmChat(
+                api_key=EMERGENT_LLM_KEY,
+                session_id=input.session_id,
+                system_message=system_prompt
+            )
+            response = await chat.send_message(UserMessage(text=input.message))
+        except Exception as e:
+            logger.error(f"Chat error: {e}")
+            response = "Desolee, une erreur est survenue. Veuillez reessayer." if input.language == "fr" else "Sorry, an error occurred. Please try again."
 
     await db.chat_messages.insert_one({
         "session_id": input.session_id,

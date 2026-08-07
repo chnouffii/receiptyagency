@@ -14,31 +14,16 @@ from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, List
 
 from utils.helpers import require_admin
+from utils import ratelimit
 
 router = APIRouter()
 
 JWT_SECRET = os.environ.get('JWT_SECRET')
 CLIENT_TOKEN_PREFIX = "client:"
 
-# Rate limiter for client login
-_client_login_attempts: dict = defaultdict(list)
-_RATE_LIMIT_MAX = 5
-_RATE_LIMIT_WINDOW = 900
-
-
-def _check_client_rate_limit(ip: str):
-    now = time.time()
-    _client_login_attempts[ip] = [t for t in _client_login_attempts[ip] if now - t < _RATE_LIMIT_WINDOW]
-    if len(_client_login_attempts[ip]) >= _RATE_LIMIT_MAX:
-        raise HTTPException(status_code=429, detail="Trop de tentatives. Réessayez dans 15 minutes.")
-
-
-def _record_client_failed(ip: str):
-    _client_login_attempts[ip].append(time.time())
-
-
-def _clear_client_attempts(ip: str):
-    _client_login_attempts.pop(ip, None)
+# Plafond de connexion client : 5 échecs par quart d'heure et par IP.
+_LOGIN_LIMIT = 5
+_LOGIN_WINDOW = 900
 
 
 def get_db():
@@ -196,17 +181,19 @@ class AdminClientUpdate(BaseModel):
 async def client_login(input: ClientLogin, request: Request):
     db = get_db()
     client_ip = request.client.host if request.client else "unknown"
-    _check_client_rate_limit(client_ip)
+    await ratelimit.enforce(
+        f"client_login:{client_ip}", _LOGIN_LIMIT, _LOGIN_WINDOW,
+        "Trop de tentatives. Réessayez dans 15 minutes.",
+    )
 
     client = await db.client_accounts.find_one({"email": input.email}, {"_id": 0})
     if not client or not bcrypt.checkpw(input.password.encode(), client["password"].encode()):
-        _record_client_failed(client_ip)
         raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
 
     if not client.get("is_active", True):
         raise HTTPException(status_code=401, detail="Compte désactivé. Contactez votre conseiller.")
 
-    _clear_client_attempts(client_ip)
+    await ratelimit.reset(f"client_login:{client_ip}")
 
     token = jwt.encode(
         {
