@@ -37,8 +37,16 @@ export const PALETTE = {
 export const S = {
   /** Fond général de l'espace démo. */
   page: 'bg-[#0B0F17]',
-  /** Panneau de premier niveau (colonnes, grandes zones). */
-  panel: 'bg-[#111827]/70 border border-slate-800/80 rounded-2xl',
+  /**
+   * Panneau de premier niveau (colonnes, grandes zones).
+   *
+   * `min-w-0` est indispensable : un panneau est presque toujours placé dans
+   * une grille ou un flex, dont les items ont `min-width: auto` par défaut et
+   * refusent donc de descendre sous la largeur min-content de leur contenu.
+   * Sans lui, l'en-tête du panneau imposait 453 px et faisait déborder tout
+   * l'espace démo de 100 px sur un écran de 375 px.
+   */
+  panel: 'min-w-0 bg-[#111827]/70 border border-slate-800/80 rounded-2xl',
   /** Carte de contenu à l'intérieur d'un panneau. */
   card: 'bg-slate-800/30 border border-slate-800/80 rounded-xl',
   /** Carte cliquable : la bordure et le fond changent, jamais la taille. */

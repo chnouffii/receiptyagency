@@ -6,6 +6,9 @@ RUN npm install ajv@8.17.1 ajv-keywords@5.1.0 --legacy-peer-deps
 COPY . .
 ARG REACT_APP_BACKEND_URL
 ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
+# Supervision Sentry — optionnelle : sans DSN, aucun SDK n'est chargé.
+ARG REACT_APP_SENTRY_DSN
+ENV REACT_APP_SENTRY_DSN=$REACT_APP_SENTRY_DSN
 # Les source maps exposent l'intégralité du code source (commentaires compris)
 # à quiconque ouvre /static/js/*.map. Jamais en production.
 ENV GENERATE_SOURCEMAP=false

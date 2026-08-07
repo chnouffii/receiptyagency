@@ -149,7 +149,7 @@ export function SupportTriageDemo() {
       </motion.div>
 
       {/* ── Indicateurs ──────────────────────────────────────────────────── */}
-      <motion.div variants={staggerContainer} initial="hidden" animate="show" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <motion.div variants={staggerContainer} initial="hidden" animate="show" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0">
         <MetricTile
           label="Délai de première réponse"
           value={SUPPORT_METRICS.firstResponseAfter}
@@ -181,7 +181,7 @@ export function SupportTriageDemo() {
         />
       </motion.div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] [&>*]:min-w-0">
         {/* ── Boîte de réception unifiée ──────────────────────────────────── */}
         <motion.div variants={staggerItem}>
           <Panel
@@ -440,7 +440,7 @@ function TriagePanel({ triage }) {
         </span>
       </div>
 
-      <div className="mt-2.5 grid gap-2.5 sm:grid-cols-3">
+      <div className="mt-2.5 grid gap-2.5 sm:grid-cols-3 [&>*]:min-w-0">
         {[
           { label: 'Urgence', value: urgency.label, tone: urgency.tone },
           { label: 'Sentiment', value: sentiment.label, tone: sentiment.tone },

@@ -14,7 +14,7 @@ export function Panel({ title, subtitle, icon: Icon, action, children, className
   return (
     <section className={`${S.panel} flex flex-col overflow-hidden ${className}`}>
       {(title || action) && (
-        <header className="flex items-start justify-between gap-4 border-b border-slate-800/80 px-5 py-4">
+        <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b border-slate-800/80 px-5 py-4">
           <div className="flex min-w-0 items-start gap-3">
             {Icon && (
               <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-800/80 bg-slate-800/50">
@@ -301,7 +301,7 @@ export function SideDrawer({ open, onClose, title, subtitle, icon: Icon, childre
             transition={{ type: 'spring', stiffness: 320, damping: 34 }}
             className="relative flex h-full w-full max-w-xl flex-col border-l border-slate-800/80 bg-[#0B0F17] shadow-2xl shadow-black/50"
           >
-            <header className="flex items-start justify-between gap-4 border-b border-slate-800/80 px-5 py-4">
+            <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b border-slate-800/80 px-5 py-4">
               <div className="flex min-w-0 items-start gap-3">
                 {Icon && (
                   <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-800/80 bg-slate-800/50">

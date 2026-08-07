@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 
 /**
@@ -35,6 +35,7 @@ function writeConsent(value) {
 export function CookieConsent() {
   const { lang } = useLanguage();
   const [visible, setVisible] = useState(false);
+  const bannerRef = useRef(null);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -42,6 +43,28 @@ export function CookieConsent() {
     if (isPrivate) return;
     if (!readConsent()) setVisible(true);
   }, []);
+
+  /**
+   * Publie la hauteur de la bannière dans `--consent-offset`, que la bulle de
+   * chat consomme pour se placer au-dessus au lieu de la recouvrir. Suit les
+   * changements de hauteur (le texte passe sur 2 ou 3 lignes selon la largeur).
+   */
+  useEffect(() => {
+    const el = bannerRef.current;
+    const root = document.documentElement;
+    if (!visible || !el) {
+      root.style.setProperty('--consent-offset', '0px');
+      return undefined;
+    }
+    const publish = () => root.style.setProperty('--consent-offset', `${el.offsetHeight}px`);
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      root.style.setProperty('--consent-offset', '0px');
+    };
+  }, [visible]);
 
   const accept = () => {
     writeConsent('granted');
@@ -74,10 +97,13 @@ export function CookieConsent() {
 
   return (
     <div
+      ref={bannerRef}
       role="dialog"
       aria-live="polite"
       aria-label={t.label}
-      className="fixed inset-x-0 bottom-0 z-[60] border-t border-slate-700/60 bg-[#0B0F17]/95 px-4 py-4 backdrop-blur-sm sm:px-6"
+      // z au-dessus de la bulle de chat (z-[9999]) : la bannière doit rester
+      // au premier plan tant que le choix n'est pas fait.
+      className="fixed inset-x-0 bottom-0 z-[10000] border-t border-slate-700/60 bg-[#0B0F17]/95 px-4 py-4 backdrop-blur-sm sm:px-6"
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-relaxed text-slate-300">

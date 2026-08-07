@@ -152,7 +152,7 @@ export function ProposalGeneratorDemo() {
         </DemoButton>
       </motion.div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] [&>*]:min-w-0">
         {/* ── Formulaire de saisie rapide ─────────────────────────────────── */}
         <motion.div variants={staggerItem}>
           <Panel
@@ -193,7 +193,7 @@ export function ProposalGeneratorDemo() {
                 />
               </label>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 [&>*]:min-w-0">
                 <label className="block">
                   <span className={T.label}>Secteur d’activité</span>
                   <select
@@ -229,7 +229,7 @@ export function ProposalGeneratorDemo() {
                 </label>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 [&>*]:min-w-0">
                 <label className="block">
                   <span className={T.label}>Interlocuteur (optionnel)</span>
                   <input
@@ -275,7 +275,7 @@ export function ProposalGeneratorDemo() {
               {/* Ton de rédaction : appliqué à la génération et modifiable après coup. */}
               <div>
                 <span className={T.label}>Ton de rédaction</span>
-                <div className="mt-1.5 grid gap-1.5" data-testid="proposal-tones">
+                <div className="mt-1.5 grid gap-1.5 [&>*]:min-w-0" data-testid="proposal-tones">
                   {PROPOSAL_TONES.map((item) => {
                     const isActive = item.id === tone;
                     return (
@@ -475,7 +475,7 @@ export function ProposalGeneratorDemo() {
                     {/* Indicateurs de succès */}
                     <motion.section variants={staggerItem}>
                       <SectionLabel>Indicateurs de succès attendus</SectionLabel>
-                      <div className="mt-2.5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="mt-2.5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0">
                         {proposal.kpis.map((kpi) => (
                           <div key={kpi.label} className={`${S.card} p-4`}>
                             <p className="font-data text-lg font-bold tabular-nums text-emerald-400">
@@ -528,7 +528,7 @@ export function ProposalGeneratorDemo() {
                         <SectionLabel>Trois options au choix</SectionLabel>
                         <span className="text-[11px] text-slate-400">Montants hors taxes</span>
                       </div>
-                      <div className="mt-2.5 grid gap-3 lg:grid-cols-3" data-testid="proposal-tiers">
+                      <div className="mt-2.5 grid gap-3 lg:grid-cols-3 [&>*]:min-w-0" data-testid="proposal-tiers">
                         {proposal.tiers.map((tier) => (
                           <div
                             key={tier.id}

@@ -141,7 +141,7 @@ export function ProspectScoringDemo() {
 
             <div>
               <SectionLabel>Exemples pré-remplis</SectionLabel>
-              <div className="mt-2.5 grid gap-2.5 sm:grid-cols-2">
+              <div className="mt-2.5 grid gap-2.5 sm:grid-cols-2 [&>*]:min-w-0">
                 {PROSPECT_SAMPLES.map((sample) => (
                   <motion.button
                     key={sample.id}
@@ -196,7 +196,7 @@ export function ProspectScoringDemo() {
             initial="hidden"
             animate="show"
             exit={{ opacity: 0 }}
-            className="grid gap-5 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]"
+            className="grid gap-5 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] [&>*]:min-w-0"
           >
             {/* Colonne gauche : score + identité */}
             <div className="space-y-5">
@@ -314,7 +314,7 @@ export function ProspectScoringDemo() {
                   subtitle="Identifiées par croisement des signaux et de la stack"
                   icon={Zap}
                 >
-                  <div className="grid gap-3 p-5 sm:grid-cols-2">
+                  <div className="grid gap-3 p-5 sm:grid-cols-2 [&>*]:min-w-0">
                     {prospect.opportunities.map((opportunity) => (
                       <div key={opportunity.title} className={`${S.card} flex flex-col p-4`}>
                         <h3 className="font-heading text-sm font-semibold text-slate-100">{opportunity.title}</h3>
@@ -524,7 +524,7 @@ export function ProspectScoringDemo() {
           <div className="space-y-4">
             <div>
               <span className={T.label}>Destination</span>
-              <div className="mt-1.5 grid grid-cols-2 gap-2">
+              <div className="mt-1.5 grid grid-cols-2 gap-2 [&>*]:min-w-0">
                 {['HubSpot', 'Salesforce'].map((target) => (
                   <motion.button
                     key={target}

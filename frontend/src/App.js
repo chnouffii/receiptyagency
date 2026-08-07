@@ -9,7 +9,9 @@ import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { ChatWidget } from "./components/ChatWidget";
 import { CookieConsent } from "./components/CookieConsent";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { mountCursor } from "./lib/designAnimations";
+import { initMonitoring } from "./lib/monitoring";
 
 // Lazy-loaded pages — only downloaded when the user navigates to them
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -76,6 +78,8 @@ function AppContent() {
     document.getElementById('emergent-badge')?.remove();
     // Custom cursor (design refonte) — global, pointer-fine devices only
     const cleanup = mountCursor();
+    // Supervision : sans REACT_APP_SENTRY_DSN, l'appel ne charge rien.
+    initMonitoring();
     return cleanup;
   }, []);
 
@@ -116,13 +120,15 @@ function AppContent() {
 
 function App() {
   return (
-    <HelmetProvider>
-      <ThemeProvider>
-        <LanguageProvider>
-          <AppContent />
-        </LanguageProvider>
-      </ThemeProvider>
-    </HelmetProvider>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <AppContent />
+          </LanguageProvider>
+        </ThemeProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
   );
 }
 

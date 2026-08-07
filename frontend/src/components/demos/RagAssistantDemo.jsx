@@ -151,7 +151,7 @@ export function RagAssistantDemo() {
         </DemoButton>
       </motion.div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] [&>*]:min-w-0">
         {/* ── Conversation ────────────────────────────────────────────────── */}
         <motion.div variants={staggerItem}>
           <Panel
@@ -205,7 +205,7 @@ export function RagAssistantDemo() {
             {/* Questions suggérées */}
             <div className="border-b border-slate-800/80 p-5">
               <SectionLabel>Questions fréquentes — cliquez pour interroger la base</SectionLabel>
-              <div className="mt-2.5 grid gap-2">
+              <div className="mt-2.5 grid gap-2 [&>*]:min-w-0">
                 {RAG_SUGGESTIONS.map((suggestion) => (
                   <motion.button
                     key={suggestion.id}
@@ -297,7 +297,7 @@ export function RagAssistantDemo() {
         <motion.div variants={staggerItem}>
           <Panel title="Base de connaissances" subtitle="Corpus indexé pour cette démonstration" icon={Database}>
             <div className="space-y-4 p-5">
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-3 gap-2.5 [&>*]:min-w-0">
                 {[
                   { label: 'Documents', value: KNOWLEDGE_STATS.documents },
                   { label: 'Pages', value: KNOWLEDGE_STATS.pages },

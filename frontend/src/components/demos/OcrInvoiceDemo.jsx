@@ -207,7 +207,7 @@ export function OcrInvoiceDemo() {
         </DemoButton>
       </motion.div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2 [&>*]:min-w-0">
         {/* ── Colonne gauche : dépôt du document ──────────────────────────── */}
         <motion.div variants={staggerItem}>
           <Panel
@@ -345,7 +345,7 @@ export function OcrInvoiceDemo() {
               )}
 
               {/* Carte métrique : la promesse chiffrée */}
-              <motion.div variants={staggerContainer} initial="hidden" animate="show" className="grid gap-3 sm:grid-cols-2">
+              <motion.div variants={staggerContainer} initial="hidden" animate="show" className="grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
                 <MetricTile
                   label="Gain de temps calculé"
                   value="5 min 30"
@@ -468,7 +468,7 @@ export function OcrInvoiceDemo() {
                           variants={staggerContainer}
                           initial="hidden"
                           animate="show"
-                          className="grid gap-3.5 sm:grid-cols-2"
+                          className="grid gap-3.5 sm:grid-cols-2 [&>*]:min-w-0"
                         >
                           {INVOICE_FORM_FIELDS.map((field) => (
                             <motion.label key={field.key} variants={staggerItem} className="block">

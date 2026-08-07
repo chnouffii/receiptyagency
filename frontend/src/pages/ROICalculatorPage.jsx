@@ -114,7 +114,7 @@ export default function ROICalculatorPage() {
                 {formatEuro(results.annualSavings)}
               </motion.p>
               <p style={{ fontSize: 14, color: 'var(--text3)', margin: 0 }}>{lang === 'fr' ? 'par an' : 'per year'}</p>
-              <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
+              <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(110px,100%),1fr))', gap: 12 }}>
                 {[
                   { l: lang === 'fr' ? '3 ans' : '3 years', v: formatEuro(results.savings3Years), c: 'var(--text)' },
                   { l: 'ROI an 1', v: `${results.roiYear1 > 0 ? '+' : ''}${results.roiYear1}%`, c: results.roiYear1 > 0 ? '#34d399' : '#f87171' },
@@ -192,9 +192,9 @@ export default function ROICalculatorPage() {
         </div>
 
         {/* Social proof */}
-        <div style={{ marginTop: 64, borderRadius: 22, border: '1px solid var(--border)', background: 'var(--surface)', padding: 32, textAlign: 'center' }}>
+        <div style={{ marginTop: 64, borderRadius: 22, border: '1px solid var(--border)', background: 'var(--surface)', padding: 'clamp(20px,5vw,32px)', textAlign: 'center' }}>
           <p style={{ fontSize: 14, marginBottom: 24, color: 'var(--text3)' }}>{lang === 'fr' ? 'Résultats observés chez nos clients' : 'Results observed with our clients'}</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 32 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(150px,100%),1fr))', gap: 'clamp(16px,4vw,32px)' }}>
             {[
               { value: '+340%', label: lang === 'fr' ? 'Efficacité opérationnelle' : 'Operational efficiency', color: 'var(--accent)' },
               { value: '-45%', label: lang === 'fr' ? 'Coûts opérationnels' : 'Operational costs', color: '#34d399' },
