@@ -119,6 +119,21 @@ async def log_audit(db, admin_email: str, action: str, target_type: str, target_
     await db.audit_logs.insert_one(log_entry)
 
 
+def _range_label(low, high) -> str:
+    """Rend une fourchette lisible. Le prospect n'a jamais vu de montant sec :
+    l'email doit refléter exactement ce qui lui a été affiché."""
+    try:
+        low = float(low or 0)
+        high = float(high or 0)
+    except (TypeError, ValueError):
+        return ""
+    if low <= 0 and high <= 0:
+        return "Sur mesure"
+    if high <= low:
+        return f"{int(low)}"
+    return f"{int(low)} - {int(high)}"
+
+
 def _row(label: str, value) -> str:
     """Build one escaped table row for the notification email."""
     safe = html.escape(str(value)) if value not in (None, "") else "Non renseigne"
@@ -155,8 +170,11 @@ async def send_notification_email(contact_data: dict):
             + _row("Solution", contact_data.get('category'))
             + _row("Taille entreprise", contact_data.get('company_size'))
             + _row("Fonctionnalites", features_str)
-            + _row("Setup estime (EUR)", contact_data.get('estimated_setup'))
-            + _row("Mensuel estime (EUR)", contact_data.get('estimated_monthly'))
+            + _row("Budget setup estime (EUR)", _range_label(
+                contact_data.get('estimated_setup'), contact_data.get('estimated_setup_max')))
+            + _row("Budget mensuel estime (EUR)", _range_label(
+                contact_data.get('estimated_monthly'), contact_data.get('estimated_monthly_max')))
+            + _row("Palier", contact_data.get('budget_tier'))
         )
         extra = ""
     else:

@@ -24,6 +24,7 @@ export const Footer = () => {
           <div className="flex flex-wrap gap-8">
             <Link to="/adn" style={linkStyle} onMouseEnter={hover} onMouseLeave={unhover}>{t.nav.adn}</Link>
             <Link to="/solutions" style={linkStyle} onMouseEnter={hover} onMouseLeave={unhover}>{t.nav.solutions}</Link>
+            <Link to="/quote" style={linkStyle} onMouseEnter={hover} onMouseLeave={unhover}>{t.footer.budget}</Link>
             <Link to="/faq" style={linkStyle} onMouseEnter={hover} onMouseLeave={unhover}>FAQ</Link>
             <Link to="/contact" style={linkStyle} onMouseEnter={hover} onMouseLeave={unhover}>{t.nav.contact}</Link>
           </div>

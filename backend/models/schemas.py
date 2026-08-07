@@ -24,6 +24,9 @@ class Lead(BaseModel):
     features: List[str] = []
     estimated_setup: float = 0
     estimated_monthly: float = 0
+    estimated_setup_max: float = 0
+    estimated_monthly_max: float = 0
+    budget_tier: str = ""
     language: str = "fr"
     status: str = "new"
     type: str = "lead"
@@ -40,8 +43,14 @@ class LeadCreate(BaseModel):
     category: str
     company_size: int = 10
     features: List[str] = []
+    # `estimated_*` porte la BORNE BASSE de la fourchette affichée au prospect :
+    # l'agrégat de pipeline (/admin/stats) reste ainsi prudent plutôt que gonflé.
+    # Les bornes hautes et le palier sont conservés à côté pour le contexte.
     estimated_setup: float = 0
     estimated_monthly: float = 0
+    estimated_setup_max: float = 0
+    estimated_monthly_max: float = 0
+    budget_tier: str = ""
     language: str = "fr"
 
 

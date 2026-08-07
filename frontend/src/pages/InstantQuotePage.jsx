@@ -1,42 +1,70 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Wallet, Globe, Cpu, ShoppingCart, Mail, Shield, BarChart3, Check, ArrowRight, ArrowLeft, Send } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import {
+  Users, Wallet, Globe, Cpu, ShoppingCart, Mail, Shield, BarChart3,
+  Check, ArrowRight, ArrowLeft, Send, Info, MessageSquare,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
-import { Slider } from '../components/ui/slider';
-import { Checkbox } from '../components/ui/checkbox';
-import { Progress } from '../components/ui/progress';
+import SEOHead from '../components/SEOHead';
+import { calculerFourchette, formaterFourchette, LIBELLES_PALIERS } from '../lib/pricing';
 import axios from 'axios';
+
+/**
+ * /quote — Estimation de budget.
+ *
+ * Ce n'est PAS un devis : la page affiche une fourchette explicitement
+ * indicative, sans montant sec, et ne génère aucun PDF. Le devis réel est
+ * produit depuis l'espace admin (POST /api/admin/quotes/generate), numéroté et
+ * avec TVA. Toute la grille tarifaire vit dans `lib/pricing.js`.
+ *
+ * Le lead transmis porte la BORNE BASSE dans `estimated_setup` /
+ * `estimated_monthly` — l'agrégat de pipeline reste prudent — et la borne haute
+ * plus le palier dans les champs `*_max` / `budget_tier`.
+ */
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const ICON_MAP = { users: Users, wallet: Wallet, globe: Globe, cpu: Cpu, 'shopping-cart': ShoppingCart, mail: Mail, shield: Shield, 'bar-chart': BarChart3 };
+const ICON_MAP = {
+  users: Users, wallet: Wallet, globe: Globe, cpu: Cpu,
+  'shopping-cart': ShoppingCart, mail: Mail, shield: Shield, 'bar-chart': BarChart3,
+};
 
-function getScaleMultiplier(size) {
-  if (size <= 20) return 0.8;
-  if (size <= 50) return 1.0;
-  if (size <= 200) return 1.3;
-  if (size <= 500) return 1.6;
-  return 2.0;
-}
-
-function calculatePrice(solutionCount, companySize, featureCount) {
-  if (solutionCount === 0) return { setup: 0, monthly: 0 };
-  const multiplier = getScaleMultiplier(companySize);
-  const baseSetup = 2000 + (solutionCount - 1) * 800;
-  const baseMonthly = 149 + (solutionCount - 1) * 50;
-  const rawSetup = baseSetup * multiplier + featureCount * 600;
-  const rawMonthly = baseMonthly * multiplier + featureCount * 40;
-  return {
-    setup: Math.min(10000, Math.max(1000, Math.round(rawSetup))),
-    monthly: Math.min(499, Math.max(99, Math.round(rawMonthly))),
-  };
-}
+const PALIERS_EFFECTIF = [10, 20, 50, 100, 200, 350, 500, 1000];
 
 const stepVariants = {
   enter: { opacity: 0, x: 40 },
   center: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -40 },
+};
+
+const carte = {
+  borderRadius: 18,
+  border: '1px solid var(--border)',
+  background: 'var(--surface)',
+};
+
+const champ = {
+  width: '100%',
+  minHeight: 48,
+  padding: '12px 16px',
+  borderRadius: 12,
+  border: '1px solid var(--border)',
+  background: 'var(--bg2)',
+  color: 'var(--text)',
+  fontSize: 14,
+  outline: 'none',
+  transition: 'border-color .2s, box-shadow .2s',
+};
+
+const onFocus = (e) => {
+  e.target.style.borderColor = 'var(--accent)';
+  e.target.style.boxShadow = '0 0 0 3px var(--glow)';
+};
+const onBlur = (e) => {
+  e.target.style.borderColor = 'var(--border)';
+  e.target.style.boxShadow = 'none';
 };
 
 export default function InstantQuotePage() {
@@ -51,15 +79,16 @@ export default function InstantQuotePage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // Fetch solutions from API
   useEffect(() => {
-    axios.get(`${API}/solutions`).then(res => {
-      setSolutions(res.data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    axios.get(`${API}/solutions`)
+      .then((res) => { setSolutions(res.data); setLoading(false); })
+      .catch(() => setLoading(false));
   }, []);
 
-  const selectedSolution = useMemo(() => solutions.find(s => s.id === selectedSolutionId), [solutions, selectedSolutionId]);
+  const selectedSolution = useMemo(
+    () => solutions.find((s) => s.id === selectedSolutionId),
+    [solutions, selectedSolutionId],
+  );
 
   const availableFeatures = useMemo(() => {
     if (!selectedSolution) return [];
@@ -68,15 +97,15 @@ export default function InstantQuotePage() {
       : (selectedSolution.features_en || selectedSolution.features_fr || []);
   }, [selectedSolution, lang]);
 
-  const price = useMemo(() => calculatePrice(
-    selectedSolution ? 1 : 0,
-    companySize,
-    selectedFeatures.length
-  ), [selectedSolution, companySize, selectedFeatures]);
+  const fourchette = useMemo(
+    () => calculerFourchette(companySize, selectedFeatures.length),
+    [companySize, selectedFeatures.length],
+  );
 
-  const toggleFeature = (f) => {
-    setSelectedFeatures(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
-  };
+  const locale = lang === 'fr' ? 'fr-FR' : 'en-US';
+
+  const toggleFeature = (f) =>
+    setSelectedFeatures((prev) => (prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]));
 
   const selectSolution = (id) => {
     setSelectedSolutionId(id);
@@ -85,13 +114,12 @@ export default function InstantQuotePage() {
 
   const canNext = () => {
     if (step === 0) return !!selectedSolutionId;
-    if (step === 1) return true;
-    if (step === 2) return true;
     if (step === 3) return form.name && form.email && form.company;
     return true;
   };
 
   const handleSubmit = async () => {
+    if (!canNext()) return;
     setSubmitting(true);
     const catName = selectedSolution
       ? (lang === 'fr' ? selectedSolution.name_fr : (selectedSolution.name_en || selectedSolution.name_fr))
@@ -105,195 +133,382 @@ export default function InstantQuotePage() {
         category: catName,
         company_size: companySize,
         features: selectedFeatures,
-        estimated_setup: price.setup,
-        estimated_monthly: price.monthly,
+        // Borne basse dans les champs historiques, borne haute à côté.
+        estimated_setup: fourchette.surMesure ? 0 : fourchette.setup[0],
+        estimated_monthly: fourchette.surMesure ? 0 : fourchette.monthly[0],
+        estimated_setup_max: fourchette.surMesure ? 0 : fourchette.setup[1],
+        estimated_monthly_max: fourchette.surMesure ? 0 : fourchette.monthly[1],
+        budget_tier: LIBELLES_PALIERS[fourchette.palier]?.fr || fourchette.palier,
         language: lang,
       });
       setSubmitted(true);
       toast.success(t.quote.success);
     } catch {
-      toast.error('Error submitting quote');
+      toast.error(lang === 'fr' ? "Erreur lors de l'envoi" : 'Error submitting request');
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ── Écran de confirmation ────────────────────────────────────────────────
   if (submitted) {
     return (
-      <div data-testid="quote-success" className="pt-24 bg-[#050505] min-h-screen flex items-center justify-center">
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-md mx-auto px-6">
-          <div className="w-16 h-16 rounded-full bg-blue-600/20 flex items-center justify-center mx-auto mb-6">
-            <Check className="w-8 h-8 text-blue-400" />
+      <div
+        data-testid="quote-success"
+        style={{ paddingTop: 96, minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)' }}
+        className="flex items-center justify-center"
+      >
+        <SEOHead page="quote" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center max-w-md mx-auto px-6"
+        >
+          <div
+            style={{ background: 'color-mix(in srgb, var(--accent) 18%, transparent)' }}
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
+          >
+            <Check style={{ width: 30, height: 30, color: 'var(--accent-text)' }} />
           </div>
-          <h2 className="font-heading text-2xl font-bold text-white">{t.quote.success}</h2>
-          <p className="mt-3 text-gray-400">{t.quote.success_desc}</p>
+          <h1 className="font-heading" style={{ fontSize: 26, fontWeight: 700, margin: 0 }}>
+            {t.quote.success}
+          </h1>
+          <p style={{ marginTop: 12, fontSize: 15, lineHeight: 1.6, color: 'var(--text2)' }}>
+            {t.quote.success_desc}
+          </p>
+          <Link
+            to="/"
+            style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              minHeight: 44, marginTop: 28, padding: '12px 22px', borderRadius: 100,
+              border: '1px solid var(--border2)', color: 'var(--text)',
+              fontSize: 14, fontWeight: 600, textDecoration: 'none',
+            }}
+          >
+            {lang === 'fr' ? "Retour à l'accueil" : 'Back to home'}
+          </Link>
         </motion.div>
       </div>
     );
   }
 
-  return (
-    <div data-testid="quote-page" className="pt-24 bg-[#050505] min-h-screen">
-      <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <h1 className="font-heading text-4xl sm:text-5xl font-bold text-white tracking-tight">{t.quote.title}</h1>
-          <p className="mt-4 text-base text-gray-400">{t.quote.subtitle}</p>
-        </motion.div>
+  const etapes = t.quote.steps;
 
-        {/* Progress */}
-        <div className="mt-10 mb-2">
-          {/* Cette page a un fond #050505 codé en dur (non migrée vers le design
-              system) : on y fixe des couleurs claires plutôt que des tokens de
-              thème, qui donneraient du gris foncé sur noir en thème clair. */}
-          <div className="flex justify-between text-xs text-gray-400 mb-3">
-            {t.quote.steps.map((s, i) => (
-              <span key={i} className={`transition-colors duration-200 ${i <= step ? 'text-blue-400 font-semibold' : ''}`}>{s}</span>
-            ))}
-          </div>
-          <Progress value={(step + 1) * 25} className="h-1 bg-white/5" data-testid="quote-progress" />
+  return (
+    <div
+      data-testid="quote-page"
+      style={{ paddingTop: 96, minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)' }}
+    >
+      <SEOHead page="quote" />
+      <div className="max-w-4xl mx-auto px-5 sm:px-6" style={{ paddingBottom: 96 }}>
+        <div style={{ textAlign: 'center', marginBottom: 8 }}>
+          <h1
+            className="font-heading"
+            style={{ fontSize: 'clamp(2rem,5vw,3rem)', fontWeight: 700, letterSpacing: '-.02em', margin: 0 }}
+          >
+            {t.quote.title}
+          </h1>
+          <p style={{ marginTop: 14, fontSize: 16, color: 'var(--text2)' }}>{t.quote.subtitle}</p>
         </div>
 
-        {/* Step Content */}
-        <div className="mt-10 min-h-[340px]">
-          <AnimatePresence mode="wait">
-            <motion.div key={step} variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}>
+        {/* Progression — les libellés restent lisibles à toutes les étapes */}
+        <div style={{ marginTop: 40, marginBottom: 8 }}>
+          <ol
+            className="flex justify-between"
+            style={{ fontSize: 12, listStyle: 'none', padding: 0, margin: '0 0 12px', gap: 8 }}
+          >
+            {etapes.map((s, i) => (
+              <li
+                key={s}
+                aria-current={i === step ? 'step' : undefined}
+                style={{
+                  color: i <= step ? 'var(--accent-text)' : 'var(--text3)',
+                  fontWeight: i <= step ? 600 : 500,
+                  transition: 'color .2s',
+                }}
+              >
+                {s}
+              </li>
+            ))}
+          </ol>
+          <div
+            role="progressbar"
+            aria-valuenow={step + 1}
+            aria-valuemin={1}
+            aria-valuemax={etapes.length}
+            aria-label={lang === 'fr' ? 'Progression' : 'Progress'}
+            style={{ height: 4, borderRadius: 100, background: 'var(--surface2)', overflow: 'hidden' }}
+          >
+            <motion.div
+              animate={{ width: `${((step + 1) / etapes.length) * 100}%` }}
+              transition={{ duration: 0.3 }}
+              style={{ height: '100%', background: 'var(--accent)' }}
+            />
+          </div>
+        </div>
 
-              {/* Step 0: Category Selection - Dynamic from API */}
+        <div style={{ marginTop: 40, minHeight: 360 }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              variants={stepVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.28 }}
+            >
+              {/* ── Étape 0 : besoin ─────────────────────────────────────── */}
               {step === 0 && (
-                <div>
-                  <h3 className="font-heading text-lg font-semibold text-white mb-6">{t.quote.category_label}</h3>
+                <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+                  <legend className="font-heading" style={{ fontSize: 19, fontWeight: 600, marginBottom: 18 }}>
+                    {t.quote.category_label}
+                  </legend>
                   {loading ? (
-                    <div className="text-center text-gray-500 py-12">{lang === 'fr' ? 'Chargement...' : 'Loading...'}</div>
-                  ) : solutions.length === 0 ? (
-                    <div className="text-center text-gray-500 py-12">{lang === 'fr' ? 'Aucune solution disponible.' : 'No solutions available.'}</div>
+                    <p style={{ color: 'var(--text3)' }}>{lang === 'fr' ? 'Chargement…' : 'Loading…'}</p>
                   ) : (
-                    <div className={`grid grid-cols-1 gap-4 ${solutions.length <= 3 ? 'sm:grid-cols-3' : solutions.length <= 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
+                    <div
+                      className="grid gap-3"
+                      style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(min(240px,100%),1fr))' }}
+                    >
                       {solutions.map((sol) => {
                         const Icon = ICON_MAP[sol.icon] || Users;
-                        const name = lang === 'fr' ? sol.name_fr : (sol.name_en || sol.name_fr);
-                        const tag = lang === 'fr' ? sol.tag_fr : (sol.tag_en || sol.tag_fr);
+                        const actif = selectedSolutionId === sol.id;
+                        const nom = lang === 'fr' ? sol.name_fr : (sol.name_en || sol.name_fr);
+                        const desc = lang === 'fr' ? sol.desc_fr : (sol.desc_en || sol.desc_fr);
                         return (
                           <button
                             key={sol.id}
+                            type="button"
                             onClick={() => selectSolution(sol.id)}
-                            data-testid={`category-${sol.id}`}
-                            className={`flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all duration-200 ${
-                              selectedSolutionId === sol.id
-                                ? 'border-blue-500/50 bg-blue-600/10 shadow-[0_0_15px_rgba(0,122,255,0.15)]'
-                                : 'border-white/5 bg-white/[0.02] hover:border-white/10'
-                            }`}
+                            aria-pressed={actif}
+                            data-testid={`quote-solution-${sol.id}`}
+                            style={{
+                              ...carte,
+                              minHeight: 44,
+                              padding: 18,
+                              textAlign: 'left',
+                              cursor: 'pointer',
+                              borderColor: actif ? 'var(--accent)' : 'var(--border)',
+                              background: actif
+                                ? 'color-mix(in srgb, var(--accent) 10%, transparent)'
+                                : 'var(--surface)',
+                              transition: 'border-color .2s, background .2s',
+                            }}
                           >
-                            <Icon className={`w-8 h-8 ${selectedSolutionId === sol.id ? 'text-blue-400' : 'text-gray-500'}`} />
-                            <span className="font-heading font-semibold text-white text-sm">{name}</span>
-                            <span className="text-xs text-gray-500">{tag}</span>
+                            <Icon style={{ width: 22, height: 22, color: 'var(--accent-text)', marginBottom: 10 }} />
+                            <span
+                              className="font-heading"
+                              style={{ display: 'block', fontSize: 15, fontWeight: 600, color: 'var(--text)' }}
+                            >
+                              {nom}
+                            </span>
+                            <span
+                              style={{ display: 'block', marginTop: 6, fontSize: 13, lineHeight: 1.5, color: 'var(--text2)' }}
+                            >
+                              {desc}
+                            </span>
                           </button>
                         );
                       })}
                     </div>
                   )}
-                </div>
+                </fieldset>
               )}
 
-              {/* Step 1: Company Size */}
+              {/* ── Étape 1 : taille ─────────────────────────────────────── */}
               {step === 1 && (
                 <div>
-                  <h3 className="font-heading text-lg font-semibold text-white mb-6">{t.quote.scale_label}</h3>
-                  <div className="bg-[#0F0F10] border border-white/5 rounded-2xl p-8">
-                    <div className="text-center mb-8">
-                      <span className="font-mono text-5xl font-bold text-blue-400">{companySize}</span>
-                      <span className="text-gray-500 ml-2">{t.quote.employees}</span>
-                    </div>
-                    <Slider
-                      data-testid="company-size-slider"
-                      value={[companySize]}
-                      onValueChange={(v) => setCompanySize(v[0])}
-                      min={1}
-                      max={500}
+                  <label
+                    htmlFor="quote-size"
+                    className="font-heading"
+                    style={{ display: 'block', fontSize: 19, fontWeight: 600, marginBottom: 18 }}
+                  >
+                    {t.quote.scale_label}
+                  </label>
+                  <div style={{ ...carte, padding: 24 }}>
+                    <p
+                      className="font-heading"
+                      style={{ fontSize: 34, fontWeight: 700, color: 'var(--accent-text)', margin: 0 }}
+                    >
+                      {companySize >= 1000 ? '1000+' : companySize}{' '}
+                      <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--text2)' }}>
+                        {t.quote.employees}
+                      </span>
+                    </p>
+                    <input
+                      id="quote-size"
+                      type="range"
+                      min={0}
+                      max={PALIERS_EFFECTIF.length - 1}
                       step={1}
-                      className="py-4"
+                      value={PALIERS_EFFECTIF.indexOf(companySize) === -1 ? 2 : PALIERS_EFFECTIF.indexOf(companySize)}
+                      onChange={(e) => setCompanySize(PALIERS_EFFECTIF[Number(e.target.value)])}
+                      aria-label={t.quote.scale_label}
+                      aria-valuetext={`${companySize} ${t.quote.employees}`}
+                      style={{ width: '100%', height: 44, marginTop: 16, accentColor: 'var(--accent)', cursor: 'pointer' }}
                     />
-                    <div className="flex justify-between text-xs text-gray-600 mt-2">
-                      <span>1</span><span>100</span><span>250</span><span>500+</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text3)' }}>
+                      <span>10</span>
+                      <span>1000+</span>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Step 2: Features - Dynamic from selected solution */}
+              {/* ── Étape 2 : options ────────────────────────────────────── */}
               {step === 2 && (
-                <div>
-                  <h3 className="font-heading text-lg font-semibold text-white mb-6">{t.quote.features_label}</h3>
-                  {availableFeatures.length === 0 ? (
-                    <div className="text-center text-gray-500 py-8">{lang === 'fr' ? 'Aucune fonctionnalité configurée pour cette solution.' : 'No features configured for this solution.'}</div>
-                  ) : (
-                    <div className="space-y-3">
-                      {availableFeatures.map((feature, i) => (
+                <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+                  <legend className="font-heading" style={{ fontSize: 19, fontWeight: 600, marginBottom: 18 }}>
+                    {t.quote.features_label}
+                  </legend>
+                  <div
+                    className="grid gap-3"
+                    style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(min(260px,100%),1fr))' }}
+                  >
+                    {availableFeatures.map((f) => {
+                      const actif = selectedFeatures.includes(f);
+                      return (
                         <label
-                          key={feature}
-                          data-testid={`feature-option-${i}`}
-                          className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
-                            selectedFeatures.includes(feature)
-                              ? 'border-blue-500/30 bg-blue-600/5'
-                              : 'border-white/5 bg-white/[0.02] hover:border-white/10'
-                          }`}
+                          key={f}
+                          style={{
+                            ...carte,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            minHeight: 56,
+                            padding: '12px 16px',
+                            cursor: 'pointer',
+                            borderColor: actif ? 'var(--accent)' : 'var(--border)',
+                            background: actif
+                              ? 'color-mix(in srgb, var(--accent) 10%, transparent)'
+                              : 'var(--surface)',
+                            transition: 'border-color .2s, background .2s',
+                          }}
                         >
-                          <Checkbox
-                            checked={selectedFeatures.includes(feature)}
-                            onCheckedChange={() => toggleFeature(feature)}
-                            className="border-white/20 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                          <input
+                            type="checkbox"
+                            checked={actif}
+                            onChange={() => toggleFeature(f)}
+                            style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer', flexShrink: 0 }}
                           />
-                          <span className="text-sm text-gray-300">{feature}</span>
+                          <span style={{ fontSize: 14, color: 'var(--text)' }}>{f}</span>
                         </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                      );
+                    })}
+                  </div>
+                </fieldset>
               )}
 
-              {/* Step 3: Contact & Price */}
+              {/* ── Étape 3 : fourchette + coordonnées ───────────────────── */}
               {step === 3 && (
-                <div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                      <h3 className="font-heading text-lg font-semibold text-white mb-6">{t.quote.contact}</h3>
-                      <div className="space-y-4">
-                        {['name', 'email', 'company', 'phone'].map((field) => (
+                <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))' }}>
+                  <div>
+                    <h2 className="font-heading" style={{ fontSize: 19, fontWeight: 600, marginBottom: 18 }}>
+                      {t.quote.contact}
+                    </h2>
+                    <div style={{ display: 'grid', gap: 12 }}>
+                      {[
+                        { k: 'name', label: t.quote.name, type: 'text', autoComplete: 'name', req: true },
+                        { k: 'email', label: t.quote.email, type: 'email', autoComplete: 'email', req: true },
+                        { k: 'company', label: t.quote.company, type: 'text', autoComplete: 'organization', req: true },
+                        { k: 'phone', label: t.quote.phone, type: 'tel', autoComplete: 'tel', req: false },
+                      ].map((f) => (
+                        <div key={f.k}>
+                          <label
+                            htmlFor={`quote-${f.k}`}
+                            style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text2)', marginBottom: 6 }}
+                          >
+                            {f.label}
+                            {f.req && (
+                              <span style={{ color: 'var(--danger)' }} aria-label={t.quote.required}> *</span>
+                            )}
+                          </label>
                           <input
-                            key={field}
-                            type={field === 'email' ? 'email' : 'text'}
-                            placeholder={t.quote[field]}
-                            value={form[field]}
-                            onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                            data-testid={`quote-input-${field}`}
-                            className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 rounded-lg text-white placeholder:text-gray-600 h-12 px-4 text-sm outline-none transition-all duration-200"
+                            id={`quote-${f.k}`}
+                            type={f.type}
+                            autoComplete={f.autoComplete}
+                            required={f.req}
+                            value={form[f.k]}
+                            onChange={(e) => setForm({ ...form, [f.k]: e.target.value })}
+                            onFocus={onFocus}
+                            onBlur={onBlur}
+                            style={champ}
+                            data-testid={`quote-input-${f.k}`}
                           />
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
-                    <div>
-                      <h3 className="font-heading text-lg font-semibold text-white mb-6">{t.quote.your_estimate}</h3>
-                      <div className="rounded-2xl border border-blue-500/20 bg-blue-600/5 p-6 space-y-6">
-                        {selectedSolution && (
-                          <div className="flex items-center gap-3 pb-4 border-b border-white/5">
-                            {(() => { const Icon = ICON_MAP[selectedSolution.icon] || Users; return <Icon className="w-5 h-5 text-blue-400" />; })()}
-                            <span className="text-sm font-semibold text-white">
-                              {lang === 'fr' ? selectedSolution.name_fr : (selectedSolution.name_en || selectedSolution.name_fr)}
-                            </span>
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase tracking-wider">{t.quote.setup_fee}</p>
-                          <p className="font-mono text-3xl font-bold text-white mt-1" data-testid="setup-price">
-                            {price.setup.toLocaleString()} &euro;
-                          </p>
-                        </div>
-                        <div className="border-t border-white/5 pt-4">
-                          <p className="text-xs text-gray-500 uppercase tracking-wider">{t.quote.monthly_fee}</p>
-                          <p className="font-mono text-3xl font-bold text-blue-400 mt-1" data-testid="monthly-price">
-                            {price.monthly.toLocaleString()} &euro;<span className="text-sm text-gray-500 font-normal">/mo</span>
-                          </p>
-                        </div>
+                  </div>
+
+                  <div>
+                    <h2 className="font-heading" style={{ fontSize: 19, fontWeight: 600, marginBottom: 18 }}>
+                      {t.quote.your_estimate}
+                    </h2>
+
+                    {fourchette.surMesure ? (
+                      <div style={{ ...carte, padding: 24 }}>
+                        <MessageSquare style={{ width: 24, height: 24, color: 'var(--accent-text)', marginBottom: 12 }} />
+                        <p className="font-heading" style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>
+                          {t.quote.custom_quote}
+                        </p>
+                        <p style={{ marginTop: 10, fontSize: 14, lineHeight: 1.6, color: 'var(--text2)' }}>
+                          {t.quote.custom_desc}
+                        </p>
                       </div>
+                    ) : (
+                      <div style={{ ...carte, padding: 24 }} data-testid="quote-range">
+                        {selectedSolution && (
+                          <p
+                            style={{
+                              fontSize: 13, fontWeight: 600, color: 'var(--accent-text)',
+                              margin: '0 0 16px', paddingBottom: 14, borderBottom: '1px solid var(--border)',
+                            }}
+                          >
+                            {lang === 'fr' ? selectedSolution.name_fr : (selectedSolution.name_en || selectedSolution.name_fr)}
+                          </p>
+                        )}
+                        <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text2)', margin: 0 }}>
+                          {t.quote.setup_fee}
+                        </p>
+                        <p
+                          className="font-heading"
+                          style={{ fontSize: 'clamp(1.4rem,4vw,1.9rem)', fontWeight: 700, margin: '4px 0 0' }}
+                          data-testid="setup-range"
+                        >
+                          {formaterFourchette(fourchette.setup, locale)}
+                        </p>
+
+                        <p
+                          style={{
+                            fontSize: 12, textTransform: 'uppercase', letterSpacing: '.06em',
+                            color: 'var(--text2)', margin: '20px 0 0', paddingTop: 16, borderTop: '1px solid var(--border)',
+                          }}
+                        >
+                          {t.quote.monthly_fee}
+                        </p>
+                        <p
+                          className="font-heading"
+                          style={{ fontSize: 'clamp(1.4rem,4vw,1.9rem)', fontWeight: 700, color: 'var(--accent-text)', margin: '4px 0 0' }}
+                          data-testid="monthly-range"
+                        >
+                          {formaterFourchette(fourchette.monthly, locale)}
+                          <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text2)' }}>{t.quote.per_month}</span>
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Mention non contractuelle — obligatoire dès qu'un montant apparaît */}
+                    <div
+                      style={{
+                        display: 'flex', gap: 10, marginTop: 14, padding: 14,
+                        borderRadius: 12, border: '1px solid var(--border)', background: 'var(--surface2)',
+                      }}
+                    >
+                      <Info style={{ width: 16, height: 16, flexShrink: 0, marginTop: 2, color: 'var(--text2)' }} />
+                      <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.55, color: 'var(--text2)' }}>
+                        <strong style={{ color: 'var(--text)' }}>{t.quote.disclaimer_title}.</strong>{' '}
+                        {t.quote.disclaimer_body}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -302,37 +517,40 @@ export default function InstantQuotePage() {
           </AnimatePresence>
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="mt-10 flex justify-between items-center">
+        {/* Navigation */}
+        <div style={{ marginTop: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <button
-            onClick={() => setStep(s => s - 1)}
+            type="button"
+            onClick={() => setStep((s) => s - 1)}
             disabled={step === 0}
             data-testid="quote-prev-btn"
-            style={{ minHeight: 44 }}
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 44, padding: '10px 16px',
+              background: 'transparent', border: 'none', color: 'var(--text2)', fontSize: 14,
+              cursor: step === 0 ? 'not-allowed' : 'pointer', opacity: step === 0 ? 0.35 : 1,
+            }}
           >
-            <ArrowLeft className="w-4 h-4" /> {t.quote.prev}
+            <ArrowLeft style={{ width: 16, height: 16 }} /> {t.quote.prev}
           </button>
 
-          {step < 3 ? (
-            <button
-              onClick={() => setStep(s => s + 1)}
-              disabled={!canNext()}
-              data-testid="quote-next-btn"
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 shadow-[0_0_15px_rgba(37,99,235,0.2)]"
-            >
-              {t.quote.next} <ArrowRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={!canNext() || submitting}
-              data-testid="quote-submit-btn"
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 shadow-[0_0_15px_rgba(37,99,235,0.2)]"
-            >
-              {submitting ? '...' : t.quote.submit} <Send className="w-4 h-4" />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => (step < 3 ? setStep((s) => s + 1) : handleSubmit())}
+            disabled={!canNext() || submitting}
+            data-testid={step < 3 ? 'quote-next-btn' : 'quote-submit-btn'}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 44, padding: '12px 24px',
+              borderRadius: 100, border: 'none', background: 'var(--accent2)', color: '#fff',
+              fontSize: 14, fontWeight: 600,
+              cursor: !canNext() || submitting ? 'not-allowed' : 'pointer',
+              opacity: !canNext() || submitting ? 0.45 : 1,
+              boxShadow: '0 0 0 1px var(--accent2), 0 12px 40px -8px var(--glow)',
+            }}
+          >
+            {step < 3
+              ? <>{t.quote.next} <ArrowRight style={{ width: 16, height: 16 }} /></>
+              : <>{submitting ? '…' : t.quote.submit} <Send style={{ width: 16, height: 16 }} /></>}
+          </button>
         </div>
       </div>
     </div>

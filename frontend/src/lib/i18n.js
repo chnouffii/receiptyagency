@@ -78,9 +78,9 @@ export const translations = {
       }
     },
     quote: {
-      title: 'Devis Instantané',
-      subtitle: 'Configurez votre solution en quelques clics.',
-      steps: ['Catégorie', 'Échelle', 'Fonctionnalités', 'Votre Devis'],
+      title: 'Estimation de budget',
+      subtitle: 'Situez votre projet en quelques clics. Fourchette indicative, sans engagement.',
+      steps: ['Besoin', 'Taille', 'Options', 'Votre fourchette'],
       category_label: 'Sélectionnez votre besoin',
       scale_label: 'Taille de votre entreprise',
       employees: 'employés',
@@ -90,14 +90,21 @@ export const translations = {
       email: 'Email professionnel',
       company: 'Entreprise',
       phone: 'Téléphone',
-      setup_fee: 'Frais de mise en place',
+      setup_fee: 'Mise en place',
       monthly_fee: 'Abonnement mensuel',
-      submit: 'Envoyer ma demande',
+      submit: 'Recevoir une proposition',
       next: 'Suivant',
       prev: 'Précédent',
       success: 'Demande envoyée avec succès !',
-      success_desc: 'Notre équipe vous contactera sous 24h.',
-      your_estimate: 'Votre estimation'
+      success_desc: 'Notre équipe vous contactera sous 24h avec une proposition chiffrée.',
+      your_estimate: 'Votre fourchette indicative',
+      custom_quote: 'Sur mesure',
+      custom_desc: 'Au-delà de 500 collaborateurs, le périmètre se définit avec vous : nous établissons un chiffrage dédié après un premier échange.',
+      disclaimer_title: 'Fourchette indicative, non contractuelle',
+      disclaimer_body: "Ces montants situent un ordre de grandeur à partir de projets comparables. Ils ne constituent ni un devis ni une offre : le prix définitif est établi après un échange sur votre périmètre réel.",
+      per_month: '/mois',
+      from: 'à partir de',
+      required: 'obligatoire',
     },
     cases: {
       title: 'Études de Cas',
@@ -196,6 +203,7 @@ export const translations = {
     footer: {
       tagline: "L'agence d'intégration IA qui fait la différence.",
       rights: 'Tous droits réservés.',
+      budget: 'Estimation de budget',
       privacy: 'Politique de confidentialité',
       terms: "Conditions d'utilisation"
     }
@@ -279,26 +287,33 @@ export const translations = {
       }
     },
     quote: {
-      title: 'Instant Quote',
-      subtitle: 'Configure your solution in a few clicks.',
-      steps: ['Category', 'Scale', 'Features', 'Your Quote'],
+      title: 'Budget estimate',
+      subtitle: 'Position your project in a few clicks. Indicative range, no commitment.',
+      steps: ['Need', 'Size', 'Options', 'Your range'],
       category_label: 'Select your need',
-      scale_label: 'Company size',
+      scale_label: 'Your company size',
       employees: 'employees',
       features_label: 'Desired features',
-      contact: 'Your contact info',
+      contact: 'Your details',
       name: 'Full name',
-      email: 'Professional email',
+      email: 'Work email',
       company: 'Company',
       phone: 'Phone',
-      setup_fee: 'Setup fee',
+      setup_fee: 'Setup',
       monthly_fee: 'Monthly subscription',
-      submit: 'Submit my request',
+      submit: 'Request a proposal',
       next: 'Next',
       prev: 'Previous',
       success: 'Request sent successfully!',
-      success_desc: 'Our team will contact you within 24h.',
-      your_estimate: 'Your estimate'
+      success_desc: 'Our team will contact you within 24h with a priced proposal.',
+      your_estimate: 'Your indicative range',
+      custom_quote: 'Custom',
+      custom_desc: 'Above 500 employees the scope is defined together: we produce a dedicated quote after an initial discussion.',
+      disclaimer_title: 'Indicative range, not contractual',
+      disclaimer_body: 'These figures give an order of magnitude based on comparable projects. They are neither a quote nor an offer: the final price is set after discussing your actual scope.',
+      per_month: '/month',
+      from: 'from',
+      required: 'required',
     },
     cases: {
       title: 'Case Studies',
@@ -397,6 +412,7 @@ export const translations = {
     footer: {
       tagline: 'The AI integration agency that makes the difference.',
       rights: 'All rights reserved.',
+      budget: 'Budget estimate',
       privacy: 'Privacy Policy',
       terms: 'Terms of Service'
     }

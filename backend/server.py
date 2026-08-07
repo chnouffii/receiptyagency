@@ -95,12 +95,16 @@ async def export_leads_csv(admin=Depends(require_admin)):
     leads = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["Name", "Email", "Company", "Phone", "Category", "Size", "Setup EUR", "Monthly EUR", "Status", "Created"])
+    writer.writerow(["Name", "Email", "Company", "Phone", "Category", "Size",
+                     "Setup min EUR", "Setup max EUR", "Monthly min EUR", "Monthly max EUR",
+                     "Budget tier", "Status", "Created"])
     for lead in leads:
         writer.writerow([
             lead.get("name", ""), lead.get("email", ""), lead.get("company", ""),
             lead.get("phone", ""), lead.get("category", ""), lead.get("company_size", ""),
-            lead.get("estimated_setup", 0), lead.get("estimated_monthly", 0),
+            lead.get("estimated_setup", 0), lead.get("estimated_setup_max", 0),
+            lead.get("estimated_monthly", 0), lead.get("estimated_monthly_max", 0),
+            lead.get("budget_tier", ""),
             lead.get("status", ""), lead.get("created_at", "")
         ])
     output.seek(0)

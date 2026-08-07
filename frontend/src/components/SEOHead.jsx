@@ -109,6 +109,19 @@ const SEO_DATA = {
     },
     path: '/demos',
   },
+  quote: {
+    fr: {
+      title: "Estimation de budget IA — Fourchette indicative | Receipty",
+      description: "Situez le budget de votre projet d'automatisation IA en quelques clics. Fourchette indicative et sans engagement, proposition chiffrée sous 24h.",
+      keywords: "budget projet IA, prix automatisation, tarif agence IA, estimation coût intelligence artificielle",
+    },
+    en: {
+      title: "AI Budget Estimate — Indicative Range | Receipty",
+      description: "Position your AI automation project budget in a few clicks. Indicative range with no commitment, priced proposal within 24h.",
+      keywords: "AI project budget, automation pricing, AI agency rates, artificial intelligence cost estimate",
+    },
+    path: '/quote',
+  },
   privacy: {
     fr: {
       title: "Politique de Confidentialité | Receipty",
