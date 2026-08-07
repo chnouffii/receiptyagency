@@ -97,8 +97,12 @@ export const Navbar = () => {
         </div>
 
         <button
-          className="md:hidden"
-          style={{ color: 'var(--text)', background: 'transparent', border: 'none', cursor: 'pointer', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          // `display` doit rester piloté par les classes : `flex md:hidden`.
+          // Un `display: flex` en style inline écraserait `md:hidden` — les
+          // styles inline battent les classes — et le hamburger réapparaîtrait
+          // sur desktop, à côté du menu complet.
+          className="flex md:hidden items-center justify-center"
+          style={{ color: 'var(--text)', background: 'transparent', border: 'none', cursor: 'pointer', width: 44, height: 44 }}
           onClick={() => setIsOpen(!isOpen)}
           data-testid="mobile-menu-toggle"
           aria-label={isOpen ? (lang === 'fr' ? 'Fermer le menu' : 'Close menu') : (lang === 'fr' ? 'Ouvrir le menu' : 'Open menu')}
