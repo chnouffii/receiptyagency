@@ -15,11 +15,17 @@ export const CALENDLY_URL =
 export function DemosHeader({ onExit }) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-[#0B0F17]/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-4 px-5 py-3.5 lg:px-8">
-        <div className="flex items-center gap-3">
+      {/* `flex-nowrap` volontaire : avec `flex-wrap`, la barre passait sur deux
+          lignes tant que la police de repli était active, puis revenait sur une
+          seule dès que Manrope se chargeait (`font-display: swap`). Tout le
+          contenu remontait alors de 44 px — un CLS de 0,123 sur mobile, au-delà
+          du seuil de 0,1. La hauteur ne doit dépendre d'aucune métrique de
+          police : une seule ligne, et le texte s'efface par paliers. */}
+      <div className="mx-auto flex max-w-[1400px] flex-nowrap items-center justify-between gap-3 px-5 py-3.5 lg:px-8">
+        <div className="flex min-w-0 items-center gap-3">
           <a
             href="/"
-            className="font-heading text-lg font-bold tracking-tight text-slate-100 transition-colors duration-200 hover:text-white"
+            className="truncate font-heading text-lg font-bold tracking-tight text-slate-100 transition-colors duration-200 hover:text-white"
           >
             Receipty<span className="text-blue-500">.</span>
           </a>
@@ -30,7 +36,7 @@ export function DemosHeader({ onExit }) {
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <motion.a
             whileTap={TAP}
             href={CALENDLY_URL}
@@ -41,7 +47,8 @@ export function DemosHeader({ onExit }) {
           >
             <CalendarCheck size={16} strokeWidth={1.75} />
             <span className="hidden sm:inline">Réserver un audit sur-mesure</span>
-            <span className="sm:hidden">Réserver un audit</span>
+            <span className="hidden min-[360px]:inline sm:hidden">Réserver un audit</span>
+            <span className="min-[360px]:hidden">Audit</span>
           </motion.a>
           <motion.button
             whileTap={TAP}
