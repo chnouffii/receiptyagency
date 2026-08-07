@@ -167,6 +167,7 @@ async def send_notification_email(contact_data: dict):
             + _row("Email", contact_data.get('email'))
             + _row("Telephone", contact_data.get('phone'))
             + _row("Societe", contact_data.get('company'))
+            + _row("Besoin decrit", contact_data.get('problem_description'))
             + _row("Solution", contact_data.get('category'))
             + _row("Taille entreprise", contact_data.get('company_size'))
             + _row("Fonctionnalites", features_str)

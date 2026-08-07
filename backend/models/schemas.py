@@ -27,6 +27,7 @@ class Lead(BaseModel):
     estimated_setup_max: float = 0
     estimated_monthly_max: float = 0
     budget_tier: str = ""
+    problem_description: str = ""
     language: str = "fr"
     status: str = "new"
     type: str = "lead"
@@ -51,6 +52,7 @@ class LeadCreate(BaseModel):
     estimated_setup_max: float = 0
     estimated_monthly_max: float = 0
     budget_tier: str = ""
+    problem_description: str = ""
     language: str = "fr"
 
 

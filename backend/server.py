@@ -63,6 +63,7 @@ from routes.audits import router as audits_router
 from routes.closers import router as closers_router
 from routes.faq import router as faq_router
 from routes.clients import router as clients_router
+from routes.quote_assist import router as quote_assist_router
 
 # Include all routers
 api_router.include_router(leads_router, tags=["Leads"])
@@ -75,6 +76,7 @@ api_router.include_router(audits_router, tags=["Audits"])
 api_router.include_router(closers_router, tags=["Closers"])
 api_router.include_router(faq_router, tags=["FAQ"])
 api_router.include_router(clients_router, tags=["Client Portal"])
+api_router.include_router(quote_assist_router, tags=["Quote Assist"])
 
 
 # Root endpoint

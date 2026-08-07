@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   Users, Wallet, Globe, Cpu, ShoppingCart, Mail, Shield, BarChart3,
-  Check, ArrowRight, ArrowLeft, Send, Info, MessageSquare,
+  Check, ArrowRight, ArrowLeft, Send, Info, MessageSquare, Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../context/LanguageContext';
@@ -78,6 +78,11 @@ export default function InstantQuotePage() {
   const [form, setForm] = useState({ name: '', email: '', company: '', phone: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  // Le besoin décrit librement : c'est la donnée la plus utile de tout le
+  // formulaire, transmise au lead même si l'analyse échoue ou est ignorée.
+  const [description, setDescription] = useState('');
+  const [analysing, setAnalysing] = useState(false);
+  const [analyse, setAnalyse] = useState(null);
 
   useEffect(() => {
     axios.get(`${API}/solutions`)
@@ -112,6 +117,36 @@ export default function InstantQuotePage() {
     setSelectedFeatures([]);
   };
 
+  /**
+   * Demande une suggestion au backend à partir de la description.
+   *
+   * Toute défaillance — clé API absente, quota atteint, délai dépassé, réponse
+   * illisible — se traduit par un simple retour à la sélection manuelle. On ne
+   * montre jamais d'erreur au prospect : l'analyse est un confort, la
+   * description qu'il vient d'écrire est déjà l'essentiel.
+   */
+  const analyser = async () => {
+    if (analysing || description.trim().length < 15) return;
+    setAnalysing(true);
+    try {
+      const { data } = await axios.post(`${API}/quote/analyze`, {
+        description: description.trim(),
+        language: lang,
+      });
+      if (data?.available && data.solution_id) {
+        setSelectedSolutionId(data.solution_id);
+        setSelectedFeatures(Array.isArray(data.features) ? data.features : []);
+        setAnalyse({ summary: data.summary || '' });
+      } else {
+        setAnalyse(null);
+      }
+    } catch {
+      setAnalyse(null);
+    } finally {
+      setAnalysing(false);
+    }
+  };
+
   const canNext = () => {
     if (step === 0) return !!selectedSolutionId;
     if (step === 3) return form.name && form.email && form.company;
@@ -133,6 +168,7 @@ export default function InstantQuotePage() {
         category: catName,
         company_size: companySize,
         features: selectedFeatures,
+        problem_description: description.trim(),
         // Borne basse dans les champs historiques, borne haute à côté.
         estimated_setup: fourchette.surMesure ? 0 : fourchette.setup[0],
         estimated_monthly: fourchette.surMesure ? 0 : fourchette.monthly[0],
@@ -257,12 +293,85 @@ export default function InstantQuotePage() {
               exit="exit"
               transition={{ duration: 0.28 }}
             >
-              {/* ── Étape 0 : besoin ─────────────────────────────────────── */}
+              {/* ── Étape 0 : besoin décrit librement, puis choix ────────── */}
               {step === 0 && (
                 <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
-                  <legend className="font-heading" style={{ fontSize: 19, fontWeight: 600, marginBottom: 18 }}>
-                    {t.quote.category_label}
+                  <legend className="font-heading" style={{ fontSize: 19, fontWeight: 600, marginBottom: 8 }}>
+                    {t.quote.describe_label}
                   </legend>
+                  <p style={{ fontSize: 13, color: 'var(--text2)', margin: '0 0 12px' }}>
+                    {t.quote.describe_hint}
+                  </p>
+
+                  <textarea
+                    id="quote-description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    rows={4}
+                    maxLength={1200}
+                    placeholder={t.quote.describe_placeholder}
+                    aria-describedby="quote-description-hint"
+                    data-testid="quote-description"
+                    style={{ ...champ, minHeight: 110, resize: 'vertical', lineHeight: 1.6 }}
+                  />
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginTop: 12 }}>
+                    <button
+                      type="button"
+                      onClick={analyser}
+                      disabled={analysing || description.trim().length < 15}
+                      data-testid="quote-analyze-btn"
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 44,
+                        padding: '10px 20px', borderRadius: 100, border: '1px solid var(--accent)',
+                        background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                        color: 'var(--accent-text)', fontSize: 14, fontWeight: 600,
+                        cursor: analysing || description.trim().length < 15 ? 'not-allowed' : 'pointer',
+                        opacity: analysing || description.trim().length < 15 ? 0.5 : 1,
+                      }}
+                    >
+                      <Sparkles style={{ width: 16, height: 16 }} />
+                      {analysing ? t.quote.analyzing : t.quote.analyze}
+                    </button>
+                    <span id="quote-description-hint" style={{ fontSize: 12, color: 'var(--text3)' }}>
+                      {description.trim().length < 15 ? t.quote.too_short : `${description.length}/1200`}
+                    </span>
+                  </div>
+
+                  {/* Résultat de l'analyse — purement indicatif, toujours modifiable */}
+                  <AnimatePresence>
+                    {analyse?.summary && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        role="status"
+                        data-testid="quote-analysis"
+                        style={{
+                          ...carte, marginTop: 16, padding: 16,
+                          borderColor: 'var(--accent)',
+                          background: 'color-mix(in srgb, var(--accent) 8%, transparent)',
+                        }}
+                      >
+                        <p style={{ margin: 0, fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--accent-text)' }}>
+                          {t.quote.analysis_title}
+                        </p>
+                        <p style={{ margin: '8px 0 0', fontSize: 14.5, lineHeight: 1.6, color: 'var(--text)' }}>
+                          {analyse.summary}
+                        </p>
+                        <p style={{ margin: '10px 0 0', fontSize: 12, color: 'var(--text2)' }}>
+                          {t.quote.analysis_hint}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <p className="font-heading" style={{ fontSize: 15, fontWeight: 600, margin: '28px 0 14px' }}>
+                    {analyse?.summary ? t.quote.or_pick : t.quote.category_label}
+                  </p>
+
                   {loading ? (
                     <p style={{ color: 'var(--text3)' }}>{lang === 'fr' ? 'Chargement…' : 'Loading…'}</p>
                   ) : (
