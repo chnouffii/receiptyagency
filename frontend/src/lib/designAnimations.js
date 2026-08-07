@@ -2,59 +2,10 @@
  * Couche d'interaction de la refonte — port fidèle du JS du design.
  * Vanilla DOM, agnostique du framework. On l'attache après le rendu React.
  *
- *  - mountCursor()      : curseur personnalisé global (point net + halo qui suit)
  *  - mountPageFx(root)  : particules, tilt 3D, boutons magnétiques, reveal au
  *                         scroll, compteurs — pour le sous-arbre `root`.
  * Chaque fonction retourne un cleanup à appeler au démontage.
  */
-
-export function mountCursor() {
-  if (typeof window === 'undefined') return () => {};
-  if (!window.matchMedia('(pointer:fine)').matches) return () => {};
-
-  const glow = document.createElement('div');
-  const dot = document.createElement('div');
-  glow.setAttribute('data-cursor-glow', '');
-  dot.setAttribute('data-cursor-dot', '');
-  Object.assign(glow.style, {
-    position: 'fixed', top: '0', left: '0', width: '200px', height: '200px',
-    borderRadius: '50%', pointerEvents: 'none', zIndex: '9998', opacity: '0',
-    background: 'radial-gradient(circle, var(--glow), transparent 60%)', transition: 'opacity .3s',
-  });
-  Object.assign(dot.style, {
-    position: 'fixed', top: '0', left: '0', width: '7px', height: '7px',
-    borderRadius: '50%', pointerEvents: 'none', zIndex: '9999', opacity: '0',
-    background: 'var(--accent)', transition: 'width .2s, height .2s, opacity .3s',
-  });
-  document.body.appendChild(glow);
-  document.body.appendChild(dot);
-
-  let gx = 0, gy = 0, tx = 0, ty = 0, raf;
-  const loop = () => {
-    gx += (tx - gx) * 0.18; gy += (ty - gy) * 0.18;
-    glow.style.transform = `translate(${gx}px,${gy}px) translate(-50%,-50%)`;
-    raf = requestAnimationFrame(loop);
-  };
-  const onMove = (e) => {
-    tx = e.clientX; ty = e.clientY;
-    dot.style.transform = `translate(${e.clientX}px,${e.clientY}px) translate(-50%,-50%)`;
-    glow.style.opacity = '1'; dot.style.opacity = '1';
-    const it = e.target.closest && e.target.closest('a,button,[data-tilt],[data-case],input,textarea');
-    dot.style.width = it ? '13px' : '7px';
-    dot.style.height = it ? '13px' : '7px';
-  };
-  const onOut = () => { glow.style.opacity = '0'; dot.style.opacity = '0'; };
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('mouseout', onOut);
-  loop();
-
-  return () => {
-    cancelAnimationFrame(raf);
-    window.removeEventListener('mousemove', onMove);
-    window.removeEventListener('mouseout', onOut);
-    glow.remove(); dot.remove();
-  };
-}
 
 export function mountPageFx(root) {
   if (!root) return () => {};

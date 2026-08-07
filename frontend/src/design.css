@@ -38,22 +38,38 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* ---- Tokens de thème ---- */
+/* ---- Tokens de thème ----
+   Contrastes vérifiés sur le fond de leur thème (WCAG 2.1) :
+     sombre  --text 18.7:1  --text2 7.8:1  --text3 5.0:1
+     clair   --text 17.8:1  --text2 7.0:1  --text3 5.0:1
+   --text3 vise AA (4.5:1) avec marge, pas AAA : à 7:1 il deviendrait
+   indiscernable de --text2 et la hiérarchie à trois niveaux disparaîtrait.
+   --accent2 et --cyan ne servent que de FOND (texte blanc dessus,
+   5.2:1 et 6.7:1) — ne pas les utiliser comme couleur de texte. */
 :root[data-theme="dark"], [data-theme="dark"] {
   --bg: #050506; --bg2: #0a0a0d;
   --surface: rgba(255,255,255,.025); --surface2: rgba(255,255,255,.05);
   --border: rgba(255,255,255,.08); --border2: rgba(255,255,255,.16);
-  --text: #f4f5f7; --text2: #9aa0ac; --text3: #565b66;
+  --text: #f4f5f7; --text2: #9aa0ac; --text3: #787e8d;
   --accent: #3b82f6; --accent2: #2563eb; --cyan: #34d3ee; --violet: #8b7cff;
   --glow: rgba(37,99,235,.4); --navbg: rgba(5,5,6,.62); --grain: .05; --dot: 255,255,255;
+  /* Vert et rouge sémantiques : la teinte claire d'origine (#34d399/#f87171)
+     tombait à 1.9:1 et 2.8:1 sur fond blanc. Une valeur par thème. */
+  --success: #34d399; --danger: #f87171;
+  /* Bleu utilisé comme COULEUR DE TEXTE (liens actifs, pastilles).
+     --accent convient au sombre, --accent2 au clair : ni l'un ni l'autre
+     ne passe dans les deux. */
+  --accent-text: #3b82f6;
 }
 :root[data-theme="light"], [data-theme="light"] {
   --bg: #f5f6f8; --bg2: #ffffff;
   --surface: #ffffff; --surface2: #fbfbfd;
   --border: rgba(10,12,20,.09); --border2: rgba(10,12,20,.16);
-  --text: #0c0e14; --text2: #4b5563; --text3: #9aa0ac;
-  --accent: #2563eb; --accent2: #1d4ed8; --cyan: #0891b2; --violet: #6d5cf0;
+  --text: #0c0e14; --text2: #4b5563; --text3: #636a79;
+  --accent: #2563eb; --accent2: #1d4ed8; --cyan: #0891b2; --violet: #614fef;
   --glow: rgba(37,99,235,.2); --navbg: rgba(255,255,255,.68); --grain: .03; --dot: 13,14,20;
+  --success: #047857; --danger: #b91c1c;   /* 5.5:1 et 6.5:1 sur blanc */
+  --accent-text: #1d4ed8;                  /* 6.7:1 sur blanc */
 }
 /* Défaut si data-theme absent : sombre */
 :root { color-scheme: dark; }

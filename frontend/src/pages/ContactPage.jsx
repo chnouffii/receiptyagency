@@ -59,7 +59,7 @@ export default function ContactPage() {
       <div data-testid="contact-success" style={{ paddingTop: 96, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center', maxWidth: 420, padding: '0 24px' }}>
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(52,211,153,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-            <Send style={{ width: 30, height: 30, color: '#34d399' }} />
+            <Send style={{ width: 30, height: 30, color: 'var(--success)' }} />
           </div>
           <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{t.contact.success}</h2>
           <p style={{ marginTop: 12, color: 'var(--text2)' }}>{t.contact.success_desc}</p>
@@ -95,11 +95,11 @@ export default function ContactPage() {
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 600, marginBottom: 22, color: 'var(--text)' }}>{t.contact.form_title}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               <div>
-                <label style={label}>{t.contact.name} <span style={{ color: '#f87171' }}>*</span></label>
+                <label style={label}>{t.contact.name} <span style={{ color: 'var(--danger)' }}>*</span></label>
                 <input type="text" name="name" value={form.name} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} placeholder={t.contact.name_placeholder} data-testid="contact-input-name" style={fieldStyle} required />
               </div>
               <div>
-                <label style={label}>{t.contact.email} <span style={{ color: '#f87171' }}>*</span></label>
+                <label style={label}>{t.contact.email} <span style={{ color: 'var(--danger)' }}>*</span></label>
                 <input type="email" name="email" value={form.email} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} placeholder={t.contact.email_placeholder} data-testid="contact-input-email" style={fieldStyle} required />
               </div>
               <div>
@@ -111,7 +111,7 @@ export default function ContactPage() {
                 <input type="text" name="subject" value={form.subject} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} placeholder={t.contact.subject_placeholder} data-testid="contact-input-subject" style={fieldStyle} />
               </div>
               <div>
-                <label style={label}>{t.contact.message} <span style={{ color: '#f87171' }}>*</span></label>
+                <label style={label}>{t.contact.message} <span style={{ color: 'var(--danger)' }}>*</span></label>
                 <textarea name="message" value={form.message} onChange={handleChange} onFocus={onFocus} onBlur={onBlur} placeholder={t.contact.message_placeholder} rows={5} data-testid="contact-input-message" style={{ ...fieldStyle, height: 'auto', padding: '12px 16px', resize: 'none' }} required />
               </div>
               <button type="submit" disabled={submitting} data-testid="contact-submit-btn"
@@ -127,10 +127,10 @@ export default function ContactPage() {
               <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 600, marginBottom: 22, color: 'var(--text)' }}>{t.contact.info_title}</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <InfoRow icon={Phone} title={t.contact.phone_label}>
-                  <a href={`tel:${contact.phone.replace(/\s/g, '')}`} style={{ color: 'var(--text2)' }}>{contact.phone}</a>
+                  <a href={`tel:${contact.phone.replace(/\s/g, '')}`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, color: 'var(--text2)' }}>{contact.phone}</a>
                 </InfoRow>
                 <InfoRow icon={Mail} title={t.contact.email_label}>
-                  <a href={`mailto:${contact.email}`} style={{ color: 'var(--text2)' }}>{contact.email}</a>
+                  <a href={`mailto:${contact.email}`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, color: 'var(--text2)' }}>{contact.email}</a>
                 </InfoRow>
                 <InfoRow icon={MapPin} title={t.contact.address_label}>
                   {contact.address_line1}{contact.address_line2 && (<><br />{contact.address_line2}</>)}
@@ -151,10 +151,10 @@ export default function ContactPage() {
                 </div>
                 <p style={{ color: 'rgba(255,255,255,.9)', fontSize: 14, marginBottom: 20 }}>{t.contact.urgent_desc}</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-                  <a href={`tel:${contact.phone.replace(/\s/g, '')}`} data-testid="urgent-call-btn" style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', color: '#6d28d9', borderRadius: 12, padding: '12px 18px', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+                  <a href={`tel:${contact.phone.replace(/\s/g, '')}`} data-testid="urgent-call-btn" style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, display: 'flex', alignItems: 'center', gap: 8, background: '#fff', color: '#6d28d9', borderRadius: 12, padding: '12px 18px', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
                     <PhoneCall style={{ width: 16, height: 16 }} /> {t.contact.call_now}
                   </a>
-                  <a href={`mailto:${contact.urgent_email}`} data-testid="urgent-email-btn" style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 12, padding: '12px 18px', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+                  <a href={`mailto:${contact.urgent_email}`} data-testid="urgent-email-btn" style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 12, padding: '12px 18px', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
                     <Mail style={{ width: 16, height: 16 }} /> {t.contact.urgent_email}
                   </a>
                 </div>
@@ -162,8 +162,8 @@ export default function ContactPage() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 16, background: 'rgba(52,211,153,.1)', border: '1px solid rgba(52,211,153,.2)', borderRadius: 12 }}>
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#34d399', animation: 'pulse 2s ease-in-out infinite' }} />
-              <p style={{ fontSize: 14, color: '#34d399', fontWeight: 500, margin: 0 }}>{t.contact.response_time}</p>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--success)', animation: 'pulse 2s ease-in-out infinite' }} />
+              <p style={{ fontSize: 14, color: 'var(--success)', fontWeight: 500, margin: 0 }}>{t.contact.response_time}</p>
             </div>
           </div>
         </div>

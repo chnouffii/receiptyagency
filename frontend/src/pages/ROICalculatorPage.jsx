@@ -19,7 +19,15 @@ function Slider({ label, value, min, max, step, unit, onChange }) {
         <label style={{ fontSize: 14, fontWeight: 500, color: 'var(--text2)' }}>{label}</label>
         <span style={{ fontFamily: mono, fontSize: 14, fontWeight: 700, color: 'var(--accent)' }}>{value}{unit}</span>
       </div>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--accent)' }} />
+      <input
+        type="range"
+        min={min} max={max} step={step} value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        aria-label={label}
+        // WCAG 2.5.5 : la piste ne fait que 16px de haut. `height: 44` agrandit
+        // la zone de saisie ; le navigateur centre la piste dedans.
+        style={{ width: '100%', height: 44, accentColor: 'var(--accent)', cursor: 'pointer' }}
+      />
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 4, color: 'var(--text3)' }}>
         <span>{min}{unit}</span><span>{max}{unit}</span>
       </div>
@@ -117,7 +125,7 @@ export default function ROICalculatorPage() {
               <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(110px,100%),1fr))', gap: 12 }}>
                 {[
                   { l: lang === 'fr' ? '3 ans' : '3 years', v: formatEuro(results.savings3Years), c: 'var(--text)' },
-                  { l: 'ROI an 1', v: `${results.roiYear1 > 0 ? '+' : ''}${results.roiYear1}%`, c: results.roiYear1 > 0 ? '#34d399' : '#f87171' },
+                  { l: 'ROI an 1', v: `${results.roiYear1 > 0 ? '+' : ''}${results.roiYear1}%`, c: results.roiYear1 > 0 ? 'var(--success)' : 'var(--danger)' },
                   { l: lang === 'fr' ? 'Retour invest.' : 'Payback', v: `${results.paybackMonths} ${lang === 'fr' ? 'mois' : 'mo.'}`, c: 'var(--text)' },
                 ].map((k, i) => (
                   <div key={i} style={{ padding: 12, borderRadius: 12, background: 'var(--surface2)' }}>
@@ -135,9 +143,9 @@ export default function ROICalculatorPage() {
                 <p style={{ fontFamily: mono, fontSize: 24, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{results.timeSavedWeekly}h</p>
               </div>
               <div style={card}>
-                <TrendingUp style={{ width: 16, height: 16, color: '#34d399', marginBottom: 8 }} />
+                <TrendingUp style={{ width: 16, height: 16, color: 'var(--success)', marginBottom: 8 }} />
                 <p style={{ fontSize: 11.5, color: 'var(--text3)', margin: '0 0 4px' }}>{lang === 'fr' ? 'Réduction des erreurs' : 'Error reduction'}</p>
-                <p style={{ fontFamily: mono, fontSize: 24, fontWeight: 700, color: '#34d399', margin: 0 }}>-78%</p>
+                <p style={{ fontFamily: mono, fontSize: 24, fontWeight: 700, color: 'var(--success)', margin: 0 }}>-78%</p>
               </div>
             </div>
 
@@ -175,7 +183,7 @@ export default function ROICalculatorPage() {
                   : ['Full integration with your existing tools', 'Team training and onboarding support', 'Dedicated support 5 days/week', 'Real-time dashboard and reporting']
                 ).map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <CheckCircle style={{ width: 15, height: 15, color: '#34d399', flexShrink: 0 }} />
+                    <CheckCircle style={{ width: 15, height: 15, color: 'var(--success)', flexShrink: 0 }} />
                     <span style={{ fontSize: 12.5, color: 'var(--text2)' }}>{item}</span>
                   </div>
                 ))}
@@ -197,7 +205,7 @@ export default function ROICalculatorPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(150px,100%),1fr))', gap: 'clamp(16px,4vw,32px)' }}>
             {[
               { value: '+340%', label: lang === 'fr' ? 'Efficacité opérationnelle' : 'Operational efficiency', color: 'var(--accent)' },
-              { value: '-45%', label: lang === 'fr' ? 'Coûts opérationnels' : 'Operational costs', color: '#34d399' },
+              { value: '-45%', label: lang === 'fr' ? 'Coûts opérationnels' : 'Operational costs', color: 'var(--success)' },
               { value: '+280%', label: lang === 'fr' ? 'Productivité équipe' : 'Team productivity', color: 'var(--violet)' },
             ].map((stat, i) => (
               <div key={i}>

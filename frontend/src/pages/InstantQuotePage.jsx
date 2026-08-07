@@ -142,9 +142,12 @@ export default function InstantQuotePage() {
 
         {/* Progress */}
         <div className="mt-10 mb-2">
-          <div className="flex justify-between text-xs text-gray-600 mb-3">
+          {/* Cette page a un fond #050505 codé en dur (non migrée vers le design
+              system) : on y fixe des couleurs claires plutôt que des tokens de
+              thème, qui donneraient du gris foncé sur noir en thème clair. */}
+          <div className="flex justify-between text-xs text-gray-400 mb-3">
             {t.quote.steps.map((s, i) => (
-              <span key={i} className={`${i <= step ? 'text-blue-400' : ''} transition-colors duration-200`}>{s}</span>
+              <span key={i} className={`transition-colors duration-200 ${i <= step ? 'text-blue-400 font-semibold' : ''}`}>{s}</span>
             ))}
           </div>
           <Progress value={(step + 1) * 25} className="h-1 bg-white/5" data-testid="quote-progress" />
@@ -305,6 +308,7 @@ export default function InstantQuotePage() {
             onClick={() => setStep(s => s - 1)}
             disabled={step === 0}
             data-testid="quote-prev-btn"
+            style={{ minHeight: 44 }}
             className="flex items-center gap-2 text-sm text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200"
           >
             <ArrowLeft className="w-4 h-4" /> {t.quote.prev}

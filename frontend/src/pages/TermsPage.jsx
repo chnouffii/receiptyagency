@@ -276,8 +276,8 @@ ${company.legal_email}`
               {t.title}
             </h1>
           </div>
-          <p className="text-sm text-gray-500">{t.lastUpdate}</p>
-          <p className={`mt-6 leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t.intro}</p>
+          <p className="text-sm text-[var(--text2)]">{t.lastUpdate}</p>
+          <p className={`mt-6 leading-relaxed ${isDark ? 'text-gray-400' : 'text-[var(--text2)]'}`}>{t.intro}</p>
         </motion.div>
 
         {/* Sections */}
@@ -298,7 +298,7 @@ ${company.legal_email}`
                   {section.title}
                 </h2>
               </div>
-              <div className={`text-sm leading-relaxed whitespace-pre-line pl-14 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <div className={`text-sm leading-relaxed whitespace-pre-line pl-14 ${isDark ? 'text-gray-400' : 'text-[var(--text2)]'}`}>
                 {section.content.split('**').map((part, i) => 
                   i % 2 === 1 ? <strong key={i} className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{part}</strong> : part
                 )}

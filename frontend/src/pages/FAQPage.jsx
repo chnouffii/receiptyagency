@@ -9,19 +9,23 @@ import SEOHead, { FAQSchema, BreadcrumbSchema } from '../components/SEOHead';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const SITE_URL = 'https://receipty.fr';
 
-function FAQItem({ question, answer, isOpen, onToggle }) {
+function FAQItem({ question, answer, isOpen, onToggle, id }) {
+  const panelId = `faq-panel-${id}`;
+  const buttonId = `faq-button-${id}`;
   return (
     <div style={{ borderRadius: 16, border: `1px solid ${isOpen ? 'var(--border2)' : 'var(--border)'}`, background: 'var(--surface)', overflow: 'hidden', transition: 'border-color .2s' }}>
       <button
         onClick={onToggle}
+        id={buttonId}
         aria-expanded={isOpen}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '18px 20px', textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text)' }}
+        aria-controls={panelId}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, minHeight: 44, padding: '18px 20px', textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text)' }}
       >
         <span style={{ fontWeight: 600, fontSize: 15.5 }}>{question}</span>
         <ChevronDown style={{ width: 20, height: 20, flexShrink: 0, color: 'var(--text3)', transition: 'transform .3s', transform: isOpen ? 'rotate(180deg)' : 'none' }} />
       </button>
       {isOpen && (
-        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} style={{ overflow: 'hidden' }}>
+        <motion.div id={panelId} role="region" aria-labelledby={buttonId} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} style={{ overflow: 'hidden' }}>
           <p style={{ padding: '2px 20px 20px', margin: 0, fontSize: 14.5, lineHeight: 1.65, color: 'var(--text2)', whiteSpace: 'pre-line' }}>{answer}</p>
         </motion.div>
       )}
@@ -68,7 +72,7 @@ export default function FAQPage() {
         {localized.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {localized.map((faq) => (
-              <FAQItem key={faq.id} question={faq.question} answer={faq.answer} isOpen={openId === faq.id} onToggle={() => setOpenId(openId === faq.id ? null : faq.id)} />
+              <FAQItem key={faq.id} id={faq.id} question={faq.question} answer={faq.answer} isOpen={openId === faq.id} onToggle={() => setOpenId(openId === faq.id ? null : faq.id)} />
             ))}
           </div>
         ) : (

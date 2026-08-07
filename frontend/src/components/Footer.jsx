@@ -5,7 +5,9 @@ export const Footer = () => {
   const { t } = useLanguage();
   const year = new Date().getFullYear();
 
-  const linkStyle = { color: 'var(--text2)', fontSize: 14, transition: 'color .2s', textDecoration: 'none' };
+  // WCAG 2.5.5 : 44px de zone cliquable. `inline-flex` + `minHeight` agrandit
+  // la cible sans modifier l'apparence du lien.
+  const linkStyle = { color: 'var(--text2)', fontSize: 14, transition: 'color .2s', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 44, minWidth: 44 };
   const hover = (e) => { e.currentTarget.style.color = 'var(--text)'; };
   const unhover = (e) => { e.currentTarget.style.color = 'var(--text2)'; };
 

@@ -110,7 +110,7 @@ export function CookieConsent() {
           {t.text}{' '}
           <a
             href="/privacy"
-            className="text-blue-400 underline underline-offset-2 transition-colors duration-200 hover:text-blue-300"
+            className="inline-flex min-h-[44px] items-center text-blue-400 underline underline-offset-2 transition-colors duration-200 hover:text-blue-300"
           >
             {t.more}
           </a>

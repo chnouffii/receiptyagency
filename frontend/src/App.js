@@ -10,7 +10,6 @@ import { Footer } from "./components/Footer";
 import { ChatWidget } from "./components/ChatWidget";
 import { CookieConsent } from "./components/CookieConsent";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { mountCursor } from "./lib/designAnimations";
 import { initMonitoring } from "./lib/monitoring";
 
 // Lazy-loaded pages — only downloaded when the user navigates to them
@@ -32,11 +31,34 @@ const ClientLoginPage = lazy(() => import("./pages/ClientLoginPage"));
 const ClientDashboardPage = lazy(() => import("./pages/ClientDashboardPage"));
 const DemosPage = lazy(() => import("./pages/DemosPage"));
 
+/**
+ * Lien d'évitement : premier élément focusable de la page, visible uniquement
+ * au focus clavier. Sans lui, atteindre le contenu impose de traverser toute la
+ * barre de navigation à chaque page.
+ */
+function SkipLink() {
+  return (
+    <a
+      href="#contenu"
+      style={{
+        position: 'absolute', left: -9999, top: 8, zIndex: 100,
+        padding: '12px 20px', borderRadius: 8, background: 'var(--accent2)',
+        color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none',
+      }}
+      onFocus={(e) => { e.currentTarget.style.left = '8px'; }}
+      onBlur={(e) => { e.currentTarget.style.left = '-9999px'; }}
+    >
+      Aller au contenu
+    </a>
+  );
+}
+
 function AppLayout({ children }) {
   return (
     <>
+      <SkipLink />
       <Navbar />
-      <main>{children}</main>
+      <main id="contenu">{children}</main>
       <Footer />
     </>
   );
@@ -45,8 +67,9 @@ function AppLayout({ children }) {
 function AdminLayout({ children }) {
   return (
     <>
+      <SkipLink />
       <Navbar />
-      <main>{children}</main>
+      <main id="contenu">{children}</main>
     </>
   );
 }
@@ -76,11 +99,8 @@ function AppContent() {
     document.documentElement.classList.add("dark");
     // Hide Emergent badge (CSS rule in App.css handles it; remove element once as fallback)
     document.getElementById('emergent-badge')?.remove();
-    // Custom cursor (design refonte) — global, pointer-fine devices only
-    const cleanup = mountCursor();
     // Supervision : sans REACT_APP_SENTRY_DSN, l'appel ne charge rien.
     initMonitoring();
-    return cleanup;
   }, []);
 
   return (

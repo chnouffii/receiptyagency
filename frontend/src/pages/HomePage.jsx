@@ -40,6 +40,8 @@ function TrustedMarquee({ companies }) {
 
 function FAQItem({ question, answer, index }) {
   const [open, setOpen] = useState(false);
+  const panelId = `home-faq-panel-${index}`;
+  const buttonId = `home-faq-button-${index}`;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -52,9 +54,12 @@ function FAQItem({ question, answer, index }) {
     >
       <button
         onClick={() => setOpen(!open)}
+        id={buttonId}
+        aria-expanded={open}
+        aria-controls={panelId}
         style={{
           width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          gap: 16, padding: '20px 22px', textAlign: 'left', background: 'transparent',
+          gap: 16, minHeight: 44, padding: '20px 22px', textAlign: 'left', background: 'transparent',
           border: 'none', cursor: 'pointer', color: 'var(--text)',
         }}
       >
@@ -68,6 +73,9 @@ function FAQItem({ question, answer, index }) {
         {open && (
           <motion.div
             key="a"
+            id={panelId}
+            role="region"
+            aria-labelledby={buttonId}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}

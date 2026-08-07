@@ -94,6 +94,7 @@ export const ChatWidget = () => {
             exit={{ scale: 0 }}
             onClick={() => setIsOpen(true)}
             data-testid="chat-toggle-btn"
+            aria-label={lang === 'fr' ? 'Ouvrir le chat avec le conseiller IA' : 'Open chat with the AI advisor'}
             style={{ bottom: "calc(5rem + var(--consent-offset, 0px))" }}
             className="fixed right-6 z-[9999] w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-[0_0_25px_rgba(37,99,235,0.4)] hover:shadow-[0_0_35px_rgba(37,99,235,0.6)] transition-all duration-300 hover:scale-110"
           >

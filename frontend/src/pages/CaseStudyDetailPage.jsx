@@ -89,7 +89,7 @@ export default function CaseStudyDetailPage() {
 
         {challenge && (
           <section style={{ marginTop: 48 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}><Target style={{ width: 20, height: 20, color: '#f87171' }} /><h2 style={h2}>{L.challenge}</h2></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}><Target style={{ width: 20, height: 20, color: 'var(--danger)' }} /><h2 style={h2}>{L.challenge}</h2></div>
             <p style={body}>{challenge}</p>
           </section>
         )}
@@ -101,11 +101,11 @@ export default function CaseStudyDetailPage() {
         )}
         {results.length > 0 && (
           <section style={{ marginTop: 40 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}><TrendingUp style={{ width: 20, height: 20, color: '#34d399' }} /><h2 style={h2}>{L.results}</h2></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}><TrendingUp style={{ width: 20, height: 20, color: 'var(--success)' }} /><h2 style={h2}>{L.results}</h2></div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingLeft: 32 }}>
               {results.map((r, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <CheckCircle2 style={{ width: 16, height: 16, color: '#34d399', marginTop: 3, flexShrink: 0 }} />
+                  <CheckCircle2 style={{ width: 16, height: 16, color: 'var(--success)', marginTop: 3, flexShrink: 0 }} />
                   <span style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text)' }}>{r}</span>
                 </div>
               ))}

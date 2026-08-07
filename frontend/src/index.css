@@ -4,6 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== FOCUS CLAVIER — REPLI GLOBAL =====
+   Les composants shadcn définissent leur propre anneau ; les pages écrites à la
+   main (site public, admin, portail client) n'en avaient aucun, rendant la
+   navigation au clavier impossible à suivre.
+   Placé dans @layer base : toute classe utilitaire Tailwind reste prioritaire,
+   donc les anneaux existants (shadcn, espace /demos) ne sont pas écrasés — la
+   règle ne s'applique qu'aux éléments qui n'ont rien.
+   `:focus-visible` et non `:focus` : pas d'anneau au clic à la souris. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--accent-primary, #2563EB);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
 /* ===== THEME VARIABLES ===== */
 :root {
   /* Default: Dark theme */
@@ -15,7 +31,7 @@
   
   --text-primary: #FFFFFF;
   --text-secondary: #9CA3AF;
-  --text-muted: #6B7280;
+  --text-muted: #777e8d;   /* 5.0:1 sur #050505 (etait #6B7280 = 4.2:1, sous AA) */
   --text-accent: #3B82F6;
   
   --border-primary: rgba(255, 255, 255, 0.05);
@@ -67,7 +83,7 @@
   
   --text-primary: #FFFFFF;
   --text-secondary: #9CA3AF;
-  --text-muted: #6B7280;
+  --text-muted: #777e8d;   /* 5.0:1 sur #050505 (etait #6B7280 = 4.2:1, sous AA) */
   --text-accent: #3B82F6;
   
   --border-primary: rgba(255, 255, 255, 0.05);
@@ -108,7 +124,7 @@
   
   --text-primary: #111827;
   --text-secondary: #4B5563;
-  --text-muted: #9CA3AF;
+  --text-muted: #646c7b;   /* 5.1:1 sur #F9FAFB (etait #9CA3AF = 2.4:1, tres sous AA) */
   --text-accent: #2563EB;
   
   --border-primary: rgba(0, 0, 0, 0.05);
