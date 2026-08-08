@@ -17,7 +17,9 @@ Receipty conçoit et déploie des systèmes d'IA et d'automatisation pour les PM
 - [Solutions](https://receipty.fr/solutions): détail des trois offres (Talent, Spend, Web-on-Demand).
 - [Études de cas](https://receipty.fr/cases): résultats clients (gains de temps, réduction des coûts, ROI).
 - [Calculateur ROI](https://receipty.fr/roi): estimation du retour sur investissement d'un projet d'automatisation.
-- [Contact](https://receipty.fr/contact): diagnostic IA gratuit, prise de rendez-vous.
+- [Estimation de budget](https://receipty.fr/quote): fourchette budgétaire indicative selon le besoin, la taille de l'entreprise et les options retenues.
+- [FAQ](https://receipty.fr/faq): questions fréquentes sur la méthode, les délais et les tarifs.
+- [Contact](https://receipty.fr/contact): formulaire de diagnostic IA gratuit, réponse sous 24 h.
 
 ## Ce que Receipty propose
 
@@ -26,3 +28,21 @@ Receipty conçoit et déploie des systèmes d'IA et d'automatisation pour les PM
 - Automatisation de workflows métier
 - Développement d'applications et de plateformes web avec IA
 - Accompagnement au ROI mesurable dès les premières semaines
+
+## Tarifs indicatifs
+
+Les montants ci-dessous situent un ordre de grandeur ; ils ne constituent ni un devis ni une offre. Le prix définitif est établi après un échange sur le périmètre réel.
+
+- Jusqu'à 20 salariés : mise en place 1 500 – 3 000 €, abonnement 99 – 199 €/mois.
+- De 21 à 200 salariés : mise en place 3 000 – 6 000 €, abonnement 199 – 349 €/mois.
+- De 201 à 500 salariés : mise en place 6 000 – 12 000 €, abonnement 349 – 599 €/mois.
+- Au-delà de 500 salariés : chiffrage dédié après échange.
+
+## Prendre contact
+
+Le diagnostic initial est gratuit et sans engagement. Le formulaire de la page Contact est le point d'entrée ; l'équipe répond sous 24 heures. Un assistant conversationnel est disponible sur le site pour une première orientation.
+
+## Notes
+
+- Les espaces /admin, /closer et /client sont réservés et non publics.
+- L'espace /demos est un environnement de démonstration privé, réservé aux prospects disposant d'un code d'accès. Il n'est pas indexé.

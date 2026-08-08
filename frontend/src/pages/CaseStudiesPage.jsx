@@ -3,6 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import SEOHead from '../components/SEOHead';
+import { CaseVisual } from '../components/CaseVisual';
 import { mountPageFx } from '../lib/designAnimations';
 import axios from 'axios';
 
@@ -21,19 +22,22 @@ function CaseCard({ item, index, lang }) {
         className="group break-inside-avoid mb-6"
         style={{ overflow: 'hidden', borderRadius: 20, border: '1px solid var(--border)', background: 'var(--surface)' }}
       >
-        {item.image_url && (
-          <div className="relative overflow-hidden" style={{ aspectRatio: '16 / 10' }}>
-            <img src={item.image_url} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+        <div className="relative overflow-hidden" style={{ aspectRatio: '16 / 10' }}>
+          <CaseVisual roi={item.roi} category={item.category} title={title} imageUrl={item.image_url} />
+          {/* Pastille ROI réservée aux visuels photo : sans image, le chiffre
+              est déjà l'élément principal du composant, l'afficher deux fois
+              serait redondant. */}
+          {item.image_url && (
             <div style={{ position: 'absolute', top: 14, right: 14 }}>
               <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff', background: 'var(--accent2)', borderRadius: 100, padding: '4px 11px' }}>{item.roi}</span>
             </div>
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(0,0,0,.5)' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 14, fontWeight: 500 }}>
-                {lang === 'fr' ? 'Voir le cas' : 'View case'} <ArrowUpRight style={{ width: 16, height: 16 }} />
-              </span>
-            </div>
+          )}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(0,0,0,.5)' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontSize: 14, fontWeight: 500 }}>
+              {lang === 'fr' ? 'Voir le cas' : 'View case'} <ArrowUpRight style={{ width: 16, height: 16 }} />
+            </span>
           </div>
-        )}
+        </div>
         <div style={{ padding: 24 }}>
           <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, margin: '0 0 8px' }}>{item.category}</p>
           <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 600, lineHeight: 1.25, margin: 0, color: 'var(--text)' }}>{title}</h3>

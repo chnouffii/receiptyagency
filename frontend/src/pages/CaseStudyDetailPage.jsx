@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Target, Lightbulb, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { CaseVisual } from '../components/CaseVisual';
 import SEOHead, { CaseStudySchema, BreadcrumbSchema } from '../components/SEOHead';
 import axios from 'axios';
 
@@ -73,14 +74,12 @@ export default function CaseStudyDetailPage() {
           <p style={{ marginTop: 16, fontSize: 16, lineHeight: 1.6, maxWidth: 640, color: 'var(--text2)' }}>{desc}</p>
         </motion.div>
 
-        {cs.image_url && (
-          <div style={{ marginTop: 40, borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)' }}>
-            <img src={cs.image_url} alt={title} className="w-full object-cover" style={{ height: 320 }} loading="lazy" />
-          </div>
-        )}
+        <div style={{ marginTop: 40, borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)' }}>
+          <CaseVisual roi={cs.roi} category={cs.category} title={title} imageUrl={cs.image_url} hauteur={320} />
+        </div>
 
         {(duration || team) && (
-          <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
+          <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(160px,100%),1fr))', gap: 16 }}>
             {duration && (<div style={statCard}><p style={statLabel}>{L.duration}</p><p style={statVal}>{duration}</p></div>)}
             {team && (<div style={statCard}><p style={statLabel}>{L.team}</p><p style={statVal}>{team}</p></div>)}
             <div style={statCard}><p style={statLabel}>ROI</p><p style={{ ...statVal, color: 'var(--accent)' }}>{cs.roi}</p></div>

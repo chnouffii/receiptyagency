@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
 
 const SITE_URL = 'https://receipty.fr';
@@ -201,10 +203,35 @@ export default function SEOHead({ page, customTitle, customDescription, customIm
 // ── Coordonnées de référence (NAP) — source unique pour les schémas ──────────
 const ORG_PHONE = "+33619518963";        // 06 19 51 89 63
 const ORG_EMAIL = "contact@receipty.fr";
-// Renseignez ici vos profils publics (LinkedIn, X, etc.) — améliore le GEO/E-E-A-T.
-const ORG_SAME_AS = [];
+/**
+ * Profils publics de l'organisation, alimentant le `sameAs` du schéma
+ * Organization. C'est par ce champ que Google et les moteurs génératifs
+ * recoupent votre identité : une organisation sans `sameAs` est une entité non
+ * corroborée, moins volontiers citée.
+ *
+ * Les valeurs viennent du CMS (`site_content.social`), modifiables depuis
+ * l'espace admin sans redéploiement. Seules les URL absolues sont retenues :
+ * une entrée vide ou approximative désignerait une AUTRE entité et nuirait plus
+ * que l'absence.
+ */
+function profilsPublics(social) {
+  if (!social) return [];
+  return Object.values(social)
+    .map((v) => String(v || '').trim())
+    .filter((v) => /^https?:\/\/\S+\.\S+/.test(v));
+}
 
 export function OrganizationSchema() {
+  const [social, setSocial] = useState(null);
+
+  useEffect(() => {
+    let annule = false;
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/site-content`)
+      .then((res) => { if (!annule) setSocial(res.data?.social || null); })
+      .catch(() => {});
+    return () => { annule = true; };
+  }, []);
+
   const schema = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
@@ -242,8 +269,12 @@ export function OrganizationSchema() {
       "availableLanguage": ["fr", "en"],
       "url": `${SITE_URL}/contact`
     },
-    "sameAs": ORG_SAME_AS
   };
+
+  // Un `sameAs: []` vide est un signal négatif : mieux vaut omettre la clé.
+  const profils = profilsPublics(social);
+  if (profils.length) schema.sameAs = profils;
+
   return (
     <Helmet>
       <script type="application/ld+json">{JSON.stringify(schema)}</script>

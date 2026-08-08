@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Phone, Mail, MapPin, Clock, Building2, FileText, Shield, RefreshCw, ChevronDown, ChevronUp, Plus, X, Star } from 'lucide-react';
+import { Save, Phone, Mail, MapPin, Clock, Building2, FileText, Shield, RefreshCw, ChevronDown, ChevronUp, Plus, X, Star, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
@@ -183,6 +183,12 @@ export default function AdminSiteContent({ token, isDark }) {
     legal_email: 'juridique@receipty.ai'
   });
 
+  // Profils publics → `sameAs` du schéma Organization. Ce champ permet aux
+  // moteurs de recherche et génératifs de corroborer l'identité de l'entreprise.
+  const [social, setSocial] = useState({
+    linkedin: '', linkedin_ceo1: '', linkedin_ceo2: '', x: '', youtube: '', github: '',
+  });
+
   const [trustedCompanies, setTrustedCompanies] = useState([
     'GlobalTech', 'BioPharm', 'NeoRetail', 'MedStaff', 'InvestCorp'
   ]);
@@ -210,6 +216,7 @@ export default function AdminSiteContent({ token, isDark }) {
       });
       if (res.data.contact) setContactInfo(res.data.contact);
       if (res.data.company) setCompanyInfo(res.data.company);
+      if (res.data.social) setSocial((s) => ({ ...s, ...res.data.social }));
       if (res.data.trusted_companies && res.data.trusted_companies.length > 0) {
         setTrustedCompanies(res.data.trusted_companies);
       }
@@ -242,6 +249,7 @@ export default function AdminSiteContent({ token, isDark }) {
       await axios.put(`${API}/admin/site-content`, {
         contact: contactInfo,
         company: companyInfo,
+        social,
         trusted_companies: trustedCompanies,
         privacy: privacyContent,
         terms: termsContent
@@ -270,6 +278,7 @@ export default function AdminSiteContent({ token, isDark }) {
   const sections = [
     { id: 'contact', label: 'Informations Contact', icon: Phone },
     { id: 'company', label: 'Informations Société', icon: Building2 },
+    { id: 'social', label: 'Profils publics (SEO)', icon: Globe },
     { id: 'trusted', label: 'Entreprises Confiance', icon: Building2 },
     { id: 'privacy', label: 'Politique Confidentialité', icon: Shield },
     { id: 'terms', label: 'CGU', icon: FileText }
@@ -513,6 +522,59 @@ export default function AdminSiteContent({ token, isDark }) {
       )}
 
       {/* Trusted Companies Section */}
+      {activeSection === 'social' && (
+        <div className="space-y-4">
+          <div className="rounded-xl border border-blue-500/20 bg-blue-600/5 p-4">
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              Ces URL alimentent le champ <code className="text-blue-400">sameAs</code> du schéma
+              Organization. C'est par elles que Google et les moteurs génératifs (ChatGPT,
+              Perplexity, Claude) recoupent l'identité de Receipty : une entreprise sans profils
+              déclarés est une entité non corroborée, donc moins volontiers citée.
+            </p>
+            <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">
+              <strong className="text-[var(--text-primary)]">Laissez vide plutôt qu'approximatif.</strong>{' '}
+              Une URL erronée désigne une autre entité et nuit davantage que l'absence. Seules les
+              adresses commençant par <code className="text-blue-400">https://</code> sont retenues.
+            </p>
+          </div>
+
+          {[
+            { k: 'linkedin', label: 'LinkedIn — page entreprise', ph: 'https://www.linkedin.com/company/receipty' },
+            { k: 'linkedin_ceo1', label: 'LinkedIn — Quentin Both', ph: 'https://www.linkedin.com/in/…' },
+            { k: 'linkedin_ceo2', label: 'LinkedIn — Valère de Furst', ph: 'https://www.linkedin.com/in/…' },
+            { k: 'x', label: 'X (Twitter)', ph: 'https://x.com/receipty' },
+            { k: 'youtube', label: 'YouTube', ph: 'https://www.youtube.com/@receipty' },
+            { k: 'github', label: 'GitHub', ph: 'https://github.com/receipty' },
+          ].map((f) => {
+            const valeur = social[f.k] || '';
+            const invalide = valeur.trim() !== '' && !/^https?:\/\/\S+\.\S+/.test(valeur.trim());
+            return (
+              <div key={f.k}>
+                <label htmlFor={`social-${f.k}`} className="block text-sm mb-1.5 text-[var(--text-secondary)]">
+                  {f.label}
+                </label>
+                <input
+                  id={`social-${f.k}`}
+                  type="url"
+                  value={valeur}
+                  onChange={(e) => setSocial({ ...social, [f.k]: e.target.value })}
+                  placeholder={f.ph}
+                  data-testid={`social-${f.k}`}
+                  className={`w-full bg-[var(--bg-tertiary)] border rounded-lg px-4 py-2.5 text-[var(--text-primary)] text-sm outline-none focus:border-blue-500/50 ${
+                    invalide ? 'border-red-500/60' : 'border-[var(--border-primary)]'
+                  }`}
+                />
+                {invalide && (
+                  <p role="alert" className="mt-1.5 text-xs text-red-400">
+                    URL ignorée : elle doit commencer par https:// — sinon elle ne sera pas publiée.
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {activeSection === 'trusted' && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}

@@ -289,6 +289,20 @@ def get_default_site_content():
             "dpo_email": "dpo@receipty.ai",
             "legal_email": "juridique@receipty.ai"
         },
+        # Profils publics de l'entreprise, repris dans le `sameAs` du schéma
+        # Organization. C'est par ce champ que Google et les moteurs génératifs
+        # recoupent votre identité : une organisation sans `sameAs` est une
+        # entité non corroborée, moins volontiers citée.
+        # Laisser vide plutôt que d'y mettre une URL approximative — un mauvais
+        # `sameAs` désigne une AUTRE entité et nuit davantage que l'absence.
+        "social": {
+            "linkedin": "",
+            "linkedin_ceo1": "",
+            "linkedin_ceo2": "",
+            "x": "",
+            "youtube": "",
+            "github": ""
+        },
         "privacy": {
             "data_retention_years": "3",
             "last_update_fr": "Fevrier 2026",
