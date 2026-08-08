@@ -46,13 +46,13 @@ export class ErrorBoundary extends Component {
           padding: 24,
           background: '#050506',
           color: '#f4f5f7',
-          fontFamily: "'Manrope', system-ui, sans-serif",
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
         }}
       >
         <div style={{ maxWidth: 460, textAlign: 'center' }}>
           <h1
             style={{
-              fontFamily: "'Space Grotesk', 'Manrope', system-ui, sans-serif",
+              fontFamily: "'Syne', 'Plus Jakarta Sans', system-ui, sans-serif",
               fontSize: 24,
               fontWeight: 700,
               margin: '0 0 12px',

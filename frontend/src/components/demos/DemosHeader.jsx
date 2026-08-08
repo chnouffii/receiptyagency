@@ -17,7 +17,7 @@ export function DemosHeader({ onExit }) {
     <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-[#0B0F17]/90 backdrop-blur-md">
       {/* `flex-nowrap` volontaire : avec `flex-wrap`, la barre passait sur deux
           lignes tant que la police de repli était active, puis revenait sur une
-          seule dès que Manrope se chargeait (`font-display: swap`). Tout le
+          seule dès que Plus Jakarta Sans se chargeait (`font-display: swap`). Tout le
           contenu remontait alors de 44 px — un CLS de 0,123 sur mobile, au-delà
           du seuil de 0,1. La hauteur ne doit dépendre d'aucune métrique de
           police : une seule ligne, et le texte s'efface par paliers. */}

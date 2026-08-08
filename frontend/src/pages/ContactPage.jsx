@@ -75,7 +75,7 @@ export default function ContactPage() {
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(52,211,153,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <Send style={{ width: 30, height: 30, color: 'var(--success)' }} />
           </div>
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{t.contact.success}</h2>
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 24, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{t.contact.success}</h2>
           <p style={{ marginTop: 12, color: 'var(--text2)' }}>{t.contact.success_desc}</p>
         </motion.div>
       </div>
@@ -99,7 +99,7 @@ export default function ContactPage() {
       <SEOHead page="contact" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6" style={{ padding: '48px 24px 80px' }}>
         <div style={{ textAlign: 'center', marginBottom: 56, opacity: 0, animation: 'riseIn .8s cubic-bezier(.2,.7,.2,1) .05s forwards' }}>
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2.2rem,5vw,3.6rem)', fontWeight: 700, letterSpacing: '-.02em', margin: 0, color: 'var(--text)' }}>{t.contact.title}</h1>
+          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(2.2rem,5vw,3.6rem)', fontWeight: 700, letterSpacing: '-.02em', margin: 0, color: 'var(--text)' }}>{t.contact.title}</h1>
           <p style={{ marginTop: 16, fontSize: 16, maxWidth: 640, margin: '16px auto 0', color: 'var(--text2)' }}>{t.contact.subtitle}</p>
         </div>
 
@@ -107,7 +107,7 @@ export default function ContactPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} data-testid="contact-form" noValidate style={{ ...card, position: 'relative' }}>
             <Honeypot value={piege} onChange={setPiege} />
-            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 600, marginBottom: 22, color: 'var(--text)' }}>{t.contact.form_title}</h2>
+            <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 600, marginBottom: 22, color: 'var(--text)' }}>{t.contact.form_title}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               <div>
                 <label style={label}>{t.contact.name} <span style={{ color: 'var(--danger)' }}>*</span></label>
@@ -154,7 +154,7 @@ export default function ContactPage() {
           {/* Info & urgent */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
             <div style={card}>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 600, marginBottom: 22, color: 'var(--text)' }}>{t.contact.info_title}</h2>
+              <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 600, marginBottom: 22, color: 'var(--text)' }}>{t.contact.info_title}</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <InfoRow icon={Phone} title={t.contact.phone_label}>
                   <a href={`tel:${contact.phone.replace(/\s/g, '')}`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, color: 'var(--text2)' }}>{contact.phone}</a>
@@ -177,7 +177,7 @@ export default function ContactPage() {
                   <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Zap style={{ width: 20, height: 20, color: '#fff' }} />
                   </div>
-                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, color: '#fff', margin: 0 }}>{t.contact.urgent_title}</h3>
+                  <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 700, color: '#fff', margin: 0 }}>{t.contact.urgent_title}</h3>
                 </div>
                 <p style={{ color: 'rgba(255,255,255,.9)', fontSize: 14, marginBottom: 20 }}>{t.contact.urgent_desc}</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>

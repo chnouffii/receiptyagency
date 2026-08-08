@@ -29,7 +29,7 @@ function CaseCard({ item, index, lang }) {
               serait redondant. */}
           {item.image_url && (
             <div style={{ position: 'absolute', top: 14, right: 14 }}>
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff', background: 'var(--accent2)', borderRadius: 100, padding: '4px 11px' }}>{item.roi}</span>
+              <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff', background: 'var(--accent2)', borderRadius: 100, padding: '4px 11px' }}>{item.roi}</span>
             </div>
           )}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: 'rgba(0,0,0,.5)' }}>
@@ -40,7 +40,7 @@ function CaseCard({ item, index, lang }) {
         </div>
         <div style={{ padding: 24 }}>
           <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, margin: '0 0 8px' }}>{item.category}</p>
-          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 600, lineHeight: 1.25, margin: 0, color: 'var(--text)' }}>{title}</h3>
+          <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: 18, fontWeight: 600, lineHeight: 1.25, margin: 0, color: 'var(--text)' }}>{title}</h3>
           <p style={{ marginTop: 8, fontSize: 14, lineHeight: 1.6, color: 'var(--text2)' }}>{desc}</p>
           {item.tags?.length > 0 && (
             <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -78,7 +78,7 @@ export default function CaseStudiesPage() {
       <SEOHead page="cases" />
       <section className="max-w-6xl mx-auto px-6" style={{ padding: '64px 24px 96px' }}>
         <div style={{ marginBottom: 56, opacity: 0, animation: 'riseIn .8s cubic-bezier(.2,.7,.2,1) .05s forwards' }}>
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2.4rem,6vw,4rem)', fontWeight: 700, letterSpacing: '-.03em', margin: 0, color: 'var(--text)' }}>{t.cases.title}</h1>
+          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(2.4rem,6vw,4rem)', fontWeight: 700, letterSpacing: '-.03em', margin: 0, color: 'var(--text)' }}>{t.cases.title}</h1>
           <p style={{ marginTop: 20, fontSize: 17, maxWidth: 620, color: 'var(--text2)' }}>{t.cases.subtitle}</p>
         </div>
 

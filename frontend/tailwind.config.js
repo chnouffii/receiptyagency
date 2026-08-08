@@ -7,10 +7,12 @@ module.exports = {
   ],
   theme: {
         extend: {
+                // Duo typographique : Syne pour les titres, Plus Jakarta Sans
+                // pour le texte. Les deux sont auto-hébergées (design.css).
                 fontFamily: {
-                        heading: ['Montserrat', 'sans-serif'],
-                        body: ['Montserrat', 'sans-serif'],
-                        mono: ['Montserrat', 'monospace'],
+                        heading: ['Syne', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+                        body: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
                 },
                 borderRadius: {
                         lg: 'var(--radius)',

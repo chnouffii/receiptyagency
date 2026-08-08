@@ -47,8 +47,8 @@ export default function CaseStudyDetailPage() {
 
   const statCard = { borderRadius: 14, border: '1px solid var(--border)', background: 'var(--surface)', padding: 20 };
   const statLabel = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--text3)', margin: 0 };
-  const statVal = { marginTop: 4, fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 700, color: 'var(--text)' };
-  const h2 = { fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, color: 'var(--text)', margin: 0 };
+  const statVal = { marginTop: 4, fontFamily: "'Syne', sans-serif", fontSize: 18, fontWeight: 700, color: 'var(--text)' };
+  const h2 = { fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 700, color: 'var(--text)', margin: 0 };
   const body = { lineHeight: 1.7, color: 'var(--text2)', paddingLeft: 32, margin: 0 };
 
   return (
@@ -67,10 +67,10 @@ export default function CaseStudyDetailPage() {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff', background: 'var(--accent2)', borderRadius: 100, padding: '3px 11px' }}>{cs.roi}</span>
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 12, fontWeight: 700, color: '#fff', background: 'var(--accent2)', borderRadius: 100, padding: '3px 11px' }}>{cs.roi}</span>
             <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent)', border: '1px solid var(--border2)', borderRadius: 100, padding: '3px 10px' }}>{cs.category}</span>
           </div>
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2rem,5vw,3.4rem)', fontWeight: 700, letterSpacing: '-.02em', lineHeight: 1.1, margin: 0, color: 'var(--text)' }}>{title}</h1>
+          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(2rem,5vw,3.4rem)', fontWeight: 700, letterSpacing: '-.02em', lineHeight: 1.1, margin: 0, color: 'var(--text)' }}>{title}</h1>
           <p style={{ marginTop: 16, fontSize: 16, lineHeight: 1.6, maxWidth: 640, color: 'var(--text2)' }}>{desc}</p>
         </motion.div>
 

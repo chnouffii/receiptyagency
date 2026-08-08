@@ -10,9 +10,83 @@ export const translations = {
     },
     hero: {
       title: 'Nous automatisons votre entreprise.',
+      // Le titre de la landing est composé en deux temps pour le contraste
+      // typographique (Syne regular puis extra-bold). `title` reste la
+      // version d'un seul tenant, utilisée hors de la home.
+      title_lead: 'Nous automatisons',
+      title_accent: 'votre entreprise.',
       subtitle: "L'agence d'intégration IA qui transforme vos processus métier en systèmes intelligents.",
       cta: 'Lancer mon diagnostic IA',
-      trusted: 'Entreprises qui nous font confiance'
+      trusted: 'Entreprises qui nous font confiance',
+      badge: "Agence d'intégration IA · Infrastructure française",
+      // Pipeline illustratif affiché à droite du titre.
+      pipeline_label: 'Chaîne de traitement type',
+      pipeline: [
+        { step: '01', name: 'Collecte', detail: 'Factures, e-mails, CV, tickets' },
+        { step: '02', name: 'Extraction', detail: 'Lecture et structuration par modèle' },
+        { step: '03', name: 'Contrôle', detail: 'Règles métier et levée de doute' },
+        { step: '04', name: 'Restitution', detail: 'Écriture dans votre outil' }
+      ]
+    },
+    home: {
+      services: {
+        label: 'Ce que nous faisons',
+        title: 'Quatre leviers, un seul système.',
+        lead: "Nous n'empilons pas des outils : nous branchons l'IA là où votre temps se perd réellement, puis nous la laissons entre vos mains.",
+        items: [
+          {
+            title: 'Intelligence artificielle',
+            desc: "Des modèles entraînés sur vos données et votre vocabulaire, pas un assistant générique reconfiguré à la hâte. Nous partons de vos cas réels, y compris ceux qui sortent du cadre.",
+            points: ['Modèles sur mesure', 'Ancrés sur vos documents', 'Évalués avant mise en production']
+          },
+          {
+            title: 'Automatisation',
+            desc: 'Les tâches répétitives quittent vos équipes et rejoignent un flux surveillé, avec relance et journal des décisions.',
+            points: ['Flux de bout en bout', 'Reprise sur incident']
+          },
+          {
+            title: 'Performance',
+            desc: 'Chaque chantier démarre avec une mesure de départ et un objectif chiffré, revus ensemble.',
+            points: ['Indicateurs partagés', 'Point mensuel']
+          },
+          {
+            title: 'Souveraineté & accompagnement',
+            desc: "Vos VPS et vos bases sont hébergés à Strasbourg, l'installation peut être subventionnée jusqu'à 40 %, et nous formons vos équipes pour que la solution vous appartienne vraiment.",
+            points: ['Hébergement en France', 'Conformité RGPD native', 'Formation incluse']
+          }
+        ]
+      },
+      proof: {
+        label: 'Résultats',
+        title: 'Ce que ça change, chiffré.',
+        lead: 'Trois chantiers menés en production, mesurés avant et après.',
+        stats: [
+          { value: '+340', suffix: '%', label: 'Efficacité opérationnelle', detail: 'Automatisation RH — 2 000 collaborateurs' },
+          { value: '-45', suffix: '%', label: 'Coûts opérationnels', detail: 'Détection d’anomalies financières' },
+          { value: '+280', suffix: '%', label: 'Taux de conversion', detail: 'Plateforme e-commerce avec recommandation' }
+        ],
+        quote: "L'IA ne remplace pas vos équipes. Elle leur retire ce qui n'aurait jamais dû leur incomber.",
+        cta: 'Voir les études de cas'
+      },
+      solutions: {
+        label: 'Solutions verticales',
+        title: 'Trois portes d’entrée.',
+        lead: 'Selon là où votre organisation perd le plus de temps aujourd’hui.',
+        items: [
+          { index: '01', name: 'Receipty Talent', tag: 'RH & Recrutement', desc: 'Du tri des candidatures à l’onboarding, sans ressaisie.' },
+          { index: '02', name: 'Receipty Spend', tag: 'Finance & Dépenses', desc: 'Anomalies détectées, budgets anticipés, reporting automatique.' },
+          { index: '03', name: 'Web-on-Demand', tag: 'Développement web', desc: 'Plateformes sur mesure, e-commerce et SEO pilotés par la donnée.' }
+        ],
+        cta: 'Explorer les solutions'
+      },
+      cta: {
+        label: 'Prochaine étape',
+        title: 'Parlons de ce qui vous coûte le plus de temps.',
+        lead: 'Un premier échange de 30 minutes suffit pour situer le potentiel d’automatisation de votre organisation — sans engagement, sans jargon.',
+        primary: 'Lancer mon diagnostic IA',
+        secondary: 'Estimer mon budget',
+        note: 'Réponse sous 24 h ouvrées · Infrastructure hébergée en France'
+      }
     },
     features: {
       ai: { title: 'Intelligence Artificielle', desc: 'Modèles ML sur mesure pour vos besoins' },
@@ -228,9 +302,79 @@ export const translations = {
     },
     hero: {
       title: 'We automate your business.',
+      title_lead: 'We automate',
+      title_accent: 'your business.',
       subtitle: 'The AI integration agency that transforms your business processes into intelligent systems.',
       cta: 'Start my AI diagnostic',
-      trusted: 'Companies that trust us'
+      trusted: 'Companies that trust us',
+      badge: 'AI integration agency · French infrastructure',
+      pipeline_label: 'A typical processing chain',
+      pipeline: [
+        { step: '01', name: 'Intake', detail: 'Invoices, emails, CVs, tickets' },
+        { step: '02', name: 'Extraction', detail: 'Model reads and structures the data' },
+        { step: '03', name: 'Checks', detail: 'Business rules and human review' },
+        { step: '04', name: 'Write-back', detail: 'Straight into your own tools' }
+      ]
+    },
+    home: {
+      services: {
+        label: 'What we do',
+        title: 'Four levers, one system.',
+        lead: 'We do not stack tools: we plug AI in where your time is actually lost, then hand it over to you.',
+        items: [
+          {
+            title: 'Artificial intelligence',
+            desc: 'Models trained on your data and your vocabulary, not a generic assistant hastily reconfigured. We start from your real cases, edge cases included.',
+            points: ['Custom models', 'Grounded in your documents', 'Evaluated before going live']
+          },
+          {
+            title: 'Automation',
+            desc: 'Repetitive work leaves your teams and joins a monitored flow, with retries and a decision log.',
+            points: ['End-to-end flows', 'Failure recovery']
+          },
+          {
+            title: 'Performance',
+            desc: 'Every engagement starts with a baseline measurement and a target figure, reviewed together.',
+            points: ['Shared indicators', 'Monthly review']
+          },
+          {
+            title: 'Sovereignty & support',
+            desc: 'Your VPS and databases are hosted in Strasbourg, the setup can be subsidised by up to 40%, and we train your teams so the solution genuinely belongs to you.',
+            points: ['Hosted in France', 'Native GDPR compliance', 'Training included']
+          }
+        ]
+      },
+      proof: {
+        label: 'Results',
+        title: 'What it changes, in figures.',
+        lead: 'Three engagements shipped to production, measured before and after.',
+        stats: [
+          { value: '+340', suffix: '%', label: 'Operational efficiency', detail: 'HR automation — 2,000 employees' },
+          { value: '-45', suffix: '%', label: 'Operating costs', detail: 'Financial anomaly detection' },
+          { value: '+280', suffix: '%', label: 'Conversion rate', detail: 'E-commerce platform with recommendations' }
+        ],
+        quote: 'AI does not replace your teams. It takes off their plate what should never have been there.',
+        cta: 'View the case studies'
+      },
+      solutions: {
+        label: 'Vertical solutions',
+        title: 'Three ways in.',
+        lead: 'Depending on where your organisation loses the most time today.',
+        items: [
+          { index: '01', name: 'Receipty Talent', tag: 'HR & Recruitment', desc: 'From CV screening to onboarding, with no re-keying.' },
+          { index: '02', name: 'Receipty Spend', tag: 'Finance & Expenses', desc: 'Anomalies caught, budgets anticipated, reporting automated.' },
+          { index: '03', name: 'Web-on-Demand', tag: 'Web development', desc: 'Custom platforms, e-commerce and SEO driven by data.' }
+        ],
+        cta: 'Explore the solutions'
+      },
+      cta: {
+        label: 'Next step',
+        title: 'Let us talk about what costs you the most time.',
+        lead: 'A first 30-minute conversation is enough to size up the automation potential of your organisation — no commitment, no jargon.',
+        primary: 'Start my AI diagnostic',
+        secondary: 'Estimate my budget',
+        note: 'Reply within 24 business hours · Infrastructure hosted in France'
+      }
     },
     features: {
       ai: { title: 'Artificial Intelligence', desc: 'Custom ML models for your needs' },

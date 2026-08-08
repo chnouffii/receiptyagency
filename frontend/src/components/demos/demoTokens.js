@@ -6,8 +6,8 @@
  * visuel (B2B SaaS premium, dark mode profond).
  *
  * Articulation avec le design system du site (design.css) :
- *   - les titres réutilisent `.font-heading` (Space Grotesk), le texte hérite
- *     de Manrope — la typographie de l'espace démo est celle du site ;
+ *   - les titres réutilisent `.font-heading` (Syne), le texte hérite
+ *     de Plus Jakarta Sans — la typographie de l'espace démo est celle du site ;
  *   - l'accent bleu #3B82F6 est exactement le `--accent` du site ;
  *   - seules les surfaces diffèrent : l'espace démo assume un fond plus
  *     profond et des bordures plus marquées, adaptés à la densité des

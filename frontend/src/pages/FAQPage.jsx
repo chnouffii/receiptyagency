@@ -63,7 +63,7 @@ export default function FAQPage() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 13px', borderRadius: 100, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--accent)', fontSize: 13, fontWeight: 600, marginBottom: 22 }}>
             <HelpCircle style={{ width: 15, height: 15 }} /> FAQ
           </div>
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2.2rem,5vw,3.4rem)', fontWeight: 700, letterSpacing: '-.02em', margin: 0, color: 'var(--text)' }}>
+          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(2.2rem,5vw,3.4rem)', fontWeight: 700, letterSpacing: '-.02em', margin: 0, color: 'var(--text)' }}>
             {t.faq?.title || (lang === 'fr' ? 'Questions fréquentes' : 'Frequently asked questions')}
           </h1>
           <p style={{ marginTop: 18, fontSize: 16, maxWidth: 620, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6, color: 'var(--text2)' }}>{intro}</p>
@@ -80,7 +80,7 @@ export default function FAQPage() {
         )}
 
         <div style={{ marginTop: 56, borderRadius: 22, border: '1px solid var(--border)', background: 'var(--surface)', padding: 32, textAlign: 'center' }}>
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, margin: 0, color: 'var(--text)' }}>{lang === 'fr' ? 'Une autre question ?' : 'Another question?'}</h2>
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 700, margin: 0, color: 'var(--text)' }}>{lang === 'fr' ? 'Une autre question ?' : 'Another question?'}</h2>
           <p style={{ marginTop: 8, fontSize: 14.5, color: 'var(--text2)' }}>{lang === 'fr' ? "Parlons de votre projet d'automatisation." : "Let's talk about your automation project."}</p>
           <Link to="/contact" data-magnetic style={{ marginTop: 20, display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--accent2)', color: '#fff', borderRadius: 100, padding: '14px 26px', fontSize: 14.5, fontWeight: 700, textDecoration: 'none', boxShadow: '0 0 0 1px var(--accent2), 0 12px 40px -8px var(--glow)' }}>
             {lang === 'fr' ? 'Contactez-nous' : 'Contact us'} <ArrowRight style={{ width: 16, height: 16 }} />

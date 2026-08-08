@@ -10,7 +10,7 @@ function formatEuro(n) {
 }
 
 const card = { borderRadius: 20, border: '1px solid var(--border)', background: 'var(--surface)', padding: 24 };
-const mono = "'Space Grotesk', ui-monospace, monospace";
+const mono = "'Syne', ui-monospace, monospace";
 
 function Slider({ label, value, min, max, step, unit, onChange }) {
   return (
@@ -206,7 +206,7 @@ export default function ROICalculatorPage() {
             {[
               { value: '+340%', label: lang === 'fr' ? 'Efficacité opérationnelle' : 'Operational efficiency', color: 'var(--accent)' },
               { value: '-45%', label: lang === 'fr' ? 'Coûts opérationnels' : 'Operational costs', color: 'var(--success)' },
-              { value: '+280%', label: lang === 'fr' ? 'Productivité équipe' : 'Team productivity', color: 'var(--violet)' },
+              { value: '+280%', label: lang === 'fr' ? 'Productivité équipe' : 'Team productivity', color: 'var(--cyan)' },
             ].map((stat, i) => (
               <div key={i}>
                 <p style={{ fontFamily: mono, fontSize: 28, fontWeight: 700, color: stat.color, margin: 0 }}>{stat.value}</p>

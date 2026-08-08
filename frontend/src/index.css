@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+/* Les polices (Syne + Plus Jakarta Sans) sont auto-hébergées et déclarées
+   dans design.css. Pas d'@import Google Fonts ici : un @import CSS bloque
+   le rendu le temps d'un aller-retour réseau vers un tiers. */
 
 @tailwind base;
 @tailwind components;
@@ -157,7 +159,7 @@
 
 body {
   margin: 0;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-primary);
@@ -166,11 +168,11 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Syne', 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 code {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 /* ===== THEME UTILITY CLASSES ===== */

@@ -1,73 +1,81 @@
 /* ============================================================
-   Receipty — Design system (refonte)
-   Polices auto-hébergées (Manrope + Space Grotesk) + tokens de thème.
+   Receipty — Design system (refonte v2)
+   Polices auto-hébergées (Plus Jakarta Sans + Syne) + tokens de thème.
    Le style des composants utilise ces variables (var(--accent)…).
    ============================================================ */
 
-/* ---- Polices auto-hébergées (variables fonts) ---- */
+/* ---- Polices auto-hébergées (variables fonts, SIL OFL) ----
+   Duo : Syne (titres, grotesque à fort caractère) + Plus Jakarta Sans
+   (texte courant, humaniste très lisible aux petites tailles).
+   Auto-hébergées plutôt que servies par Google Fonts : pas de requête
+   tierce bloquante au premier rendu, et pas de dépendance RGPD externe. */
 @font-face {
-  font-family: 'Manrope';
+  font-family: 'Plus Jakarta Sans';
   font-style: normal;
   font-weight: 200 800;
   font-display: swap;
-  src: url('./fonts/manrope-latin.woff2') format('woff2');
+  src: url('./fonts/jakarta-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: 'Manrope';
+  font-family: 'Plus Jakarta Sans';
   font-style: normal;
   font-weight: 200 800;
   font-display: swap;
-  src: url('./fonts/manrope-latin-ext.woff2') format('woff2');
+  src: url('./fonts/jakarta-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
-  font-family: 'Space Grotesk';
+  font-family: 'Syne';
   font-style: normal;
-  font-weight: 300 700;
+  font-weight: 400 800;
   font-display: swap;
-  src: url('./fonts/spacegrotesk-latin.woff2') format('woff2');
+  src: url('./fonts/syne-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: 'Space Grotesk';
+  font-family: 'Syne';
   font-style: normal;
-  font-weight: 300 700;
+  font-weight: 400 800;
   font-display: swap;
-  src: url('./fonts/spacegrotesk-latin-ext.woff2') format('woff2');
+  src: url('./fonts/syne-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 /* ---- Tokens de thème ----
+   Base sombre : zinc profond (#09090b) plutôt qu'un noir pur — le noir
+   absolu fait ressortir le banding des dégradés et durcit le contraste.
    Contrastes vérifiés sur le fond de leur thème (WCAG 2.1) :
-     sombre  --text 18.7:1  --text2 7.8:1  --text3 5.0:1
+     sombre  --text 19.2:1  --text2 7.8:1  --text3 5.1:1  --accent-text 7.0:1
      clair   --text 17.8:1  --text2 7.0:1  --text3 5.0:1
    --text3 vise AA (4.5:1) avec marge, pas AAA : à 7:1 il deviendrait
    indiscernable de --text2 et la hiérarchie à trois niveaux disparaîtrait.
    --accent2 et --cyan ne servent que de FOND (texte blanc dessus,
    5.2:1 et 6.7:1) — ne pas les utiliser comme couleur de texte. */
 :root[data-theme="dark"], [data-theme="dark"] {
-  --bg: #050506; --bg2: #0a0a0d;
-  --surface: rgba(255,255,255,.025); --surface2: rgba(255,255,255,.05);
-  --border: rgba(255,255,255,.08); --border2: rgba(255,255,255,.16);
-  --text: #f4f5f7; --text2: #9aa0ac; --text3: #787e8d;
-  --accent: #3b82f6; --accent2: #2563eb; --cyan: #34d3ee; --violet: #8b7cff;
-  --glow: rgba(37,99,235,.4); --navbg: rgba(5,5,6,.62); --grain: .05; --dot: 255,255,255;
+  --bg: #09090b; --bg2: #0c0c0f;
+  --surface: rgba(255,255,255,.022); --surface2: rgba(255,255,255,.045);
+  /* Bordures au trait : 10% de blanc, la valeur qui reste lisible sur
+     zinc-950 sans dessiner un cadre. --border2 est l'état survol. */
+  --border: rgba(255,255,255,.10); --border2: rgba(255,255,255,.20);
+  --text: #fafafa; --text2: #a1a1aa; --text3: #80808c;
+  --accent: #4d84e2; --accent2: #2563eb; --cyan: #34d3ee;
+  --glow: rgba(37,99,235,.28); --navbg: rgba(9,9,11,.72); --grain: .05; --dot: 255,255,255;
   /* Vert et rouge sémantiques : la teinte claire d'origine (#34d399/#f87171)
      tombait à 1.9:1 et 2.8:1 sur fond blanc. Une valeur par thème. */
   --success: #34d399; --danger: #f87171;
   /* Bleu utilisé comme COULEUR DE TEXTE (liens actifs, pastilles).
      --accent convient au sombre, --accent2 au clair : ni l'un ni l'autre
      ne passe dans les deux. */
-  --accent-text: #3b82f6;
+  --accent-text: #6a99e8;
 }
 :root[data-theme="light"], [data-theme="light"] {
   --bg: #f5f6f8; --bg2: #ffffff;
   --surface: #ffffff; --surface2: #fbfbfd;
   --border: rgba(10,12,20,.09); --border2: rgba(10,12,20,.16);
   --text: #0c0e14; --text2: #4b5563; --text3: #636a79;
-  --accent: #2563eb; --accent2: #1d4ed8; --cyan: #0891b2; --violet: #614fef;
-  --glow: rgba(37,99,235,.2); --navbg: rgba(255,255,255,.68); --grain: .03; --dot: 13,14,20;
+  --accent: #2563eb; --accent2: #1d4ed8; --cyan: #0891b2;
+  --glow: rgba(37,99,235,.14); --navbg: rgba(255,255,255,.72); --grain: .03; --dot: 13,14,20;
   --success: #047857; --danger: #b91c1c;   /* 5.5:1 et 6.5:1 sur blanc */
   --accent-text: #1d4ed8;                  /* 6.7:1 sur blanc */
 }
@@ -76,24 +84,36 @@
 
 /* ---- Base ---- */
 body {
-  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-::selection { background: rgba(59,130,246,.3); }
+::selection { background: rgba(77,132,226,.28); }
 
-/* Les titres du site utilisent la classe font-heading → Space Grotesk */
+/* Les titres du site utilisent la classe font-heading → Syne.
+   Syne est large et très dessinée : elle a besoin d'un interlettrage
+   resserré aux grandes tailles, sinon les titres se délitent. */
 .font-heading, h1, h2, h3, h4 {
-  font-family: 'Space Grotesk', 'Manrope', system-ui, sans-serif;
+  font-family: 'Syne', 'Plus Jakarta Sans', system-ui, sans-serif;
+  letter-spacing: -.02em;
 }
 
-/* ---- Animations de la refonte ---- */
+/* ---- Rythme éditorial ----
+   `.rule-label` : le petit intitulé de section (index + libellé capitales).
+   Il remplace le sous-titre centré générique par un repère de lecture. */
+.rule-label {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 11.5px; font-weight: 600; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--text3);
+}
+.rule-label::before {
+  content: ''; width: 28px; height: 1px; background: var(--border2);
+}
+
+/* ---- Animations ---- */
 @keyframes riseIn { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes blobA { 0%,100% { transform: translate(-50%,0) scale(1); } 50% { transform: translate(-42%,-8%) scale(1.15); } }
-@keyframes blobB { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(10%,12%) scale(1.2); } }
-@keyframes blobC { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-12%,8%) scale(1.1); } }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
 @keyframes pulse { 0%,100% { opacity: .45; transform: scale(1); } 50% { opacity: 1; transform: scale(1.25); } }
-@keyframes shimmer { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

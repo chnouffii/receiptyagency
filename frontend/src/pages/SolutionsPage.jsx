@@ -29,7 +29,7 @@ function SolutionCard({ sol, index, lang }) {
           <Icon style={{ width: 24, height: 24, color: 'var(--accent)' }} />
         </div>
         <div>
-          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, margin: 0, color: 'var(--text)' }}>{name}</h3>
+          <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 700, margin: 0, color: 'var(--text)' }}>{name}</h3>
           <span style={{ display: 'inline-block', marginTop: 4, fontSize: 12, fontWeight: 600, color: 'var(--accent)', border: '1px solid var(--border2)', borderRadius: 100, padding: '2px 10px' }}>{tag}</span>
         </div>
       </div>
@@ -69,7 +69,7 @@ export default function SolutionsPage() {
       <SEOHead page="solutions" />
       <section className="max-w-6xl mx-auto px-6" style={{ padding: '64px 24px 96px' }}>
         <div style={{ marginBottom: 56, ...({ opacity: 0, animation: 'riseIn .8s cubic-bezier(.2,.7,.2,1) .05s forwards' }) }}>
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2.4rem,6vw,4rem)', fontWeight: 700, letterSpacing: '-.03em', margin: 0, color: 'var(--text)' }}>{t.solutions.title}</h1>
+          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(2.4rem,6vw,4rem)', fontWeight: 700, letterSpacing: '-.03em', margin: 0, color: 'var(--text)' }}>{t.solutions.title}</h1>
           <p style={{ marginTop: 20, fontSize: 17, maxWidth: 620, color: 'var(--text2)' }}>{t.solutions.subtitle}</p>
         </div>
 
